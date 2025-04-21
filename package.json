@@ -9,6 +9,10 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "engines": {
+    "node": "22.14.0",
+    "bun": "1.2.10"
+  },
   "dependencies": {
     "animejs": "^3.2.2",
     "date-fns": "^2.30.0",
