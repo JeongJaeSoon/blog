@@ -253,16 +253,19 @@ function Talks({ lang, t }: { lang: Locale; t: Dictionary }) {
           const showOriginal = item.lang !== lang && translated
           return (
             <li key={item.id} className="print-avoid-break">
-              <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+              <div className="flex items-baseline justify-between gap-x-4">
                 <a
                   href={item.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm hover:text-accent"
+                  className="min-w-0 text-sm hover:text-accent"
                 >
                   {translated || item.originalTitle}
                 </a>
-                <time dateTime={item.date} className="font-mono text-xs text-faint">
+                <time
+                  dateTime={item.date}
+                  className="shrink-0 whitespace-nowrap font-mono text-xs text-faint"
+                >
                   {publicationDate(item.date, lang)}
                 </time>
               </div>
@@ -293,16 +296,19 @@ function Publications({ lang, t }: { lang: Locale; t: Dictionary }) {
           const showOriginal = item.lang !== lang && translated
           return (
             <li key={item.id} className="print-avoid-break">
-              <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+              <div className="flex items-baseline justify-between gap-x-4">
                 <a
                   href={item.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm hover:text-accent"
+                  className="min-w-0 text-sm hover:text-accent"
                 >
                   {translated || item.id}
                 </a>
-                <time dateTime={item.date} className="font-mono text-xs text-faint">
+                <time
+                  dateTime={item.date}
+                  className="shrink-0 whitespace-nowrap font-mono text-xs text-faint"
+                >
                   {publicationDate(item.date, lang)}
                 </time>
               </div>
@@ -419,10 +425,15 @@ function LatestPosts({
           <li key={post.slug}>
             <Link
               href={`/${lang}/blog/${post.slug}`}
-              className="group flex flex-wrap items-baseline justify-between gap-x-4"
+              className="group flex items-baseline justify-between gap-x-4"
             >
-              <span className="text-sm group-hover:text-accent">{post.title}</span>
-              <time dateTime={post.date} className="font-mono text-xs text-faint">
+              <span className="min-w-0 text-sm group-hover:text-accent">
+                {post.title}
+              </span>
+              <time
+                dateTime={post.date}
+                className="shrink-0 whitespace-nowrap font-mono text-xs text-faint"
+              >
                 {formatDate(post.date, lang)}
               </time>
             </Link>
