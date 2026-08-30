@@ -61,10 +61,13 @@ export const identity = {
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/JeongJaeSoon/', handle: '/in/JeongJaeSoon' },
     { label: 'X', href: 'https://x.com/dev_soon0_0', handle: '@dev_soon0_0' },
     { label: 'Threads', href: 'https://www.threads.com/@dev_soon.0_0', handle: '@dev_soon.0_0' },
+    { label: 'Speaker Deck', href: 'https://speakerdeck.com/jeongjaesoon', handle: '/jeongjaesoon' },
     { label: 'Email', href: 'mailto:94jaesoon.jeong@gmail.com', handle: '94jaesoon.jeong@gmail.com' },
   ] satisfies Link[],
   /** Repository listing linked from the open-source section. */
   repositories: 'https://github.com/JeongJaeSoon?tab=repositories',
+  /** Slide listing linked from the talks section. */
+  decks: 'https://speakerdeck.com/jeongjaesoon',
 } as const
 
 export const experience: Job[] = [
@@ -137,6 +140,40 @@ export type Publication = {
   lang: 'en' | 'ko' | 'ja'
 }
 
+export type Talk = {
+  /** Key into `dictionary.talks`, where the title is translated. */
+  id: string
+  /** Title in the language it was delivered in. */
+  originalTitle: string
+  href: string
+  /** Event it was given at — shown verbatim, not translated. */
+  event: string
+  /** `YYYY-MM-DD` or `YYYY-MM`, same precision rule as publications. */
+  date: string
+  lang: 'en' | 'ko' | 'ja'
+}
+
+/**
+ * Conference and meetup talks.
+ *
+ * Speaker Deck hosts the slides (see `identity.decks`), but that site is
+ * unreachable from the build environment and its deck pages are not in the
+ * search index, so individual deck URLs could not be collected here. Entries
+ * therefore link to whatever public page is verifiable; add deck URLs as they
+ * are confirmed.
+ */
+export const talks: Talk[] = [
+  {
+    id: 'qiita-bash-claude-code',
+    originalTitle: 'Qiita Bash「キミたちはClaude Codeをどう使いこなす？」LT 登壇資料',
+    href: 'https://developers.freee.co.jp/entry/qiita-claude-code',
+    event: 'Qiita Bash',
+    // The date is in the event itself, not inferred.
+    date: '2025-11-14',
+    lang: 'ja',
+  },
+]
+
 /**
  * Articles written for someone else's publication — company engineering
  * blogs, guest posts. Ordered newest first at render time.
@@ -160,14 +197,6 @@ export const publications: Publication[] = [
     href: 'https://developers.freee.co.jp/entry/ai-driven-development-2025-report',
     outlet: 'freee Developers Hub',
     date: '2025-12',
-    lang: 'ja',
-  },
-  {
-    id: 'freee-qiita-bash-claude-code',
-    originalTitle: 'Qiita Bash「キミたちはClaude Codeをどう使いこなす？」LT 登壇資料',
-    href: 'https://developers.freee.co.jp/entry/qiita-claude-code',
-    outlet: 'freee Developers Hub',
-    date: '2025-11',
     lang: 'ja',
   },
   {

@@ -17,11 +17,13 @@ export const ja: Dictionary = {
     education: '学歴',
     writing: '記事',
     publications: '寄稿記事',
+    talks: '登壇',
     codingActivity: 'コーディング活動',
   },
   ui: {
     allPosts: '記事一覧',
     allRepositories: 'リポジトリ一覧',
+    allDecks: 'スライド一覧',
     minRead: '分',
     readingTimePrefix: '約',
     noPosts: 'まだ記事がない。',
@@ -92,8 +94,6 @@ export const ja: Dictionary = {
       'Claude Enterprise を全社に安全に展開するために、SCIM × IaC で権限運用を整備した話',
     'freee-ai-driven-development-report':
       '数字で振り返る freee の AI 駆動開発 - 後編',
-    'freee-qiita-bash-claude-code':
-      'Qiita Bash「キミたちはClaude Codeをどう使いこなす？」LT 登壇資料',
     'freee-ai-driven-development-01':
       'AI駆動開発へ。freee は開発環境をどう進化させているか？- 前編',
     'freee-invoice-email-abuse':
@@ -104,6 +104,10 @@ export const ja: Dictionary = {
       'エンジニアの情報力を向上するためのLIFULLの活動',
     'lifull-remote-abroad':
       '新卒韓国人エンジニアの外国生活×リモートワーク',
+  },
+  talks: {
+    'qiita-bash-claude-code':
+      'Qiita Bash「キミたちはClaude Codeをどう使いこなす？」LT 登壇資料',
   },
   projects: {
     'agent-guard':

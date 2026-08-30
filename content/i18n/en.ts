@@ -17,11 +17,13 @@ export const en: Dictionary = {
     education: 'Education',
     writing: 'Writing',
     publications: 'Published elsewhere',
+    talks: 'Talks',
     codingActivity: 'Coding activity',
   },
   ui: {
     allPosts: 'All posts',
     allRepositories: 'All repositories',
+    allDecks: 'All decks',
     minRead: ' min read',
     readingTimePrefix: '',
     noPosts: 'No posts yet.',
@@ -93,8 +95,6 @@ export const en: Dictionary = {
       'Rolling out Claude Enterprise company-wide: permission operations with SCIM and IaC',
     'freee-ai-driven-development-report':
       'freee\'s AI-driven development in numbers — part 2',
-    'freee-qiita-bash-claude-code':
-      'Qiita Bash lightning talk — how we actually use Claude Code',
     'freee-ai-driven-development-01':
       'Toward AI-driven development: how freee is evolving its dev environment — part 1',
     'freee-invoice-email-abuse':
@@ -105,6 +105,10 @@ export const en: Dictionary = {
       'How LIFULL helps its engineers stay informed',
     'lifull-remote-abroad':
       'A new-grad Korean engineer abroad, working remotely',
+  },
+  talks: {
+    'qiita-bash-claude-code':
+      'Qiita Bash lightning talk — how we actually use Claude Code',
   },
   projects: {
     'agent-guard':
