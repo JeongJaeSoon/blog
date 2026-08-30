@@ -1,37 +1,32 @@
 {
-  "name": "arter-nextjs",
-  "version": "1.0.1",
+  "name": "jaesoon-blog",
+  "version": "2.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "deploy": "vercel deploy",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
   },
   "engines": {
-    "node": "22.14.0",
-    "bun": "1.2.10"
+    "node": ">=22.14.0",
+    "bun": ">=1.2.10"
   },
   "dependencies": {
-    "animejs": "^3.2.2",
-    "date-fns": "^2.30.0",
-    "eslint-config-next": "^14.2.15",
-    "formik": "^2.4.2",
-    "gray-matter": "^4.0.3",
-    "isotope-layout": "^3.0.6",
-    "next": "^14.2.15",
-    "progressbar.js": "^1.1.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-modal-video": "^2.0.1",
-    "react-typed": "^2.0.12",
-    "reactjs-popup": "^2.0.6",
-    "remark": "^14.0.3",
-    "remark-html": "^15.0.2",
-    "sass": "^1.49.7",
-    "smooth-scrollbar": "^8.8.4",
-    "smooth-scrollbar-react": "^2.4.1",
-    "swiper": "^9.0.0"
+    "next": "^16.3.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.4.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.3.3",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.0"
   }
 }
