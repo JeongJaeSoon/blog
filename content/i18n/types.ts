@@ -55,6 +55,7 @@ export type Dictionary = {
     skills: string
     education: string
     writing: string
+    publications: string
     codingActivity: string
   }
   ui: {
@@ -88,6 +89,12 @@ export type Dictionary = {
   experience: Record<string, JobText>
   /** Project id → one-line description. */
   projects: Record<string, string>
+  /**
+   * Publication id → its title in this language. The original-language title
+   * is always kept alongside the translation at render time, so a reader can
+   * still find the source article.
+   */
+  publications: Record<string, string>
   education: Record<string, EducationText>
   skills: SkillGroup[]
 }

@@ -16,6 +16,7 @@ export const ko: Dictionary = {
     skills: '기술',
     education: '학력',
     writing: '글',
+    publications: '기고',
     codingActivity: '코딩 활동',
   },
   ui: {
@@ -87,6 +88,7 @@ export const ko: Dictionary = {
       location: '일본 도쿄',
     },
   },
+  publications: {},
   projects: {
     'agent-guard':
       'AI 코딩 에이전트, Git 훅, CI를 위한 실시간 시크릿 유출 방지 가드레일.',

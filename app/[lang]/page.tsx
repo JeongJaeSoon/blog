@@ -7,6 +7,7 @@ import {
   experience,
   identity,
   projects,
+  publications,
 } from '@/content/profile'
 import { getDictionary, type Dictionary } from '@/content/i18n'
 import { isLocale, type Locale } from '@/lib/i18n'
@@ -27,6 +28,7 @@ export default async function HomePage({ params }: Props) {
       <Experience lang={lang} t={t} />
       <Projects t={t} />
       <Skills t={t} />
+      {publications.length > 0 && <Publications lang={lang} t={t} />}
       {education.length > 0 && <Education lang={lang} t={t} />}
       {codingStats.length > 0 && <CodingStats t={t} />}
       {posts.length > 0 && <LatestPosts lang={lang} t={t} posts={posts} />}
@@ -221,6 +223,46 @@ function Projects({ t }: { t: Dictionary }) {
             </p>
           </li>
         ))}
+      </ul>
+    </Section>
+  )
+}
+
+function Publications({ lang, t }: { lang: Locale; t: Dictionary }) {
+  const sorted = [...publications].sort((a, b) => b.date.localeCompare(a.date))
+
+  return (
+    <Section title={t.sections.publications}>
+      <ul className="space-y-4">
+        {sorted.map((item) => {
+          const translated = t.publications[item.id]
+          // Outside its own language, show the translation with the original
+          // title underneath, so the reader can still match it to the source.
+          const showOriginal = item.lang !== lang && translated
+          return (
+            <li key={item.id} className="print-avoid-break">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm hover:text-accent"
+                >
+                  {translated || item.id}
+                </a>
+                <time dateTime={item.date} className="font-mono text-xs text-faint">
+                  {formatDate(item.date, lang)}
+                </time>
+              </div>
+              {showOriginal && (
+                <p className="mt-0.5 text-xs text-faint" lang={item.lang}>
+                  {t.publications[`${item.id}.original`] ?? ''}
+                </p>
+              )}
+              <p className="mt-1 font-mono text-xs text-faint">{item.outlet}</p>
+            </li>
+          )
+        })}
       </ul>
     </Section>
   )

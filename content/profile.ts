@@ -118,6 +118,27 @@ export const projects: Project[] = [
   },
 ]
 
+export type Publication = {
+  /** Key into `dictionary.publications`, where the title is translated. */
+  id: string
+  href: string
+  /** Where it was published — shown verbatim, not translated. */
+  outlet: string
+  /** `YYYY-MM-DD`. Only ever the real publication date; never estimated. */
+  date: string
+  /** Language the article itself is written in. */
+  lang: 'en' | 'ko' | 'ja'
+}
+
+/**
+ * Articles written for someone else's publication — company engineering
+ * blogs, guest posts. Ordered newest first at render time.
+ *
+ * Rule: a publication only goes in here once its real date is known. An
+ * approximate date on a résumé is worse than no entry.
+ */
+export const publications: Publication[] = []
+
 /**
  * WakaTime coding stats.
  *

@@ -16,6 +16,7 @@ export const ja: Dictionary = {
     skills: 'スキル',
     education: '学歴',
     writing: '記事',
+    publications: '寄稿記事',
     codingActivity: 'コーディング活動',
   },
   ui: {
@@ -86,6 +87,7 @@ export const ja: Dictionary = {
       location: '東京',
     },
   },
+  publications: {},
   projects: {
     'agent-guard':
       'AIコーディングエージェント、Gitフック、CIに対応したシークレット漏洩のリアルタイムガードレール。',

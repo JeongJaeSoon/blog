@@ -16,6 +16,7 @@ export const en: Dictionary = {
     skills: 'Skills',
     education: 'Education',
     writing: 'Writing',
+    publications: 'Published elsewhere',
     codingActivity: 'Coding activity',
   },
   ui: {
@@ -87,6 +88,7 @@ export const en: Dictionary = {
       location: 'Tokyo, Japan',
     },
   },
+  publications: {},
   projects: {
     'agent-guard':
       'Real-time secret-leak guardrails for AI coding agents, Git hooks, and CI.',
