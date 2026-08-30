@@ -29,15 +29,22 @@ enough to read in one screen, which is the point.
 
 ## Where the content lives
 
-Two places, and that is the whole mental model:
+Three places, and that is the whole mental model:
 
 ```text
-content/profile.ts   → everything the résumé renders
-content/posts/*.md   → everything the blog renders
+content/profile.ts      → facts: dates, URLs, repos, stacks
+content/i18n/{en,ko,ja} → every translatable string
+content/posts/*.md      → the blog
 ```
 
-`profile.ts` is typed, so adding a role with a missing date fails the build
-instead of rendering an empty span. A post is a markdown file with frontmatter:
+The split between the first two is the part worth explaining. A fact is stored
+**once** — the date I joined freee, a repository's name, the languages a
+project is written in. Only prose gets translated. Storing "2023-11" three
+times is how three copies quietly drift apart.
+
+Both halves are typed, so adding a role with a missing date, or a locale
+missing a key, fails the build instead of rendering an empty span. A post is a
+markdown file with frontmatter:
 
 ```yaml
 ---
@@ -45,9 +52,12 @@ title: A post
 date: '2026-08-30'
 summary: One or two sentences.
 tags: [nextjs]
+lang: en
 draft: true
 ---
 ```
+
+`lang` decides which language's blog the post appears under.
 
 Setting `draft: true` keeps a post visible in `next dev` and out of the build,
 the RSS feed and the sitemap.
@@ -57,4 +67,17 @@ the RSS feed and the sitemap.
 The home page *is* the résumé. It reads from the same typed data and prints
 cleanly — `Cmd+P` drops the navigation, the footer and the "all repositories"
 links, and expands the contact handles so the paper version still carries them.
-One source of truth, two audiences.
+One source of truth, two audiences — in three languages.
+
+## What translation taught me about my own data model
+
+I thought company names were facts. They are not: `freee K.K.`, `freee株式会社`
+and `freee 주식회사` are the same company, and the Japanese page was rendering
+one of them directly above another.
+
+The location line made the same point louder. I had built it as
+`{location} — from {origin}`, which quietly encodes English word order. Korean
+puts the marker last (`대구 출신`), and so does Japanese (`韓国・大邱出身`).
+Two translators, working independently, both bent their wording around it
+rather than change code. When two people hit the same wall from opposite
+sides, the wall is the bug.
