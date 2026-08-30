@@ -9,6 +9,7 @@ import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeShiki from '@shikijs/rehype'
 import rehypeStringify from 'rehype-stringify'
+import { defaultLocale, isLocale, type Locale } from './i18n'
 
 const POSTS_DIR = path.join(process.cwd(), 'content/posts')
 
@@ -19,6 +20,8 @@ export type PostMeta = {
   summary: string
   tags: string[]
   draft: boolean
+  /** Language the post is written in. Defaults to the site default. */
+  lang: Locale
   readingMinutes: number
 }
 
@@ -32,6 +35,7 @@ function read(slug: string) {
 
 function toMeta(slug: string, data: Record<string, unknown>, body: string): PostMeta {
   const words = body.trim().split(/\s+/).length
+  const lang = String(data.lang ?? defaultLocale)
   return {
     slug,
     title: String(data.title ?? slug),
@@ -39,6 +43,7 @@ function toMeta(slug: string, data: Record<string, unknown>, body: string): Post
     summary: String(data.summary ?? ''),
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
     draft: data.draft === true,
+    lang: isLocale(lang) ? lang : defaultLocale,
     readingMinutes: Math.max(1, Math.round(words / 220)),
   }
 }
@@ -48,8 +53,8 @@ function isVisible(post: PostMeta) {
   return !post.draft || process.env.NODE_ENV === 'development'
 }
 
-/** Newest first. */
-export function getAllPosts(): PostMeta[] {
+/** Newest first. Pass a locale to get only posts written in that language. */
+export function getAllPosts(locale?: Locale): PostMeta[] {
   if (!fs.existsSync(POSTS_DIR)) return []
   return fs
     .readdirSync(POSTS_DIR)
@@ -60,16 +65,19 @@ export function getAllPosts(): PostMeta[] {
       return toMeta(slug, parsed.data, parsed.content)
     })
     .filter(isVisible)
+    .filter((post) => !locale || post.lang === locale)
     .sort((a, b) => b.date.localeCompare(a.date))
 }
 
-export function getPostsByTag(tag: string): PostMeta[] {
-  return getAllPosts().filter((post) => post.tags.some((t) => slugifyTag(t) === tag))
+export function getPostsByTag(tag: string, locale: Locale): PostMeta[] {
+  return getAllPosts(locale).filter((post) =>
+    post.tags.some((t) => slugifyTag(t) === tag),
+  )
 }
 
-export function getAllTags(): { tag: string; slug: string; count: number }[] {
+export function getAllTags(locale: Locale): { tag: string; slug: string; count: number }[] {
   const counts = new Map<string, number>()
-  for (const post of getAllPosts()) {
+  for (const post of getAllPosts(locale)) {
     for (const tag of post.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
   }
   return [...counts.entries()]
@@ -100,14 +108,4 @@ export async function getPost(slug: string): Promise<Post | null> {
   if (!isVisible(meta)) return null
   const html = String(await processor.process(parsed.content))
   return { ...meta, html }
-}
-
-export function formatDate(date: string): string {
-  if (!date) return ''
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  })
 }
