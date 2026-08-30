@@ -88,7 +88,24 @@ export const en: Dictionary = {
       location: 'Tokyo, Japan',
     },
   },
-  publications: {},
+  publications: {
+    'freee-claude-enterprise-scim':
+      'Rolling out Claude Enterprise company-wide: permission operations with SCIM and IaC',
+    'freee-ai-driven-development-report':
+      'freee\'s AI-driven development in numbers — part 2',
+    'freee-qiita-bash-claude-code':
+      'Qiita Bash lightning talk — how we actually use Claude Code',
+    'freee-ai-driven-development-01':
+      'Toward AI-driven development: how freee is evolving its dev environment — part 1',
+    'freee-invoice-email-abuse':
+      'Preventing abuse of freee Invoice\'s email delivery feature',
+    'freee-desk-2023':
+      'Upgrading my desk setup after moving to Osaki',
+    'lifull-info-power':
+      'How LIFULL helps its engineers stay informed',
+    'lifull-remote-abroad':
+      'A new-grad Korean engineer abroad, working remotely',
+  },
   projects: {
     'agent-guard':
       'Real-time secret-leak guardrails for AI coding agents, Git hooks, and CI.',
@@ -121,7 +138,7 @@ export const en: Dictionary = {
     },
     {
       group: 'Languages',
-      items: ['TypeScript', 'Python', 'Go', 'Ruby', 'Shell'],
+      items: ['TypeScript', 'Python', 'Go', 'Ruby', 'PHP', 'Shell'],
     },
     {
       group: 'Infrastructure',

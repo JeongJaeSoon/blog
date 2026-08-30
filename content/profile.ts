@@ -121,10 +121,17 @@ export const projects: Project[] = [
 export type Publication = {
   /** Key into `dictionary.publications`, where the title is translated. */
   id: string
+  /** Title in the language it was published in — shown alongside translations. */
+  originalTitle: string
   href: string
   /** Where it was published — shown verbatim, not translated. */
   outlet: string
-  /** `YYYY-MM-DD`. Only ever the real publication date; never estimated. */
+  /**
+   * `YYYY-MM-DD` when the exact day is known, `YYYY-MM` when only the month
+   * is. Month precision is deliberate: freee's URLs carry no date and the
+   * site is unreachable from the build environment, so the day would be a
+   * guess. Rendering follows whichever precision is given.
+   */
   date: string
   /** Language the article itself is written in. */
   lang: 'en' | 'ko' | 'ja'
@@ -137,7 +144,75 @@ export type Publication = {
  * Rule: a publication only goes in here once its real date is known. An
  * approximate date on a résumé is worse than no entry.
  */
-export const publications: Publication[] = []
+export const publications: Publication[] = [
+  {
+    id: 'freee-claude-enterprise-scim',
+    originalTitle:
+      'Claude Enterprise を全社に安全に展開するために、SCIM × IaC で権限運用を整備した話',
+    href: 'https://developers.freee.co.jp/entry/freee-claude-enterprise-scim',
+    outlet: 'freee Developers Hub',
+    date: '2026-05',
+    lang: 'ja',
+  },
+  {
+    id: 'freee-ai-driven-development-report',
+    originalTitle: '数字で振り返る freee の AI 駆動開発 - 後編',
+    href: 'https://developers.freee.co.jp/entry/ai-driven-development-2025-report',
+    outlet: 'freee Developers Hub',
+    date: '2025-12',
+    lang: 'ja',
+  },
+  {
+    id: 'freee-qiita-bash-claude-code',
+    originalTitle: 'Qiita Bash「キミたちはClaude Codeをどう使いこなす？」LT 登壇資料',
+    href: 'https://developers.freee.co.jp/entry/qiita-claude-code',
+    outlet: 'freee Developers Hub',
+    date: '2025-11',
+    lang: 'ja',
+  },
+  {
+    id: 'freee-ai-driven-development-01',
+    originalTitle: 'AI駆動開発へ。freee は開発環境をどう進化させているか？- 前編',
+    href: 'https://developers.freee.co.jp/entry/ai-driven-development-01',
+    outlet: 'freee Developers Hub',
+    date: '2025-09',
+    lang: 'ja',
+  },
+  {
+    id: 'freee-invoice-email-abuse',
+    originalTitle:
+      'より良いプロダクトを目指して、freee 請求書のメール送付機能不正利用防止対策の話',
+    href: 'https://developers.freee.co.jp/entry/freee-invoice-enhance-email-delivery',
+    outlet: 'freee Developers Hub',
+    date: '2024-12',
+    lang: 'ja',
+  },
+  {
+    id: 'freee-desk-2023',
+    originalTitle: '大崎に引越ししてきたので、デスク環境をアップグレード',
+    href: 'https://developers.freee.co.jp/entry/jason-desk-2023',
+    outlet: 'freee Developers Hub',
+    date: '2023-12',
+    lang: 'ja',
+  },
+  {
+    id: 'lifull-info-power',
+    originalTitle: 'エンジニアの情報力を向上するためのLIFULLの活動',
+    href: 'https://www.lifull.blog/entry/2023/02/13/090000',
+    outlet: 'LIFULL Creators Blog',
+    date: '2023-02-13',
+    lang: 'ja',
+  },
+  {
+    id: 'lifull-remote-abroad',
+    originalTitle: '新卒韓国人エンジニアの外国生活×リモートワーク',
+    href: 'https://www.lifull.blog/entry/2022/08/24/100949',
+    outlet: 'LIFULL Creators Blog',
+    date: '2022-08-24',
+    lang: 'ja',
+  },
+]
+
 
 /**
  * WakaTime coding stats.

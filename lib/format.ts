@@ -36,3 +36,12 @@ export function formatDate(date: string, locale: Locale): string {
     timeZone: 'UTC',
   })
 }
+
+/**
+ * Formats a publication date at whatever precision it carries: `2023-02-13`
+ * renders as a full date, `2025-12` as just the month and year.
+ */
+export function publicationDate(value: string, locale: Locale): string {
+  const parts = value.split('-')
+  return parts.length >= 3 ? formatDate(value, locale) : month(value, locale)
+}

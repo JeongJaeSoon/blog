@@ -88,7 +88,24 @@ export const ko: Dictionary = {
       location: '일본 도쿄',
     },
   },
-  publications: {},
+  publications: {
+    'freee-claude-enterprise-scim':
+      'Claude Enterprise를 전사에 안전하게 배포하기 위해 SCIM × IaC로 권한 운영을 정비한 이야기',
+    'freee-ai-driven-development-report':
+      '숫자로 돌아보는 freee의 AI 구동 개발 — 후편',
+    'freee-qiita-bash-claude-code':
+      'Qiita Bash LT 발표 자료 — Claude Code를 어떻게 쓰고 있는가',
+    'freee-ai-driven-development-01':
+      'AI 구동 개발로. freee는 개발 환경을 어떻게 진화시키고 있는가 — 전편',
+    'freee-invoice-email-abuse':
+      'freee 청구서 메일 발송 기능의 부정 이용 방지 대책',
+    'freee-desk-2023':
+      '오사키로 이사하며 데스크 환경 업그레이드',
+    'lifull-info-power':
+      '엔지니어의 정보력을 높이기 위한 LIFULL의 활동',
+    'lifull-remote-abroad':
+      '신입 한국인 엔지니어의 해외 생활과 리모트 워크',
+  },
   projects: {
     'agent-guard':
       'AI 코딩 에이전트, Git 훅, CI를 위한 실시간 시크릿 유출 방지 가드레일.',
@@ -121,7 +138,7 @@ export const ko: Dictionary = {
     },
     {
       group: '프로그래밍 언어',
-      items: ['TypeScript', 'Python', 'Go', 'Ruby', 'Shell'],
+      items: ['TypeScript', 'Python', 'Go', 'Ruby', 'PHP', 'Shell'],
     },
     {
       group: '인프라',

@@ -12,7 +12,7 @@ import {
 import { getDictionary, type Dictionary } from '@/content/i18n'
 import { isLocale, type Locale } from '@/lib/i18n'
 import { getAllPosts, type PostMeta } from '@/lib/posts'
-import { formatDate, period } from '@/lib/format'
+import { formatDate, period, publicationDate } from '@/lib/format'
 
 type Props = { params: Promise<{ lang: string }> }
 
@@ -251,12 +251,12 @@ function Publications({ lang, t }: { lang: Locale; t: Dictionary }) {
                   {translated || item.id}
                 </a>
                 <time dateTime={item.date} className="font-mono text-xs text-faint">
-                  {formatDate(item.date, lang)}
+                  {publicationDate(item.date, lang)}
                 </time>
               </div>
               {showOriginal && (
                 <p className="mt-0.5 text-xs text-faint" lang={item.lang}>
-                  {t.publications[`${item.id}.original`] ?? ''}
+                  {item.originalTitle}
                 </p>
               )}
               <p className="mt-1 font-mono text-xs text-faint">{item.outlet}</p>
