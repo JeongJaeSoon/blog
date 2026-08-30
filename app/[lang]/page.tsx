@@ -13,7 +13,7 @@ import {
 import { getDictionary, type Dictionary } from '@/content/i18n'
 import { isLocale, type Locale } from '@/lib/i18n'
 import { getAllPosts, type PostMeta } from '@/lib/posts'
-import { formatDate, period, publicationDate } from '@/lib/format'
+import { formatDate, month, period, publicationDate } from '@/lib/format'
 
 type Props = { params: Promise<{ lang: string }> }
 
@@ -358,7 +358,9 @@ function Education({ lang, t }: { lang: Locale; t: Dictionary }) {
                 )}
               </div>
               <span className="font-mono text-xs text-faint">
-                {period(item.start, item.end, lang, t.ui.present)}
+                {item.start
+                  ? period(item.start, item.end, lang, t.ui.present)
+                  : item.end && month(item.end, lang)}
               </span>
             </li>
           )
