@@ -18,6 +18,7 @@ bun run typecheck
 | What | Where |
 | --- | --- |
 | Identity — name, headline, links | `content/profile.ts` |
+| Blog posts | `content/posts/*.md` |
 | Site title, description, URL, nav | `lib/site.ts` |
 | Design tokens, base and print styles | `app/globals.css` |
 
@@ -25,9 +26,29 @@ Light and dark palettes are the same set of CSS variables with different
 values, so every utility keeps working in both. Dark follows the system
 preference.
 
+### Adding a post
+
+Create `content/posts/my-post.md`:
+
+```yaml
+---
+title: My post
+date: '2026-09-01'
+summary: One or two sentences, used on the index and in the RSS feed.
+tags: [platform, mcp]
+draft: false
+---
+```
+
+`draft: true` keeps a post visible in `bun dev` and out of the build, the RSS
+feed and the sitemap. Reading time is computed; do not set it.
+
+Tag pages (`/blog/tag/<tag>`), `/rss.xml`, `/sitemap.xml` and `/robots.txt` are
+generated from the posts — nothing to register by hand.
+
 ## Deploy
 
-Deployed on Vercel; the origin used for canonical URLs is resolved in
-`lib/site.ts` from `VERCEL_PROJECT_PRODUCTION_URL`, so no configuration is
-needed. Once a custom domain is attached, either let Vercel report it or pin it
+Deployed on Vercel; the origin used for canonical URLs, RSS and the sitemap is
+resolved in `lib/site.ts` from `VERCEL_PROJECT_PRODUCTION_URL`, so no
+configuration is needed. Once a custom domain is attached, either let Vercel report it or pin it
 with `NEXT_PUBLIC_SITE_URL`.

@@ -1,5 +1,5 @@
 /**
- * Resolve the origin used for canonical URLs and Open Graph.
+ * Resolve the origin used for canonical URLs, Open Graph, RSS, and the sitemap.
  *
  * Order:
  *   1. NEXT_PUBLIC_SITE_URL — set this once a custom domain is in place.
@@ -26,5 +26,8 @@ export const site = {
     'AI Platform Engineer in Tokyo. Notes on LLM platforms, agent tooling, and the operational side of shipping AI.',
   url: resolveUrl(),
   locale: 'en',
-  nav: [{ label: 'About', href: '/' }],
+  nav: [
+    { label: 'About', href: '/' },
+    { label: 'Blog', href: '/blog' },
+  ],
 } as const

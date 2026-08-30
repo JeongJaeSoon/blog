@@ -31,6 +31,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
   },
   twitter: { card: 'summary', creator: '@dev_soon0_0' },
+  alternates: { types: { 'application/rss+xml': `${site.url}/rss.xml` } },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -85,6 +86,9 @@ function SiteFooter() {
               {link.label}
             </a>
           ))}
+        <a href="/rss.xml" className="hover:text-ink">
+          RSS
+        </a>
       </div>
     </footer>
   )
