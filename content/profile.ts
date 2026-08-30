@@ -47,7 +47,8 @@ export type Project = {
 export type Education = {
   /** Key into `dictionary.education`. */
   id: string
-  start: string
+  /** Omit when only the graduation is known. */
+  start?: string
   end?: string
 }
 
@@ -89,7 +90,11 @@ export const experience: Job[] = [
   },
 ]
 
-export const education: Education[] = [{ id: 'koreacu', start: '2026-03' }]
+export const education: Education[] = [
+  { id: 'koreacu', start: '2026-03' },
+  // Only the graduation is established; the enrolment span is not.
+  { id: 'yeungjin', end: '2022-02' },
+]
 
 /** Public repositories worth showing. Star counts are refreshed by hand. */
 export const projects: Project[] = [

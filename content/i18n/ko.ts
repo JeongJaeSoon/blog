@@ -45,7 +45,7 @@ export const ko: Dictionary = {
   experience: {
     freee: {
       company: 'freee 주식회사',
-      position: '시니어 AI 플랫폼 엔지니어, CAIO Office',
+      position: '시니어 AI 플랫폼 엔지니어, 테크 리드 — CAIO Office',
       location: '일본 도쿄',
       roles: {
         'ai-platform': {
@@ -84,9 +84,10 @@ export const ko: Dictionary = {
     },
     lifull: {
       company: 'LIFULL 주식회사',
-      // TODO: fill in the exact job title from your LinkedIn — left blank on
-      // purpose rather than guessed. The line is hidden while it is empty.
-      position: '',
+      // Not a stated title: no source gives one. This is his department
+      // (プロダクトエンジニアリング部) plus how he described himself in his
+      // own LIFULL blog bios. Replace with the exact title if it differs.
+      position: '프로덕트 엔지니어링 부문 엔지니어',
       location: '일본 도쿄',
     },
   },
@@ -120,6 +121,13 @@ export const ko: Dictionary = {
     mux: '인터랙티브 TUI를 갖춘 tmux 세션 매니저.',
   },
   education: {
+    yeungjin: {
+      school: '영진전문대학교',
+      // Sources disagree on the department (일본IT과 vs 웹데이터베이스 전공);
+      // left blank rather than picking one.
+      degree: '',
+      note: '졸업',
+    },
     koreacu: {
       school: '고려사이버대학교',
       // TODO: add your department once you want it public.
