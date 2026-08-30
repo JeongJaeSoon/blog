@@ -8,6 +8,7 @@ import {
   identity,
   projects,
   publications,
+  talks,
 } from '@/content/profile'
 import { getDictionary, type Dictionary } from '@/content/i18n'
 import { isLocale, type Locale } from '@/lib/i18n'
@@ -28,6 +29,7 @@ export default async function HomePage({ params }: Props) {
       <Experience lang={lang} t={t} />
       <Projects t={t} />
       <Skills t={t} />
+      {talks.length > 0 && <Talks lang={lang} t={t} />}
       {publications.length > 0 && <Publications lang={lang} t={t} />}
       {education.length > 0 && <Education lang={lang} t={t} />}
       {codingStats.length > 0 && <CodingStats t={t} />}
@@ -223,6 +225,56 @@ function Projects({ t }: { t: Dictionary }) {
             </p>
           </li>
         ))}
+      </ul>
+    </Section>
+  )
+}
+
+function Talks({ lang, t }: { lang: Locale; t: Dictionary }) {
+  const sorted = [...talks].sort((a, b) => b.date.localeCompare(a.date))
+
+  return (
+    <Section
+      title={t.sections.talks}
+      action={
+        <a
+          href={identity.decks}
+          target="_blank"
+          rel="noreferrer"
+          className="no-print text-xs text-faint hover:text-ink"
+        >
+          {t.ui.allDecks} →
+        </a>
+      }
+    >
+      <ul className="space-y-4">
+        {sorted.map((item) => {
+          const translated = t.talks[item.id]
+          const showOriginal = item.lang !== lang && translated
+          return (
+            <li key={item.id} className="print-avoid-break">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm hover:text-accent"
+                >
+                  {translated || item.originalTitle}
+                </a>
+                <time dateTime={item.date} className="font-mono text-xs text-faint">
+                  {publicationDate(item.date, lang)}
+                </time>
+              </div>
+              {showOriginal && (
+                <p className="mt-0.5 text-xs text-faint" lang={item.lang}>
+                  {item.originalTitle}
+                </p>
+              )}
+              <p className="mt-1 font-mono text-xs text-faint">{item.event}</p>
+            </li>
+          )
+        })}
       </ul>
     </Section>
   )

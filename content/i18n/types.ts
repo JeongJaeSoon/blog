@@ -56,11 +56,13 @@ export type Dictionary = {
     education: string
     writing: string
     publications: string
+    talks: string
     codingActivity: string
   }
   ui: {
     allPosts: string
     allRepositories: string
+    allDecks: string
     /**
      * Rendered as `{readingTimePrefix}{n}{minRead}` with no added spacing, so
      * each language controls its own: English needs a leading space
@@ -95,6 +97,8 @@ export type Dictionary = {
    * still find the source article.
    */
   publications: Record<string, string>
+  /** Talk id → its title in this language. */
+  talks: Record<string, string>
   education: Record<string, EducationText>
   skills: SkillGroup[]
 }

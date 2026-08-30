@@ -17,11 +17,13 @@ export const ko: Dictionary = {
     education: '학력',
     writing: '글',
     publications: '기고',
+    talks: '발표',
     codingActivity: '코딩 활동',
   },
   ui: {
     allPosts: '전체 글',
     allRepositories: '전체 저장소',
+    allDecks: '전체 슬라이드',
     minRead: '분 읽기',
     readingTimePrefix: '',
     noPosts: '아직 작성된 글이 없습니다.',
@@ -93,8 +95,6 @@ export const ko: Dictionary = {
       'Claude Enterprise를 전사에 안전하게 배포하기 위해 SCIM × IaC로 권한 운영을 정비한 이야기',
     'freee-ai-driven-development-report':
       '숫자로 돌아보는 freee의 AI 구동 개발 — 후편',
-    'freee-qiita-bash-claude-code':
-      'Qiita Bash LT 발표 자료 — Claude Code를 어떻게 쓰고 있는가',
     'freee-ai-driven-development-01':
       'AI 구동 개발로. freee는 개발 환경을 어떻게 진화시키고 있는가 — 전편',
     'freee-invoice-email-abuse':
@@ -105,6 +105,10 @@ export const ko: Dictionary = {
       '엔지니어의 정보력을 높이기 위한 LIFULL의 활동',
     'lifull-remote-abroad':
       '신입 한국인 엔지니어의 해외 생활과 리모트 워크',
+  },
+  talks: {
+    'qiita-bash-claude-code':
+      'Qiita Bash LT — Claude Code를 어떻게 쓰고 있는가',
   },
   projects: {
     'agent-guard':
