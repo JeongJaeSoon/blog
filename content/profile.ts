@@ -1,61 +1,60 @@
 /**
- * Single source of truth for everything the résumé pages render.
+ * Locale-invariant facts: dates, URLs, repository names, tech stacks, star counts.
  *
- * Editing rule: only put things here that are verifiable from a public
- * source (GitHub, a talk, a published post) or that you are happy to show
- * a recruiter. Nothing internal, nothing about compensation.
+ * Anything translatable — job titles, summaries, descriptions, skills — lives
+ * in `content/i18n/<locale>.ts`, keyed by the `id` fields declared here. That
+ * way a date or a repository name is stored exactly once and cannot drift
+ * between languages.
+ *
+ * Editing rule: only put things here that are verifiable from a public source
+ * (GitHub, a talk, a published post) or that you are happy to show a recruiter.
+ * Nothing internal, nothing about compensation.
  */
 
 export type Link = {
   label: string
   href: string
-  /** Shown next to the link on the contact list. Keep it to a handle. */
+  /** Shown next to the link when the page is printed. Keep it to a handle. */
   handle?: string
 }
 
 export type Role = {
-  /** Team or sub-role inside the same company. */
-  title: string
+  /** Key into `dictionary.experience[jobId].roles`. */
+  id: string
   /** `YYYY-MM`. Omit `end` for the current role. */
   start: string
   end?: string
-  summary: string
-  highlights: string[]
 }
 
 export type Job = {
-  company: string
+  /** Key into `dictionary.experience` — the display name lives there. */
+  id: string
   href?: string
-  location: string
-  /** Title as it should read on a résumé. Leave empty to hide the line. */
-  position: string
   start: string
   end?: string
   roles?: Role[]
 }
 
 export type Project = {
-  name: string
+  /** Key into `dictionary.projects`. Also the displayed repository name. */
+  id: string
   href: string
-  description: string
   stack: string[]
   /** GitHub stars, refreshed by hand. Omit rather than guess. */
   stars?: number
 }
 
-export const profile = {
+export type Education = {
+  /** Key into `dictionary.education`. */
+  id: string
+  start: string
+  end?: string
+}
+
+export const identity = {
   name: 'JaeSoon Jeong',
   /** Shown after the name, e.g. how people actually address you. */
   alias: 'jason',
-  headline: 'Senior AI Platform Engineer',
-  org: 'CAIO Office, freee K.K.',
-  location: 'Tokyo, Japan',
-  origin: 'Daegu, Korea',
-  /** Two or three sentences. This is the first thing anyone reads. */
-  about: [
-    'I build the platform other engineers use to ship AI features safely — shared LLM runtime and gateway, authentication and supply-chain controls, and the governance that lets a whole company adopt AI tooling without each team reinventing it.',
-    'Before that I spent two years on product delivery: receivables and invoicing at freee, where large-scale data, performance, and infrastructure migration were the everyday problems. That end-to-end delivery habit is what I carry into platform work — a feature is not done until it is operable.',
-  ],
   avatar: '/avatar.jpg',
   links: [
     { label: 'GitHub', href: 'https://github.com/JeongJaeSoon', handle: '@JeongJaeSoon' },
@@ -64,146 +63,156 @@ export const profile = {
     { label: 'Threads', href: 'https://www.threads.com/@dev_soon.0_0', handle: '@dev_soon.0_0' },
     { label: 'Email', href: 'mailto:94jaesoon.jeong@gmail.com', handle: '94jaesoon.jeong@gmail.com' },
   ] satisfies Link[],
+  /** Repository listing linked from the open-source section. */
+  repositories: 'https://github.com/JeongJaeSoon?tab=repositories',
 } as const
 
 export const experience: Job[] = [
   {
-    company: 'freee K.K.',
+    id: 'freee',
     href: 'https://corp.freee.co.jp/',
-    location: 'Tokyo, Japan',
-    position: 'Senior AI Platform Engineer, CAIO Office',
     start: '2023-11',
     roles: [
-      {
-        title: 'AI Platform Engineering',
-        start: '2026-01',
-        summary:
-          'Shared AI platform for the whole engineering organisation: runtime, integration, and the controls around them.',
-        highlights: [
-          'Common LLM runtime and gateway, plus the integration surface teams build against',
-          'Authentication, credential lifecycle, and supply-chain controls for agent tooling',
-          'Evidence-driven delivery — release, deployment, and live end-to-end each proven separately',
-          'Enablement so teams operate what they adopt instead of routing every question back to the platform',
-        ],
-      },
-      {
-        title: 'AI-Driven Development (AI駆動開発)',
-        start: '2025-07',
-        end: '2025-12',
-        summary:
-          'Evaluating and rolling out AI development tooling across product engineering.',
-        highlights: [
-          'Tool evaluation and company-wide rollout, from sandbox pilot to enterprise operation',
-          'MCP servers and RAG groundwork for internal developer tooling',
-          'Usage guidelines, workflow automation, hands-on sessions and office hours',
-        ],
-      },
-      {
-        title: 'Receivables & Invoicing (債権・請求書)',
-        start: '2023-11',
-        end: '2025-06',
-        summary:
-          'Product engineering, then project ownership and TL work on the invoicing product.',
-        highlights: [
-          'Feature delivery end to end — requirements, design, QA, and operational readiness',
-          'Large-volume data and performance work: OOM, DB load, online schema change',
-          'Infrastructure migration, CI/CD, and observability with Datadog',
-          'Onboarding and runbooks so the team could run what it shipped',
-        ],
-      },
+      { id: 'ai-platform', start: '2026-01' },
+      { id: 'ai-driven-dev', start: '2025-07', end: '2025-12' },
+      { id: 'invoicing', start: '2023-11', end: '2025-06' },
     ],
   },
   {
-    company: 'LIFULL Co., Ltd.',
+    id: 'lifull',
     href: 'https://lifull.com/',
-    location: 'Tokyo, Japan',
-    // TODO: fill in the exact job title from your LinkedIn — left blank on
-    // purpose rather than guessed. The line is hidden while it is empty.
-    position: '',
     start: '2022-04',
     end: '2023-10',
   },
 ]
 
-export const education = [
-  {
-    school: 'Korea Cyber University (고려사이버대학교)',
-    // TODO: add your department once you want it public.
-    degree: '',
-    start: '2026-03',
-    note: 'Currently enrolled',
-  },
-]
-
-export const skills: { group: string; items: string[] }[] = [
-  {
-    group: 'AI Platform',
-    items: [
-      'MCP (Model Context Protocol)',
-      'LLM gateway & proxy',
-      'RAG',
-      'Agent governance',
-      'Langfuse',
-      'n8n',
-      'Claude Enterprise operations',
-    ],
-  },
-  {
-    group: 'Languages',
-    items: ['TypeScript', 'Python', 'Go', 'Ruby', 'Shell', 'Swift'],
-  },
-  {
-    group: 'Infrastructure',
-    items: ['AWS', 'Kubernetes', 'Terraform', 'Datadog', 'GitHub Actions', 'CI/CD'],
-  },
-  {
-    group: 'Spoken',
-    items: ['Korean (native)', 'Japanese (business)', 'English'],
-  },
-]
+export const education: Education[] = [{ id: 'koreacu', start: '2026-03' }]
 
 /** Public repositories worth showing. Star counts are refreshed by hand. */
 export const projects: Project[] = [
   {
-    name: 'agent-guard',
+    id: 'agent-guard',
     href: 'https://github.com/JeongJaeSoon/agent-guard',
-    description:
-      'Real-time secret-leak guardrails for AI coding agents, Git hooks, and CI.',
     stack: ['Shell', 'gitleaks', 'GitHub Actions'],
     stars: 24,
   },
   {
-    name: 'kollegium',
+    id: 'kollegium',
     href: 'https://github.com/JeongJaeSoon/kollegium',
-    description: 'Open-source runtime framework for AI teammates in team chat.',
     stack: ['TypeScript', 'Slack'],
   },
   {
-    name: 'terraform-provider-claude-enterprise',
+    id: 'terraform-provider-claude-enterprise',
     href: 'https://github.com/JeongJaeSoon/terraform-provider-claude-enterprise',
-    description:
-      'Community Terraform provider for Claude Enterprise per-member spend limits.',
     stack: ['Go', 'Terraform'],
   },
   {
-    name: 'relay',
+    id: 'relay',
     href: 'https://github.com/JeongJaeSoon/relay',
-    description: 'Personal multi-agent orchestrator for Claude Code.',
     stack: ['TypeScript'],
   },
   {
-    name: 'claude-wrapped',
-    href: 'https://github.com/JeongJaeSoon/claude-wrapped',
-    description: 'Wrapped-style summaries of your Claude Code usage.',
-    stack: ['TypeScript'],
-  },
-  {
-    name: 'mux',
+    id: 'mux',
     href: 'https://github.com/JeongJaeSoon/mux',
-    description: 'tmux session manager with an interactive TUI.',
     stack: ['Go'],
   },
 ]
+
+export type Publication = {
+  /** Key into `dictionary.publications`, where the title is translated. */
+  id: string
+  /** Title in the language it was published in — shown alongside translations. */
+  originalTitle: string
+  href: string
+  /** Where it was published — shown verbatim, not translated. */
+  outlet: string
+  /**
+   * `YYYY-MM-DD` when the exact day is known, `YYYY-MM` when only the month
+   * is. Month precision is deliberate: freee's URLs carry no date and the
+   * site is unreachable from the build environment, so the day would be a
+   * guess. Rendering follows whichever precision is given.
+   */
+  date: string
+  /** Language the article itself is written in. */
+  lang: 'en' | 'ko' | 'ja'
+}
+
+/**
+ * Articles written for someone else's publication — company engineering
+ * blogs, guest posts. Ordered newest first at render time.
+ *
+ * Rule: a publication only goes in here once its real date is known. An
+ * approximate date on a résumé is worse than no entry.
+ */
+export const publications: Publication[] = [
+  {
+    id: 'freee-claude-enterprise-scim',
+    originalTitle:
+      'Claude Enterprise を全社に安全に展開するために、SCIM × IaC で権限運用を整備した話',
+    href: 'https://developers.freee.co.jp/entry/freee-claude-enterprise-scim',
+    outlet: 'freee Developers Hub',
+    date: '2026-05',
+    lang: 'ja',
+  },
+  {
+    id: 'freee-ai-driven-development-report',
+    originalTitle: '数字で振り返る freee の AI 駆動開発 - 後編',
+    href: 'https://developers.freee.co.jp/entry/ai-driven-development-2025-report',
+    outlet: 'freee Developers Hub',
+    date: '2025-12',
+    lang: 'ja',
+  },
+  {
+    id: 'freee-qiita-bash-claude-code',
+    originalTitle: 'Qiita Bash「キミたちはClaude Codeをどう使いこなす？」LT 登壇資料',
+    href: 'https://developers.freee.co.jp/entry/qiita-claude-code',
+    outlet: 'freee Developers Hub',
+    date: '2025-11',
+    lang: 'ja',
+  },
+  {
+    id: 'freee-ai-driven-development-01',
+    originalTitle: 'AI駆動開発へ。freee は開発環境をどう進化させているか？- 前編',
+    href: 'https://developers.freee.co.jp/entry/ai-driven-development-01',
+    outlet: 'freee Developers Hub',
+    date: '2025-09',
+    lang: 'ja',
+  },
+  {
+    id: 'freee-invoice-email-abuse',
+    originalTitle:
+      'より良いプロダクトを目指して、freee 請求書のメール送付機能不正利用防止対策の話',
+    href: 'https://developers.freee.co.jp/entry/freee-invoice-enhance-email-delivery',
+    outlet: 'freee Developers Hub',
+    date: '2024-12',
+    lang: 'ja',
+  },
+  {
+    id: 'freee-desk-2023',
+    originalTitle: '大崎に引越ししてきたので、デスク環境をアップグレード',
+    href: 'https://developers.freee.co.jp/entry/jason-desk-2023',
+    outlet: 'freee Developers Hub',
+    date: '2023-12',
+    lang: 'ja',
+  },
+  {
+    id: 'lifull-info-power',
+    originalTitle: 'エンジニアの情報力を向上するためのLIFULLの活動',
+    href: 'https://www.lifull.blog/entry/2023/02/13/090000',
+    outlet: 'LIFULL Creators Blog',
+    date: '2023-02-13',
+    lang: 'ja',
+  },
+  {
+    id: 'lifull-remote-abroad',
+    originalTitle: '新卒韓国人エンジニアの外国生活×リモートワーク',
+    href: 'https://www.lifull.blog/entry/2022/08/24/100949',
+    outlet: 'LIFULL Creators Blog',
+    date: '2022-08-24',
+    lang: 'ja',
+  },
+]
+
 
 /**
  * WakaTime coding stats.

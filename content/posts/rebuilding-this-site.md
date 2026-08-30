@@ -4,6 +4,7 @@ date: '2026-08-30'
 summary: >-
   The old site was a purchased portfolio theme carrying a decade of jQuery-era
   plugins. Here is what replaced it, and why the content now lives in two files.
+lang: en
 tags:
   - meta
   - nextjs
