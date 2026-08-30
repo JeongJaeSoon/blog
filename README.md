@@ -54,8 +54,10 @@ link, and reveals the contact handles so the PDF still carries them.
 
 ## Deploy
 
-Set `NEXT_PUBLIC_SITE_URL` to the production origin (it feeds canonical URLs,
-RSS, and the sitemap). Any static host works; Vercel needs no configuration.
+Deployed on Vercel; the origin used for canonical URLs, RSS and the sitemap is
+resolved in `lib/site.ts` from `VERCEL_PROJECT_PRODUCTION_URL`, so no
+configuration is needed. Once a custom domain is attached, either let Vercel
+report it or pin it with `NEXT_PUBLIC_SITE_URL`.
 
 ## To fill in
 
