@@ -38,7 +38,7 @@ export const en: Dictionary = {
     org: 'CAIO Office, freee K.K.',
     locationLine: 'Tokyo, Japan — from Daegu, Korea',
     about: [
-      'I build the platform other engineers use to ship AI features safely — shared LLM runtime and gateway, authentication and supply-chain controls, and the governance that lets a whole company adopt AI tooling without each team reinventing it.',
+      'I build the foundation and enablement for freee’s company-wide transition to an AI-native organisation. I operate an internal AI workflow platform (n8n), build context pipelines with BigQuery and vector databases for RAG/MCP, and establish technical guardrails and guidelines for safely adopting tools such as Claude Code, Codex, and Devin. I also work with each department to design AI workflows and agents, then spread what works through showcases, hands-on sessions, and documentation.',
       'Before that I spent two years on product delivery: receivables and invoicing at freee, where large-scale data, performance, and infrastructure migration were the everyday problems. That end-to-end delivery habit is what I carry into platform work — a feature is not done until it is operable.',
     ],
   },
@@ -51,12 +51,13 @@ export const en: Dictionary = {
         'ai-platform': {
           title: 'AI Platform Engineering',
           summary:
-            'Shared AI platform for the whole engineering organisation: runtime, integration, and the controls around them.',
+            'Platform engineering for freee’s AI-native transition: internal workflows, context infrastructure, and safe AI-tool adoption.',
           highlights: [
-            'Common LLM runtime and gateway, plus the integration surface teams build against',
-            'Authentication, credential lifecycle, and supply-chain controls for agent tooling',
-            'Evidence-driven delivery — release, deployment, and live end-to-end each proven separately',
-            'Enablement so teams operate what they adopt instead of routing every question back to the platform',
+            'Self-hosted operation and enterprise expansion of the internal n8n-based AI workflow platform, including custom nodes',
+            'Context-aware data pipelines with BigQuery and vector databases for RAG and MCP integration',
+            'Technical guardrails and guidelines for safely using AI development tools such as Claude Code, Codex, and Devin',
+            'Department discovery, AI workflow and agent design, and leadership from showcase through validation and company-wide rollout',
+            'AI literacy and self-sufficiency through hands-on sessions, study groups, documentation, and learning materials',
           ],
         },
         'ai-driven-dev': {
