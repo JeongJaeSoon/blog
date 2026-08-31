@@ -147,7 +147,7 @@ export const ko: Dictionary = {
     koreacu: {
       school: '고려사이버대학교',
       degree: '학사 · 컴퓨터 공학',
-      note: '재학 중',
+      note: '졸업',
     },
   },
   skills: [

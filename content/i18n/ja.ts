@@ -147,7 +147,7 @@ export const ja: Dictionary = {
     koreacu: {
       school: '高麗サイバー大学校',
       degree: '学士 · コンピュータ工学',
-      note: '在学中',
+      note: '卒業',
     },
   },
   skills: [

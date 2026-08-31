@@ -147,7 +147,7 @@ export const en: Dictionary = {
     koreacu: {
       school: 'Korea Cyber University (고려사이버대학교)',
       degree: 'Bachelor’s degree · Computer Engineering',
-      note: 'Currently enrolled',
+      note: 'Graduated',
     },
   },
   skills: [
