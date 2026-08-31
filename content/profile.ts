@@ -87,13 +87,16 @@ export const experience: Job[] = [
     href: 'https://lifull.com/',
     start: '2022-04',
     end: '2023-10',
+    roles: [
+      { id: 'generative-ai', start: '2023-05', end: '2023-10' },
+      { id: 'product-engineering', start: '2022-04', end: '2023-09' },
+    ],
   },
 ]
 
 export const education: Education[] = [
-  { id: 'koreacu', start: '2026-03' },
-  // Only the graduation is established; the enrolment span is not.
-  { id: 'yeungjin', end: '2022-02' },
+  { id: 'koreacu', start: '2025-03', end: '2026-08' },
+  { id: 'yeungjin', start: '2013-03', end: '2022-02' },
 ]
 
 /** Public repositories worth showing. Star counts are refreshed by hand. */
@@ -161,17 +164,15 @@ export type Talk = {
 /**
  * Conference and meetup talks.
  *
- * Speaker Deck hosts the slides (see `identity.decks`), but that site is
- * unreachable from the build environment and its deck pages are not in the
- * search index, so individual deck URLs could not be collected here. Entries
- * therefore link to whatever public page is verifiable; add deck URLs as they
- * are confirmed.
+ * Speaker Deck hosts the slides (see `identity.decks`). Individual entries link
+ * directly to the verified deck whenever one is available.
  */
 export const talks: Talk[] = [
   {
     id: 'qiita-bash-claude-code',
     originalTitle: 'Qiita Bash「キミたちはClaude Codeをどう使いこなす？」LT 登壇資料',
-    href: 'https://developers.freee.co.jp/entry/qiita-claude-code',
+    href:
+      'https://speakerdeck.com/jeongjaesoon/freee-no-aiqu-dong-kai-fa-noquan-she-zhan-kai-wozhi-eru-claude-code-huo-yong-noli-ce-how-freee-uses-claude-code-to-drive-and-scale-ai-driven-development-across-the-entire-organization',
     event: 'Qiita Bash',
     // The date is in the event itself, not inferred.
     date: '2025-11-14',
