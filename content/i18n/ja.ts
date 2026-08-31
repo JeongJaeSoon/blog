@@ -62,11 +62,12 @@ export const ja: Dictionary = {
         },
         'ai-driven-dev': {
           title: 'AI駆動開発',
-          summary: 'プロダクト開発全体に向けたAI開発ツールの評価と展開。',
+          summary:
+            '600名以上のエンジニアと約400名規模のPdM・ApDがAI開発ツールを実務で活用できるよう、基盤と支援体制を整備。',
           highlights: [
             'ツール評価と全社展開 — サンドボックスでの試験導入からエンタープライズ運用まで',
-            '社内開発者向けツールのためのMCPサーバーとRAG基盤の整備',
-            '利用ガイドラインの策定、ワークフローの自動化、ハンズオンとオフィスアワーの運営',
+            'Python LLM Proxy、社内ナレッジのVector Embeddings、GoによるLocal・Remote MCPを活用した社内AI開発基盤の整備',
+            'アクセス権限と利用ガイドラインを整備し、1on1・ハンズオン・導入後のフォローまで支援',
           ],
         },
         invoicing: {

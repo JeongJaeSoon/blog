@@ -63,11 +63,11 @@ export const ko: Dictionary = {
         'ai-driven-dev': {
           title: 'AI 구동 개발 (AI駆動開発)',
           summary:
-            '프로덕트 엔지니어링 전반에 걸쳐 AI 개발 도구를 평가하고 도입합니다.',
+            '600명 이상의 엔지니어와 약 400명 규모의 PdM·ApD가 AI 개발 도구를 실제 업무에 활용할 수 있도록 기반과 지원 체계를 만들었습니다.',
           highlights: [
             '도구 평가부터 전사 도입까지 — 샌드박스 파일럿에서 엔터프라이즈 운영으로',
-            '사내 개발자 도구를 위한 MCP 서버와 RAG 기반 구축',
-            '사용 가이드라인, 워크플로 자동화, 실습 세션과 오피스 아워 운영',
+            'Python LLM Proxy, 내부 지식 Vector Embeddings, Go Local·Remote MCP를 활용한 사내 AI 개발 기반 구축',
+            '사용 가이드라인과 접근 권한을 정비하고, 1on1·핸즈온·후속 지원으로 도입 확산',
           ],
         },
         invoicing: {

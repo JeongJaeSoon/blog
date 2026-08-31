@@ -63,11 +63,11 @@ export const en: Dictionary = {
         'ai-driven-dev': {
           title: 'AI-Driven Development (AI駆動開発)',
           summary:
-            'Evaluating and rolling out AI development tooling across product engineering.',
+            'Built the foundation and enablement for more than 600 engineers and roughly 400 product managers and applied product developers to use AI tooling in their work.',
           highlights: [
             'Tool evaluation and company-wide rollout, from sandbox pilot to enterprise operation',
-            'MCP servers and RAG groundwork for internal developer tooling',
-            'Usage guidelines, workflow automation, hands-on sessions and office hours',
+            'Internal AI development foundations with a Python LLM proxy, internal-knowledge vector embeddings, and Go local/remote MCP',
+            'Access controls and usage guidelines, followed by 1:1 support, hands-on sessions, and rollout follow-up',
           ],
         },
         invoicing: {
