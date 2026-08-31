@@ -18,12 +18,12 @@ export function PostList({
   }
 
   return (
-    <ul className="mt-10 space-y-8">
+    <ul className="divide-y divide-line border-y border-line">
       {posts.map((post) => (
-        <li key={post.slug}>
+        <li key={post.slug} className="py-6">
           <article>
             <Link href={`/${lang}/blog/${post.slug}`} className="group">
-              <h2 className="font-medium tracking-tight group-hover:text-accent">
+              <h2 className="text-[1.05rem] font-medium tracking-tight group-hover:text-accent">
                 {post.title}
               </h2>
             </Link>

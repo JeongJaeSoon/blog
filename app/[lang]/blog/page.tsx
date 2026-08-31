@@ -27,24 +27,31 @@ export default async function BlogIndex({ params }: Props) {
   const tags = getAllTags(lang)
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold tracking-tight">{t.sections.writing}</h1>
+    <div className="space-y-10">
+      <header className="border-b border-line pb-7">
+        <p className="font-mono text-xs uppercase tracking-[0.18em] text-faint">
+          {t.nav.blog}
+        </p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight">
+          {t.sections.writing}
+        </h1>
 
-      {tags.length > 0 && (
-        <ul className="mt-4 flex flex-wrap gap-x-3 gap-y-1.5">
-          {tags.map((tag) => (
-            <li key={tag.slug}>
-              <Link
-                href={`/${lang}/blog/tag/${tag.slug}`}
-                className="font-mono text-xs text-faint hover:text-accent"
-              >
-                #{tag.slug}
-                <span className="ml-1 opacity-60">{tag.count}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+        {tags.length > 0 && (
+          <ul className="mt-5 flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <li key={tag.slug}>
+                <Link
+                  href={`/${lang}/blog/tag/${tag.slug}`}
+                  className="inline-flex rounded-full border border-line px-2.5 py-1 font-mono text-xs text-faint transition-colors hover:border-accent hover:text-accent"
+                >
+                  #{tag.slug}
+                  <span className="ml-1.5 opacity-60">{tag.count}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </header>
 
       <PostList posts={posts} lang={lang} t={t} />
     </div>
