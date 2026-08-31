@@ -61,15 +61,15 @@ export default async function PostPage({ params }: Props) {
           {' · '}
           {t.ui.readingTimePrefix}
           {post.readingMinutes}
-              {t.ui.minRead}
+          {t.ui.minRead}
         </p>
         {post.tags.length > 0 && (
-          <ul className="mt-3 flex flex-wrap gap-3">
+          <ul className="mt-4 flex flex-wrap gap-2">
             {post.tags.map((tag) => (
               <li key={tag}>
                 <Link
                   href={`/${lang}/blog/tag/${slugifyTag(tag)}`}
-                  className="font-mono text-xs text-faint hover:text-accent"
+                  className="inline-flex rounded-full border border-line px-2.5 py-1 font-mono text-xs text-faint transition-colors hover:border-accent hover:text-accent"
                 >
                   #{slugifyTag(tag)}
                 </Link>

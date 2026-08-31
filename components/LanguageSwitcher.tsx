@@ -45,7 +45,7 @@ export function LanguageSwitcher({
             href={hrefFor(locale)}
             hrefLang={locale}
             aria-label={localeNames[locale]}
-            aria-current={active ? 'true' : undefined}
+            aria-current={active ? 'page' : undefined}
             className={`rounded-full px-2 py-1.5 transition-colors ${
               active
                 ? 'bg-ink text-bg'

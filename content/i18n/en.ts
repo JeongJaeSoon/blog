@@ -38,8 +38,8 @@ export const en: Dictionary = {
     org: 'CAIO Office, freee K.K.',
     locationLine: 'Tokyo, Japan — from Daegu, Korea',
     about: [
-      'I build the platform other engineers use to ship AI features safely — shared LLM runtime and gateway, authentication and supply-chain controls, and the governance that lets a whole company adopt AI tooling without each team reinventing it.',
-      'Before that I spent two years on product delivery: receivables and invoicing at freee, where large-scale data, performance, and infrastructure migration were the everyday problems. That end-to-end delivery habit is what I carry into platform work — a feature is not done until it is operable.',
+      'I build the foundation and enablement for freee’s company-wide transition to an AI-native organisation. I operate an internal AI workflow platform (n8n), build context pipelines with BigQuery and vector databases for RAG/MCP, and establish technical guardrails and guidelines for safely adopting tools such as Claude Code, Codex, and Devin. I also work with each department to design AI workflows and agents, then spread what works through showcases, hands-on sessions, and documentation.',
+      'Before that, I delivered the receivables and invoicing product at freee end to end. Earlier at LIFULL, I built and operated a web application for searching and viewing archived real-estate listing data, then led PoCs and MVPs applying generative AI and LLMs to improve B2B real-estate operations. That experience of operating real products and validating AI against business value is the foundation I bring to platform work. A feature is not done until it is operable.',
     ],
   },
   experience: {
@@ -51,22 +51,23 @@ export const en: Dictionary = {
         'ai-platform': {
           title: 'AI Platform Engineering',
           summary:
-            'Shared AI platform for the whole engineering organisation: runtime, integration, and the controls around them.',
+            'Platform engineering for freee’s AI-native transition: internal workflows, context infrastructure, and safe AI-tool adoption.',
           highlights: [
-            'Common LLM runtime and gateway, plus the integration surface teams build against',
-            'Authentication, credential lifecycle, and supply-chain controls for agent tooling',
-            'Evidence-driven delivery — release, deployment, and live end-to-end each proven separately',
-            'Enablement so teams operate what they adopt instead of routing every question back to the platform',
+            'Self-hosted operation and enterprise expansion of the internal n8n-based AI workflow platform, including custom nodes',
+            'Context-aware data pipelines with BigQuery and vector databases for RAG and MCP integration',
+            'Technical guardrails and guidelines for safely using AI development tools such as Claude Code, Codex, and Devin',
+            'Department discovery, AI workflow and agent design, and leadership from showcase through validation and company-wide rollout',
+            'AI literacy and self-sufficiency through hands-on sessions, study groups, documentation, and learning materials',
           ],
         },
         'ai-driven-dev': {
           title: 'AI-Driven Development (AI駆動開発)',
           summary:
-            'Evaluating and rolling out AI development tooling across product engineering.',
+            'Built the foundation and enablement for more than 600 engineers and roughly 400 product managers and applied product developers to use AI tooling in their work.',
           highlights: [
             'Tool evaluation and company-wide rollout, from sandbox pilot to enterprise operation',
-            'MCP servers and RAG groundwork for internal developer tooling',
-            'Usage guidelines, workflow automation, hands-on sessions and office hours',
+            'Internal AI development foundations with a Python LLM proxy, internal-knowledge vector embeddings, and Go local/remote MCP',
+            'Access controls and usage guidelines, followed by 1:1 support, hands-on sessions, and rollout follow-up',
           ],
         },
         invoicing: {
@@ -75,7 +76,7 @@ export const en: Dictionary = {
             'Product engineering, then project ownership and TL work on the invoicing product.',
           highlights: [
             'Feature delivery end to end — requirements, design, QA, and operational readiness',
-            'Large-volume data and performance work: OOM, DB load, online schema change',
+            'Large-volume data and DB performance work: query, indexing, and replica-DB optimization; OOM, DB load, and online schema changes',
             'Infrastructure migration, CI/CD, and observability with Datadog',
             'Onboarding and runbooks so the team could run what it shipped',
           ],
@@ -146,7 +147,7 @@ export const en: Dictionary = {
     koreacu: {
       school: 'Korea Cyber University (고려사이버대학교)',
       degree: 'Bachelor’s degree · Computer Engineering',
-      note: 'Currently enrolled',
+      note: 'Graduated',
     },
   },
   skills: [
