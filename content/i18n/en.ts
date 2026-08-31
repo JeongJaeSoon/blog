@@ -76,7 +76,7 @@ export const en: Dictionary = {
             'Product engineering, then project ownership and TL work on the invoicing product.',
           highlights: [
             'Feature delivery end to end — requirements, design, QA, and operational readiness',
-            'Large-volume data and performance work: OOM, DB load, online schema change',
+            'Large-volume data and DB performance work: query, indexing, and replica-DB optimization; OOM, DB load, and online schema changes',
             'Infrastructure migration, CI/CD, and observability with Datadog',
             'Onboarding and runbooks so the team could run what it shipped',
           ],
