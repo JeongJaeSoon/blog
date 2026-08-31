@@ -4,6 +4,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { locales, localeNames, isLocale, type Locale } from '@/lib/i18n'
 
+const compactLocaleNames: Record<Locale, string> = {
+  en: 'EN',
+  ko: 'KO',
+  ja: 'JA',
+}
+
 /**
  * Swaps the leading locale segment of the current path, so switching language
  * keeps you on the same page instead of dropping you at the home page.
@@ -27,7 +33,10 @@ export function LanguageSwitcher({
   }
 
   return (
-    <nav aria-label={label} className="flex items-center gap-2 font-mono text-xs">
+    <nav
+      aria-label={label}
+      className="inline-flex shrink-0 items-center rounded-full border border-line bg-surface p-0.5 font-mono text-[0.6875rem] leading-none"
+    >
       {locales.map((locale) => {
         const active = locale === current
         return (
@@ -35,10 +44,15 @@ export function LanguageSwitcher({
             key={locale}
             href={hrefFor(locale)}
             hrefLang={locale}
+            aria-label={localeNames[locale]}
             aria-current={active ? 'true' : undefined}
-            className={active ? 'text-ink' : 'text-faint hover:text-ink'}
+            className={`rounded-full px-2 py-1.5 transition-colors ${
+              active
+                ? 'bg-ink text-bg'
+                : 'text-faint hover:bg-line hover:text-ink'
+            }`}
           >
-            {localeNames[locale]}
+            {compactLocaleNames[locale]}
           </Link>
         )
       })}
