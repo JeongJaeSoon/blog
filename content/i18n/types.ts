@@ -11,6 +11,8 @@
 
 export type RoleText = {
   title: string
+  /** Role-specific job title, distinct from the department or team name. */
+  position?: string
   summary: string
   highlights: string[]
 }
