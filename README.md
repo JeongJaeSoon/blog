@@ -66,7 +66,5 @@ with `NEXT_PUBLIC_SITE_URL`.
 
 ## To fill in
 
-- `LIFULL Co., Ltd.` has no job title — see the `TODO` in `content/profile.ts`.
-- Korea Cyber University has no department — same file.
 - WakaTime charts: the dashboard is private, so the section stays hidden until
   you paste share-embed SVG URLs into `codingStats`.

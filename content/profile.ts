@@ -79,6 +79,7 @@ export const experience: Job[] = [
     roles: [
       { id: 'ai-platform', start: '2026-01' },
       { id: 'ai-driven-dev', start: '2025-07', end: '2025-12' },
+      { id: 'accounting-db', start: '2024-07', end: '2025-06' },
       { id: 'invoicing', start: '2023-11', end: '2025-06' },
     ],
   },
@@ -168,6 +169,25 @@ export type Talk = {
  * directly to the verified deck whenever one is available.
  */
 export const talks: Talk[] = [
+  {
+    id: 'freee-ai-native-engineering-career',
+    originalTitle:
+      'AI時代を生き抜くエンジニアキャリアの築き方 (AI-Native 時代、エンジニアという道は 「最大の挑戦の場」となる) / Building an Engineering Career to Thrive in the Age of AI (In the AI-Native Era, the Path of Engineering Becomes the Ultimate Arena of Challenge)',
+    href: 'https://speakerdeck.com/jeongjaesoon/aishi-dai-wosheng-kiba-kuenziniakiyarianozhu-kifang',
+    event: 'recursion',
+    date: '2025-09-10',
+    lang: 'ja',
+  },
+  {
+    id: 'freee-opensearch-full-indexing',
+    originalTitle:
+      'OpenSearch Full-Indexing : 予期せぬ挑戦とその解決策 / OpenSearch Full-Indexing : Unexpected Challenges and Solutions',
+    href: 'https://speakerdeck.com/jeongjaesoon/opensearch-full-indexing-unexpected-challenges-and-solutions',
+    event: 'freee 技術の日 2024',
+    // The presentation date is printed on the first slide.
+    date: '2024-05-31',
+    lang: 'ja',
+  },
   {
     id: 'qiita-bash-claude-code',
     originalTitle: 'Qiita Bash「キミたちはClaude Codeをどう使いこなす？」LT 登壇資料',

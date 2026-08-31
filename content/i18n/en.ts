@@ -50,6 +50,7 @@ export const en: Dictionary = {
       roles: {
         'ai-platform': {
           title: 'AI Platform Engineering',
+          position: 'Senior AI Platform Engineer, Tech Lead',
           summary:
             'Platform engineering for freee’s AI-native transition: internal workflows, context infrastructure, and safe AI-tool adoption.',
           highlights: [
@@ -62,6 +63,7 @@ export const en: Dictionary = {
         },
         'ai-driven-dev': {
           title: 'AI-Driven Development (AI駆動開発)',
+          position: 'Software Engineer, Tech Lead',
           summary:
             'Built the foundation and enablement for more than 600 engineers and roughly 400 product managers and applied product developers to use AI tooling in their work.',
           highlights: [
@@ -70,8 +72,19 @@ export const en: Dictionary = {
             'Access controls and usage guidelines, followed by 1:1 support, hands-on sessions, and rollout follow-up',
           ],
         },
+        'accounting-db': {
+          title: 'Accounting Database Infrastructure',
+          position: 'Software Engineer',
+          summary:
+            'Improved accounting-application performance from a database perspective.',
+          highlights: [
+            'Improved query performance and optimized indexing strategy',
+            'Improved and optimized replica-database performance',
+          ],
+        },
         invoicing: {
           title: 'Receivables & Invoicing (債権・請求書)',
+          position: 'Software Engineer, Tech Lead',
           summary:
             'Product engineering, then project ownership and TL work on the invoicing product.',
           highlights: [
@@ -90,6 +103,7 @@ export const en: Dictionary = {
       roles: {
         'generative-ai': {
           title: 'Generative AI Product Development Office · Product Development Unit',
+          position: 'Application Engineer',
           summary:
             'Planned and built PoCs and MVPs that applied LLMs and generative AI to improve real-estate B2B workflows.',
           highlights: [
@@ -99,6 +113,7 @@ export const en: Dictionary = {
         },
         'product-engineering': {
           title: 'Product Engineering Department 3 Unit · Development 1 Group',
+          position: 'Application Engineer',
           summary:
             'Developed and operated a web application for managing, searching, and viewing archived property-listing data.',
           highlights: [
@@ -126,6 +141,10 @@ export const en: Dictionary = {
       'A new-grad Korean engineer abroad, working remotely',
   },
   talks: {
+    'freee-ai-native-engineering-career':
+      'Building an engineering career to thrive in the age of AI',
+    'freee-opensearch-full-indexing':
+      'OpenSearch Full-Indexing — unexpected challenges and solutions',
     'qiita-bash-claude-code':
       'Qiita Bash lightning talk — how we actually use Claude Code',
   },
@@ -157,6 +176,8 @@ export const en: Dictionary = {
         'MCP (Model Context Protocol)',
         'LLM gateway & proxy',
         'RAG',
+        'Vector DB',
+        'OpenSearch',
         'Agent governance',
         'Langfuse',
         'n8n',
