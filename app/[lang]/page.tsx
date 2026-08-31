@@ -168,6 +168,9 @@ function Experience({ lang, t }: { lang: Locale; t: Dictionary }) {
                             {period(role.start, role.end, lang, t.ui.present)}
                           </span>
                         </div>
+                        {roleText.position && (
+                          <p className="mt-0.5 text-sm text-muted">{roleText.position}</p>
+                        )}
                         <p className="mt-1 text-sm text-muted">{roleText.summary}</p>
                         <ul className="mt-2 space-y-1 text-sm text-muted">
                           {roleText.highlights.map((highlight) => (

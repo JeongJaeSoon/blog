@@ -50,6 +50,7 @@ export const ja: Dictionary = {
       roles: {
         'ai-platform': {
           title: 'AI Platform Engineering',
+          position: 'シニアAIプラットフォームエンジニア、テックリード',
           summary:
             'freeeのAI-Native化を支えるプラットフォームエンジニアリング。社内ワークフロー、コンテキスト基盤、AIツールの安全な導入を担当。',
           highlights: [
@@ -62,6 +63,7 @@ export const ja: Dictionary = {
         },
         'ai-driven-dev': {
           title: 'AI駆動開発',
+          position: 'Software Engineer, Tech Lead',
           summary:
             '600名以上のエンジニアと約400名規模のPdM・ApDがAI開発ツールを実務で活用できるよう、基盤と支援体制を整備。',
           highlights: [
@@ -70,8 +72,19 @@ export const ja: Dictionary = {
             'アクセス権限と利用ガイドラインを整備し、1on1・ハンズオン・導入後のフォローまで支援',
           ],
         },
+        'accounting-db': {
+          title: 'Accounting Database Infrastructure',
+          position: 'Software Engineer',
+          summary:
+            'データベースの観点から会計アプリケーションのパフォーマンス改善を担当。',
+          highlights: [
+            'クエリパフォーマンスの改善とインデックス戦略の最適化',
+            'Replica DBのパフォーマンス改善と最適化',
+          ],
+        },
         invoicing: {
           title: '債権・請求書',
+          position: 'Software Engineer, Tech Lead',
           summary:
             '請求書プロダクトの開発、その後のプロジェクトオーナーおよびTLとしての業務。',
           highlights: [
@@ -90,6 +103,7 @@ export const ja: Dictionary = {
       roles: {
         'generative-ai': {
           title: 'Generative AIプロダクト開発室 · プロダクト開発ユニット',
+          position: 'Application Engineer',
           summary:
             'LLMと生成AIを活用し、不動産B2B業務を効率化するPoC・MVPを企画・開発しました。',
           highlights: [
@@ -99,6 +113,7 @@ export const ja: Dictionary = {
         },
         'product-engineering': {
           title: 'プロダクトエンジニアリング3部 · 開発1グループ',
+          position: 'Application Engineer',
           summary:
             '不動産物件のアーカイブデータを管理し、検索・閲覧できるWebアプリケーションを開発・運用しました。',
           highlights: [
@@ -126,6 +141,8 @@ export const ja: Dictionary = {
       '新卒韓国人エンジニアの外国生活×リモートワーク',
   },
   talks: {
+    'freee-opensearch-full-indexing':
+      'OpenSearch Full-Indexing：予期せぬ挑戦とその解決策',
     'qiita-bash-claude-code':
       'Qiita Bash「キミたちはClaude Codeをどう使いこなす？」LT 登壇資料',
   },
@@ -158,6 +175,8 @@ export const ja: Dictionary = {
         'MCP (Model Context Protocol)',
         'LLMゲートウェイ・プロキシ',
         'RAG',
+        'Vector DB',
+        'OpenSearch',
         'エージェントのガバナンス',
         'Langfuse',
         'n8n',

@@ -50,6 +50,7 @@ export const ko: Dictionary = {
       roles: {
         'ai-platform': {
           title: 'AI 플랫폼 엔지니어링',
+          position: '시니어 AI 플랫폼 엔지니어, 테크 리드',
           summary:
             '전사의 AI-Native 전환을 위해 사내 워크플로우·컨텍스트 기반·AI 도구의 안전한 도입을 지원하는 플랫폼 엔지니어링을 맡고 있습니다.',
           highlights: [
@@ -62,6 +63,7 @@ export const ko: Dictionary = {
         },
         'ai-driven-dev': {
           title: 'AI 구동 개발 (AI駆動開発)',
+          position: '소프트웨어 엔지니어, 테크 리드',
           summary:
             '600명 이상의 엔지니어와 약 400명 규모의 PdM·ApD가 AI 개발 도구를 실제 업무에 활용할 수 있도록 기반과 지원 체계를 만들었습니다.',
           highlights: [
@@ -70,8 +72,19 @@ export const ko: Dictionary = {
             '사용 가이드라인과 접근 권한을 정비하고, 1on1·핸즈온·후속 지원으로 도입 확산',
           ],
         },
+        'accounting-db': {
+          title: '회계 데이터베이스 인프라 (Accounting Database Infrastructure)',
+          position: '소프트웨어 엔지니어',
+          summary:
+            '데이터베이스 관점에서 회계 애플리케이션의 성능 개선을 담당했습니다.',
+          highlights: [
+            '쿼리 성능 개선 및 인덱싱 전략 최적화',
+            'Replica DB 성능 개선 및 최적화',
+          ],
+        },
         invoicing: {
           title: '채권·청구서 (債権・請求書)',
+          position: '소프트웨어 엔지니어, 테크 리드',
           summary:
             '청구서 프로덕트에서 프로덕트 엔지니어링을 담당했고, 이후 프로젝트 오너십과 TL 업무를 맡았습니다.',
           highlights: [
@@ -90,6 +103,7 @@ export const ko: Dictionary = {
       roles: {
         'generative-ai': {
           title: '생성 AI 프로덕트 개발실 · 프로덕트 개발 유닛',
+          position: '애플리케이션 엔지니어',
           summary:
             'LLM과 생성 AI를 활용해 부동산 B2B 업무 효율화를 위한 PoC와 MVP를 기획·개발했습니다.',
           highlights: [
@@ -99,6 +113,7 @@ export const ko: Dictionary = {
         },
         'product-engineering': {
           title: '프로덕트 엔지니어링 3부 · 개발 1그룹',
+          position: '애플리케이션 엔지니어',
           summary:
             '부동산 매물의 아카이브 데이터를 관리하고 검색·열람하는 웹 애플리케이션을 개발·운영했습니다.',
           highlights: [
@@ -126,6 +141,8 @@ export const ko: Dictionary = {
       '신입 한국인 엔지니어의 해외 생활과 리모트 워크',
   },
   talks: {
+    'freee-opensearch-full-indexing':
+      'OpenSearch Full-Indexing — 예상치 못한 도전과 해결책',
     'qiita-bash-claude-code':
       'Qiita Bash LT — Claude Code를 어떻게 쓰고 있는가',
   },
@@ -157,6 +174,8 @@ export const ko: Dictionary = {
         'MCP (Model Context Protocol)',
         'LLM 게이트웨이 및 프록시',
         'RAG',
+        'Vector DB',
+        'OpenSearch',
         '에이전트 거버넌스',
         'Langfuse',
         'n8n',
