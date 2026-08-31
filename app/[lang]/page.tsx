@@ -24,7 +24,7 @@ export default async function HomePage({ params }: Props) {
   const posts = getAllPosts(lang).slice(0, 4)
 
   return (
-    <div className="space-y-14">
+    <div className="space-y-16">
       <Intro t={t} />
       <Experience lang={lang} t={t} />
       <Projects t={t} />
@@ -49,11 +49,12 @@ function Section({
 }) {
   return (
     <section>
-      <div className="mb-5 flex items-baseline justify-between gap-4">
-        <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-faint">
+      <div className="mb-6 flex items-center gap-3">
+        <h2 className="shrink-0 font-mono text-xs uppercase tracking-[0.18em] text-muted">
           {title}
         </h2>
-        {action}
+        <span aria-hidden className="h-px flex-1 bg-line" />
+        {action && <div className="shrink-0">{action}</div>}
       </div>
       {children}
     </section>
@@ -63,7 +64,7 @@ function Section({
 function Intro({ t }: { t: Dictionary }) {
   return (
     <section className="print-avoid-break">
-      <div className="flex items-start gap-5">
+      <div className="flex items-start gap-4 sm:gap-5">
         <Image
           src={identity.avatar}
           alt=""
@@ -94,14 +95,14 @@ function Intro({ t }: { t: Dictionary }) {
         ))}
       </div>
 
-      <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+      <ul className="mt-6 flex flex-wrap gap-2">
         {identity.links.map((link) => (
           <li key={link.label}>
             <a
               href={link.href}
               target="_blank"
               rel="me noreferrer"
-              className="text-accent underline decoration-1 underline-offset-4 hover:no-underline"
+              className="inline-flex rounded-full border border-line px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-accent"
             >
               {link.label}
             </a>
@@ -120,12 +121,15 @@ function Intro({ t }: { t: Dictionary }) {
 function Experience({ lang, t }: { lang: Locale; t: Dictionary }) {
   return (
     <Section title={t.sections.experience}>
-      <div className="space-y-9">
+      <div className="space-y-10">
         {experience.map((job) => {
           const text = t.experience[job.id]
           return (
-            <article key={job.id} className="print-avoid-break">
-              <header className="flex flex-wrap items-baseline justify-between gap-x-4">
+            <article
+              key={job.id}
+              className="print-avoid-break border-b border-line pb-10 last:border-b-0 last:pb-0"
+            >
+              <header className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-4">
                 <h3 className="font-medium">
                   {job.href ? (
                     <a
@@ -158,7 +162,7 @@ function Experience({ lang, t }: { lang: Locale; t: Dictionary }) {
                     if (!roleText) return null
                     return (
                       <div key={role.id}>
-                        <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-4">
                           <h4 className="text-sm font-medium">{roleText.title}</h4>
                           <span className="font-mono text-xs text-faint">
                             {period(role.start, role.end, lang, t.ui.present)}
@@ -253,7 +257,7 @@ function Talks({ lang, t }: { lang: Locale; t: Dictionary }) {
           const showOriginal = item.lang !== lang && translated
           return (
             <li key={item.id} className="print-avoid-break">
-              <div className="flex items-baseline justify-between gap-x-4">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-4">
                 <a
                   href={item.href}
                   target="_blank"
@@ -296,7 +300,7 @@ function Publications({ lang, t }: { lang: Locale; t: Dictionary }) {
           const showOriginal = item.lang !== lang && translated
           return (
             <li key={item.id} className="print-avoid-break">
-              <div className="flex items-baseline justify-between gap-x-4">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-4">
                 <a
                   href={item.href}
                   target="_blank"
@@ -353,7 +357,7 @@ function Education({ lang, t }: { lang: Locale; t: Dictionary }) {
           return (
             <li
               key={item.id}
-              className="flex flex-wrap items-baseline justify-between gap-x-4"
+              className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-4"
             >
               <div>
                 <p className="text-sm">{text.school}</p>
@@ -425,7 +429,7 @@ function LatestPosts({
           <li key={post.slug}>
             <Link
               href={`/${lang}/blog/${post.slug}`}
-              className="group flex items-baseline justify-between gap-x-4"
+              className="group flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-4"
             >
               <span className="min-w-0 text-sm group-hover:text-accent">
                 {post.title}

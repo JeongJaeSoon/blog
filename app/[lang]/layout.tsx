@@ -69,9 +69,9 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={localeTags[lang]} className={`${sans.variable} ${mono.variable}`}>
       <body className="min-h-dvh">
-        <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-6">
+        <div className="mx-auto flex min-h-dvh max-w-3xl flex-col px-5 sm:px-8">
           <SiteHeader lang={lang} t={t} />
-          <main className="flex-1 py-10">{children}</main>
+          <main className="flex-1 py-8 sm:py-12">{children}</main>
           <SiteFooter lang={lang} />
         </div>
       </body>
@@ -92,19 +92,29 @@ function SiteHeader({
   ]
 
   return (
-    <header className="no-print flex items-center justify-between gap-4 border-b border-line py-5">
-      <Link href={`/${lang}`} className="font-mono text-sm tracking-tight hover:text-accent">
-        {identity.name.toLowerCase().replace(' ', '-')}
-      </Link>
-      <div className="flex items-center gap-5">
-        <nav className="flex items-center gap-5 text-sm text-muted">
+    <header className="no-print border-b border-line py-4 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:py-5">
+      <div className="flex items-center justify-between gap-4">
+        <Link
+          href={`/${lang}`}
+          className="whitespace-nowrap font-mono text-sm tracking-tight hover:text-accent"
+        >
+          {identity.name.toLowerCase().replace(' ', '-')}
+        </Link>
+        <div className="sm:hidden">
+          <LanguageSwitcher current={lang} label={t.ui.language} />
+        </div>
+      </div>
+      <div className="mt-4 flex items-center justify-between gap-5 sm:mt-0 sm:justify-end">
+        <nav className="flex items-center gap-6 text-sm text-muted">
           {nav.map((item) => (
             <Link key={item.href} href={item.href} className="hover:text-ink">
               {item.label}
             </Link>
           ))}
         </nav>
-        <LanguageSwitcher current={lang} label={t.ui.language} />
+        <div className="hidden sm:block">
+          <LanguageSwitcher current={lang} label={t.ui.language} />
+        </div>
       </div>
     </header>
   )
@@ -112,11 +122,11 @@ function SiteHeader({
 
 function SiteFooter({ lang }: { lang: Locale }) {
   return (
-    <footer className="no-print flex flex-wrap items-center justify-between gap-3 border-t border-line py-6 text-xs text-faint">
+    <footer className="no-print flex flex-col items-start justify-between gap-4 border-t border-line py-7 text-xs text-faint sm:flex-row sm:items-center">
       <span>
         © {new Date().getFullYear()} {identity.name}
       </span>
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-x-4 gap-y-2">
         {identity.links
           .filter((link) => link.label !== 'Email')
           .map((link) => (
