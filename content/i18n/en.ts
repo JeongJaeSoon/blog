@@ -39,7 +39,7 @@ export const en: Dictionary = {
     locationLine: 'Tokyo, Japan — from Daegu, Korea',
     about: [
       'I build the foundation and enablement for freee’s company-wide transition to an AI-native organisation. I operate an internal AI workflow platform (n8n), build context pipelines with BigQuery and vector databases for RAG/MCP, and establish technical guardrails and guidelines for safely adopting tools such as Claude Code, Codex, and Devin. I also work with each department to design AI workflows and agents, then spread what works through showcases, hands-on sessions, and documentation.',
-      'Before that I spent two years on product delivery: receivables and invoicing at freee, where large-scale data, performance, and infrastructure migration were the everyday problems. That end-to-end delivery habit is what I carry into platform work — a feature is not done until it is operable.',
+      'Before that, I delivered the receivables and invoicing product at freee end to end. Earlier at LIFULL, I built and operated a web application for searching and viewing archived real-estate listing data, then led PoCs and MVPs applying generative AI and LLMs to improve B2B real-estate operations. That experience of operating real products and validating AI against business value is the foundation I bring to platform work. A feature is not done until it is operable.',
     ],
   },
   experience: {
