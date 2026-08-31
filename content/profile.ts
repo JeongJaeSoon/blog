@@ -170,6 +170,15 @@ export type Talk = {
  */
 export const talks: Talk[] = [
   {
+    id: 'freee-ai-native-engineering-career',
+    originalTitle:
+      'AI時代を生き抜くエンジニアキャリアの築き方 (AI-Native 時代、エンジニアという道は 「最大の挑戦の場」となる) / Building an Engineering Career to Thrive in the Age of AI (In the AI-Native Era, the Path of Engineering Becomes the Ultimate Arena of Challenge)',
+    href: 'https://speakerdeck.com/jeongjaesoon/aishi-dai-wosheng-kiba-kuenziniakiyarianozhu-kifang',
+    event: 'recursion',
+    date: '2025-09-10',
+    lang: 'ja',
+  },
+  {
     id: 'freee-opensearch-full-indexing',
     originalTitle:
       'OpenSearch Full-Indexing : 予期せぬ挑戦とその解決策 / OpenSearch Full-Indexing : Unexpected Challenges and Solutions',

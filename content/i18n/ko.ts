@@ -141,6 +141,8 @@ export const ko: Dictionary = {
       '신입 한국인 엔지니어의 해외 생활과 리모트 워크',
   },
   talks: {
+    'freee-ai-native-engineering-career':
+      'AI 시대를 살아가는 엔지니어 커리어를 만드는 방법',
     'freee-opensearch-full-indexing':
       'OpenSearch Full-Indexing — 예상치 못한 도전과 해결책',
     'qiita-bash-claude-code':

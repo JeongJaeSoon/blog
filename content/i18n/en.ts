@@ -141,6 +141,8 @@ export const en: Dictionary = {
       'A new-grad Korean engineer abroad, working remotely',
   },
   talks: {
+    'freee-ai-native-engineering-career':
+      'Building an engineering career to thrive in the age of AI',
     'freee-opensearch-full-indexing':
       'OpenSearch Full-Indexing — unexpected challenges and solutions',
     'qiita-bash-claude-code':
