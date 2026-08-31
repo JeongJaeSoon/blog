@@ -84,11 +84,28 @@ export const en: Dictionary = {
     },
     lifull: {
       company: 'LIFULL Co., Ltd.',
-      // Not a stated title: no source gives one. This is his department
-      // (プロダクトエンジニアリング部) plus how he described himself in his
-      // own LIFULL blog bios. Replace with the exact title if it differs.
-      position: 'Engineer, Product Engineering Division',
+      position: 'Application Engineer',
       location: 'Tokyo, Japan',
+      roles: {
+        'generative-ai': {
+          title: 'Generative AI Product Development Office · Product Development Unit',
+          summary:
+            'Planned and built PoCs and MVPs that applied LLMs and generative AI to improve real-estate B2B workflows.',
+          highlights: [
+            'Led technical experiments through practical product validation',
+            'Improved features and product quality based on user feedback',
+          ],
+        },
+        'product-engineering': {
+          title: 'Product Engineering Department 3 Unit · Development 1 Group',
+          summary:
+            'Developed and operated a web application for managing, searching, and viewing archived property-listing data.',
+          highlights: [
+            'Owned the system end to end, including database design',
+            'Built and operated the supporting cloud infrastructure',
+          ],
+        },
+      },
     },
   },
   publications: {
@@ -123,15 +140,12 @@ export const en: Dictionary = {
   education: {
     yeungjin: {
       school: 'Yeungjin University (영진전문대학교)',
-      // Sources disagree on the department (일본IT과 vs 웹데이터베이스 전공);
-      // left blank rather than picking one.
-      degree: '',
+      degree: 'Associate’s Degree in Computer Information · School of Computer Information',
       note: 'Graduated',
     },
     koreacu: {
       school: 'Korea Cyber University (고려사이버대학교)',
-      // TODO: add your department once you want it public.
-      degree: '',
+      degree: 'Bachelor’s degree · Computer Engineering',
       note: 'Currently enrolled',
     },
   },

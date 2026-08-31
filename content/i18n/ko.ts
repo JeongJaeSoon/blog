@@ -84,11 +84,28 @@ export const ko: Dictionary = {
     },
     lifull: {
       company: 'LIFULL 주식회사',
-      // Not a stated title: no source gives one. This is his department
-      // (プロダクトエンジニアリング部) plus how he described himself in his
-      // own LIFULL blog bios. Replace with the exact title if it differs.
-      position: '프로덕트 엔지니어링 부문 엔지니어',
+      position: '애플리케이션 엔지니어',
       location: '일본 도쿄',
+      roles: {
+        'generative-ai': {
+          title: '생성 AI 프로덕트 개발실 · 프로덕트 개발 유닛',
+          summary:
+            'LLM과 생성 AI를 활용해 부동산 B2B 업무 효율화를 위한 PoC와 MVP를 기획·개발했습니다.',
+          highlights: [
+            '기술 실험부터 실제 제품 검증까지 주도',
+            '사용자 피드백을 바탕으로 기능 개선과 제품 고도화',
+          ],
+        },
+        'product-engineering': {
+          title: '프로덕트 엔지니어링 3부 · 개발 1그룹',
+          summary:
+            '부동산 매물의 아카이브 데이터를 관리하고 검색·열람하는 웹 애플리케이션을 개발·운영했습니다.',
+          highlights: [
+            '데이터베이스 설계를 포함한 시스템 전반 담당',
+            '클라우드 인프라 구성과 운영',
+          ],
+        },
+      },
     },
   },
   publications: {
@@ -123,15 +140,12 @@ export const ko: Dictionary = {
   education: {
     yeungjin: {
       school: '영진전문대학교',
-      // Sources disagree on the department (일본IT과 vs 웹데이터베이스 전공);
-      // left blank rather than picking one.
-      degree: '',
+      degree: '컴퓨터정보계열 · 컴퓨터정보 전문학사',
       note: '졸업',
     },
     koreacu: {
       school: '고려사이버대학교',
-      // TODO: add your department once you want it public.
-      degree: '',
+      degree: '학사 · 컴퓨터 공학',
       note: '재학 중',
     },
   },
