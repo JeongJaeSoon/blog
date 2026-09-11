@@ -21,9 +21,13 @@ bun run typecheck
 | What | Where |
 | --- | --- |
 | Résumé — profile, experience, projects, skills, education | `content/profile.ts` |
-| Blog posts | `content/posts/*.md` |
+| Blog posts | `content/posts/<slug>/{en,ko,ja}.md` |
 | Site title, description, URL, nav | `lib/site.ts` |
 | Design tokens, base and print styles | `app/globals.css` |
+
+Each blog article has one directory named after its shared URL slug. The
+directory contains `en.md`, `ko.md` and `ja.md`; a missing rendition fails the
+build so the language switcher cannot lead to a 404.
 
 Everything else is layout. `content/profile.ts` is typed, so an entry missing a
 required field fails `bun run build` rather than rendering a blank.
