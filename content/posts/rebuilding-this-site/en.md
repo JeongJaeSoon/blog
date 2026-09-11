@@ -57,10 +57,10 @@ draft: true
 ---
 ```
 
-One directory represents one article, and its three Markdown files are the
-English, Korean and Japanese renditions. The directory name is their shared URL
-slug, while `lang` must match the filename. A missing rendition fails the build
-instead of sending the language switcher to a 404.
+A post now gets one directory with `en.md`, `ko.md`, and `ja.md` inside it. The
+directory name becomes the shared URL slug, and `lang` has to agree with the
+filename. If one translation is missing, I would rather stop the build than let
+the language button ship with a 404.
 
 Setting `draft: true` keeps a post visible in `next dev` and out of the build,
 the RSS feed and the sitemap.
