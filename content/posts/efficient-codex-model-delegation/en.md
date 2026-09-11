@@ -11,34 +11,26 @@ tags:
   - workflow
 ---
 
-I keep the main agent focused on difficult judgment, breaking work apart, and
-integrating the result. Independent work can go to a subagent, but that does
-not mean every subtask should be delegated. I delegate only when the expected
-savings are greater than the cost of describing the work, transferring the
-right context, and reviewing what comes back.
+I use the main agent for the work that needs judgment: deciding what to do,
+where to split it, and how to combine the result. A subagent earns its place
+only when the time saved is greater than the time spent briefing it, handing
+over context, and checking its output.
 
-That distinction matters. Splitting a short, tightly coupled task can add
-latency and tokens while interrupting the line of reasoning. Delegation is not
-the default workflow; it is an optimization for work where it can reduce total
-time and cost without compromising the quality bar.
+That rules out a lot of tempting splits. A small edit or a question whose
+answer is needed for the next step is usually faster to do in the main thread.
+Breaking it out adds a hand-off, a wait, and another result to verify.
 
 ## Decide whether to delegate first
 
-The main agent should usually handle work directly when it:
-
-- ends after one or two quick checks or a small edit;
-- takes less effort to do than to explain;
-- produces a result needed immediately for the next decision; or
-- costs more to review than the split saves.
-
-Delegation is a better fit when a task can proceed independently, has a clear
-and substantial scope, and benefits from running alongside the main work. That
-includes well-bounded research, review, and implementation. When the tradeoff
-is unclear, the main agent keeps the task.
+I keep a task in the main thread when a couple of checks or a small change will
+finish it, when the brief would be longer than the work, or when its result is
+needed immediately. I delegate bounded research, review, and implementation
+that can run independently. If the calculation is close, I do it directly.
 
 ## Pick the subagent model by difficulty
 
-Once a task earns delegation, its difficulty determines the model used.
+Once a task is worth delegating, I choose the model by the difficulty of that
+specific task.
 
 | Task difficulty | Subagent model | Good fit |
 | --- | --- | --- |
@@ -46,29 +38,26 @@ Once a task earns delegation, its difficulty determines the model used.
 | General | `gpt-5.6-terra` | Research or implementation that can complete independently |
 | Complex | `gpt-5.6-sol` | Analysis or design that must weigh several conditions |
 
-The operating rule is not to use Astra for subagents. The main model is kept
-for deep judgment and integration; work that can be separated without losing
-quality gets the least expensive model that meets its needs.
+The rule is simple: Astra is not used for subagents. The main model stays on
+judgment and integration; separable work gets the least expensive model that
+can meet the bar.
 
 ## What is confirmed, and what is not
 
-As of September 11, 2026, the local configuration confirmed `gpt-6-astra` as
-the main model with `high` reasoning effort, and `gpt-5.6-terra` as the default
-subagent model. The delegation policy also records the explicit Luna, Terra,
-and Sol selection rule for simple, general, and complex work.
+On September 11, 2026, I confirmed that the local configuration used
+`gpt-6-astra` with `high` reasoning effort for the main model, and
+`gpt-5.6-terra` as the default subagent model. The delegation policy records
+the Luna, Terra, and Sol choices above.
 
-The runtime record confirmed a main Astra run and a subagent run explicitly
-assigned to Luna. An isolated check with CLI 0.153.4 also loaded and returned
-the Terra default.
+The runtime record also showed a main Astra run and a subagent explicitly
+started with Luna. In an isolated check, CLI 0.153.4 read back the Terra
+default.
 
-Those checks have limits. They do not prove that every task is classified or
-delegated automatically. This run did not verify that omitting a subagent model
-selects Terra, because the observed subagent run named Luna explicitly. The
-policy is behavioral guidance for agents, not an enforced routing mechanism.
-An exhaustive strict validation of the whole configuration also did not finish
-because of an unrelated, unsupported setting.
+There are limits to those checks. I did not test a subagent launch with its
+model omitted, so I have not verified that it selects Terra in practice. The
+policy is guidance for the agent, not an enforced router. Strict validation of
+the whole configuration also stopped on an unrelated unsupported setting.
 
-I have not measured a reduction in token count, spend, or account usage.
-Delegation always carries context-transfer and review costs, so it cannot
-guarantee lower total usage. The practical rule is intentionally narrower:
-delegate only the work for which those costs are likely to be repaid.
+I have not measured token, spend, or account-usage savings. Every delegation
+still has a context-transfer and review cost. The rule is deliberately narrow:
+delegate only when that cost is likely to be paid back.

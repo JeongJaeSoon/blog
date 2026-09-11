@@ -1,7 +1,7 @@
 ---
 title: Self-hosting Obsidian on a NAS and exposing it as a Remote MCP
 date: '2026-08-25'
-summary: How I keep an Obsidian Sync vault running on a UGREEN NAS, expose it safely to Claude through an OAuth-enabled Remote MCP, and avoid five problems I encountered along the way.
+summary: Notes from putting headless Obsidian Sync and an OAuth-enabled Remote MCP on a UGREEN NAS so the vault remains available when my Macs are off.
 lang: en
 tags:
   - obsidian
@@ -11,9 +11,9 @@ tags:
 draft: false
 ---
 
-My Obsidian vault used to live on two MacBooks only. I added my UGREEN NAS as an always-on Sync peer, then added an independent MCP server that can read and write the vault remotely.
+For a long time, my Obsidian vault lived on two MacBooks and nowhere else. I have now made a UGREEN NAS another always-on Sync peer and put an independent MCP server beside it for remote reads and writes. The finished setup is three containers behind one Cloudflare Tunnel.
 
-The complete setup consists of three containers and one Cloudflare Tunnel. This post covers the deployment and five pitfalls I encountered while building it.
+The deployment order turned out to be the easy part. Portainer's limitations, a misleading CLI option, and an MCP SDK version change took longer to untangle. I am writing down both the working setup and the five failures I would want to remember if I built it again.
 
 ## Why self-host it
 
@@ -23,20 +23,20 @@ Obsidian Sync works well for keeping my MacBooks and iPhone in sync. The problem
 - Asking an LLM to search my notes requires copying and pasting content.
 - Automations such as n8n need an always-on target.
 
-The NAS became my fourth Sync peer.
+That gap is what the NAS, as a fourth Sync peer, is meant to fill.
 
 The sync layer uses the official `obsidian-headless` client, which expands a synced vault into ordinary Markdown files without a GUI. I considered Syncthing, Git, and Self-hosted LiveSync, but I already pay for Obsidian Sync and had no reason to introduce another sync mechanism.
 
-`obsidian-headless` is currently an open beta. Take a snapshot of the vault before you begin.
+`obsidian-headless` is still an open beta, so I do not treat it like a settled release. I took a vault snapshot before starting, and recommend doing the same.
 
 The access layer is an independent MCP server that reads the filesystem directly. The Local REST API community plugin requires the Obsidian app to be running, so it is not a good fit for an always-on NAS.
 
-I used two criteria to choose the MCP server:
+I ruled out any MCP server that did not meet these two conditions:
 
 - It must support Streamable HTTP and OAuth 2.0 so Claude can use it as a custom connector. An stdio-only MCP cannot be used as a remote connector.
 - It must replace files atomically so Obsidian Sync never observes a partially written file.
 
-A Cloudflare Tunnel sits above these sync and access layers.
+A Cloudflare Tunnel then connects those two layers to the outside world.
 
 ## Prerequisites
 
@@ -58,7 +58,7 @@ The tunnel runs in a separate stack and shares this `edge` network with the MCP 
 
 Create an empty `docker/obsidian-remote/vault` directory on the NAS and copy its verified absolute path. It is often `/volume1/docker/obsidian-remote/vault`, but do not guess—confirm the actual path on your NAS.
 
-Generate the secrets:
+I generated the required secrets together at this point:
 
 ```bash
 openssl rand -hex 32   # MCP bearer token
@@ -70,7 +70,7 @@ openssl rand -hex 24   # OAuth login password
 
 Create a Portainer stack named `obsidian-remote` and paste the [complete Compose file](https://gist.github.com/JeongJaeSoon/c7ba9387778a21116408830a655bc65b) into the Web editor.
 
-The stack contains two services:
+The Compose file runs two services:
 
 - `obsidian-sync` installs `obsidian-headless` on `node:22-bookworm-slim` and runs `ob sync --continuous`. It deliberately waits for `/root/.ob-ready` until initial setup is complete.
 - `obsidian-mcp` runs from `python:3.12-slim` with uv and the vault-mcp source. It mounts the same host path as the sync service and joins both the default and `edge` networks.
@@ -91,7 +91,7 @@ VAULT_OAUTH_PASSWORD=the generated login password
 
 An empty `VAULT_OAUTH_PASSWORD` denies every login attempt.
 
-Deploying the stack creates two containers. It is expected for `obsidian-sync` to be waiting at this stage.
+The deployment creates two containers. `obsidian-sync` is supposed to be waiting at this point because its initial setup has not happened yet.
 
 ## 3. Initialize headless Sync
 
@@ -107,7 +107,7 @@ ls /vault | head
 touch /root/.ob-ready
 ```
 
-Restart the container afterward. A successful sync produces output similar to this:
+After creating the ready file, restart the container. This is the log I saw once Sync connected successfully:
 
 ```text
 Starting sync:
@@ -122,7 +122,7 @@ Fully synced
 
 ## 4. Test the MCP server on the LAN
 
-The MCP server can take one or two minutes to start for the first time. Look for these log lines:
+On its first run, the MCP server spent one or two minutes preparing dependencies. I used these four log lines as the sign that it was ready:
 
 ```text
 INFO  Starting vault MCP server. Vault: /vault
@@ -175,7 +175,7 @@ Configure the Public Hostname as follows:
 
 The Path must remain blank. OAuth discovery at `/.well-known/...` and the `/oauth/...` routes also need to pass through the tunnel.
 
-Verify the public endpoint:
+I checked the public side by querying the OAuth metadata directly:
 
 ```bash
 curl -s https://vault.example.com/.well-known/oauth-authorization-server | jq
@@ -195,7 +195,7 @@ Dynamic Client Registration lets Claude register its own redirect URI. Entering 
 
 Click Connect and sign in with `VAULT_OAUTH_USERNAME` and `VAULT_OAUTH_PASSWORD`. Once registered, the connector is also available in Claude on mobile.
 
-## Five pitfalls I encountered
+## Five things that went wrong
 
 ### 1. Portainer remote deployment does not support `build:`
 
@@ -246,7 +246,7 @@ Point it at a persistent volume:
 OAUTH_CLIENTS_PATH: /data/oauth_clients.json
 ```
 
-## The result
+## What the connection made possible
 
 The MCP server exposes 20 tools:
 
@@ -257,13 +257,12 @@ The MCP server exposes 20 tools:
 - Daily note path lookup, read, and append
 - Vault health checks
 
-The first health analysis found hundreds of files with missing frontmatter and broken wiki links. Many were representation mismatches rather than lost content, making them good candidates for automation.
+My first health analysis turned up hundreds of files with missing frontmatter or broken wiki links. Many were representation mismatches rather than lost content, exactly the kind of cleanup that lends itself to automation.
 
 ## Remaining limitations and operational notes
 
-`obsidian-headless` is an open beta. Compare file counts after the first sync and keep a snapshot. Never run desktop Obsidian Sync and headless Sync simultaneously on the same device and path.
+Even after the setup is running, `obsidian-headless` remains an open beta. I compare file counts after the first sync and keep a snapshot. Desktop Obsidian Sync and headless Sync should never run simultaneously against the same path on the same device.
 
 The MCP server is a public internet endpoint. Use an unguessable OAuth password. Putting Cloudflare Access in front of it stops the connector's OAuth handshake at a human login page, so I do not use Access here. After the connector is established, you can narrow access by country or IP with WAF rules if needed.
 
 An automation service such as n8n running on the same NAS can mount the vault directly. To reduce conflicts, keep machine-written content in a separate area such as `inbox/`.
-

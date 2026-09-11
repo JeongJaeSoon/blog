@@ -1,7 +1,7 @@
 ---
 title: ObsidianをNASにセルフホストしてRemote MCP化する
 date: '2026-08-25'
-summary: Obsidian SyncのVaultをUGREEN NASへ常時同期し、OAuth対応のRemote MCPとしてClaudeから安全に読み書きできるようにした構成と、実際につまずいた5点をまとめます。
+summary: Macが閉じていてもObsidian Vaultを扱えるよう、UGREEN NASにheadless SyncとOAuth対応のRemote MCPを載せた記録です。
 lang: ja
 tags:
   - obsidian
@@ -11,9 +11,9 @@ tags:
 draft: false
 ---
 
-MacBook 2台だけに置いていたObsidian Vaultを、UGREEN NASにも常時同期するようにしました。そのVaultを遠隔から読み書きできる独立したMCPサーバーも追加しています。
+私のObsidian Vaultは長らくMacBook 2台の中だけにありました。これをUGREEN NASにも常時同期し、その上に遠隔から読み書きするためのMCPサーバーを載せました。最終的な構成は3コンテナとCloudflare Tunnel 1本です。
 
-構成は3コンテナとCloudflare Tunnel 1本です。この記事では、実際の構築手順と、途中で踏んだ5つの落とし穴をまとめます。
+手順自体より時間がかかったのは、Portainerの制約やCLIのオプション、MCP SDKのversion差を切り分けるところでした。同じ構成を再現できるよう、うまくいった設定だけでなく、実際に踏んだ5つの落とし穴も残しておきます。
 
 ## なぜセルフホストするのか
 
@@ -23,20 +23,20 @@ Obsidian SyncはMacBookとiPhoneの同期には十分便利です。ただし、
 - LLMにノートを検索させるたびにコピー＆ペーストが必要
 - n8nなどの自動化から使うには常時稼働する対象が必要
 
-そこでNASを4台目のSyncクライアントにしました。
+この穴を埋めるため、NASを4台目のSyncクライアントにしました。
 
 同期層には公式の`obsidian-headless`を使います。GUIなしで同期済みVaultを通常のMarkdownファイルとして展開できます。Syncthing、Git、Self-hosted LiveSyncも候補でしたが、すでにObsidian Syncを契約しているので、同期方式を増やす理由はありませんでした。
 
-ただし`obsidian-headless`はオープンベータです。導入前に必ずVaultのスナップショットを取ってください。
+`obsidian-headless`はまだオープンベータなので、私はここを安定版と同じ感覚では扱っていません。導入前にはVaultのスナップショットが必要です。
 
 アクセス層には、ファイルシステムを直接読む独立したMCPサーバーを使います。Local REST APIコミュニティプラグインはObsidianアプリの起動が前提なので、NASでの常時運用には向きません。
 
-MCPサーバーを選ぶ条件は次の2つでした。
+MCPサーバーについては、次の2点を外せない条件にしました。
 
 - Claudeのカスタムコネクタから使えるStreamable HTTPとOAuth 2.0に対応していること。stdio専用MCPはRemote Connectorとして使えません。
 - Obsidian Syncに書きかけのファイルを見せないよう、ファイルをアトミックに置換できること。
 
-この同期層とアクセス層の上にCloudflare Tunnelを置きます。
+この2層をCloudflare Tunnelで外へつなぐ、というのが全体像です。
 
 ## 前提
 
@@ -58,7 +58,7 @@ Tunnelは別Stackで動かし、MCPとこの`edge`ネットワークを共有し
 
 NAS上に空の`docker/obsidian-remote/vault`ディレクトリを作り、確認済みの絶対パスを控えます。多くの環境では`/volume1/docker/obsidian-remote/vault`ですが、推測せず実際のパスを確認してください。
 
-Secretは次のように生成します。
+ここで使うSecretはまとめて生成しておきます。
 
 ```bash
 openssl rand -hex 32   # MCP bearer token
@@ -70,7 +70,7 @@ openssl rand -hex 24   # OAuth login password
 
 PortainerでStack `obsidian-remote`を作り、Web editorに[完全なComposeファイル](https://gist.github.com/JeongJaeSoon/c7ba9387778a21116408830a655bc65b)を貼り付けます。
 
-Stackには2つのサービスがあります。
+このComposeで動くサービスは2つです。
 
 - `obsidian-sync`: `node:22-bookworm-slim`上に`obsidian-headless`を導入し、`ob sync --continuous`を実行します。初期設定が終わるまで、意図的に`/root/.ob-ready`の作成を待ちます。
 - `obsidian-mcp`: `python:3.12-slim`、uv、vault-mcpのソースで動作します。Syncと同じホストパスをマウントし、defaultと`edge`の両ネットワークに参加します。
@@ -91,7 +91,7 @@ VAULT_OAUTH_PASSWORD=生成したログインpassword
 
 `VAULT_OAUTH_PASSWORD`を空にすると、全員のログインが拒否されます。
 
-デプロイすると2コンテナが作られます。この時点で`obsidian-sync`が待機しているのは正常です。
+デプロイ後にできるコンテナは2つです。`obsidian-sync`はまだ初期設定前なので、この時点では待機したままで問題ありません。
 
 ## 3. Headless Syncを初期化する
 
@@ -107,7 +107,7 @@ ls /vault | head
 touch /root/.ob-ready
 ```
 
-その後、コンテナを再起動します。ログが次のようになれば同期できています。
+最後のready fileを作ったらコンテナを再起動します。私の環境では、同期が通ると次のログになりました。
 
 ```text
 Starting sync:
@@ -122,7 +122,7 @@ Fully synced
 
 ## 4. MCPをLAN内から確認する
 
-MCPの初回起動には1〜2分かかります。次のログを確認します。
+初回は依存関係の準備があるため、MCPが立ち上がるまで1〜2分待ちました。目印にしたログは次の4行です。
 
 ```text
 INFO  Starting vault MCP server. Vault: /vault
@@ -175,7 +175,7 @@ Public Hostnameは次のようにします。
 
 Pathは必ず空欄にします。OAuth discoveryの`/.well-known/...`と`/oauth/...`にもTunnel経由で到達する必要があるためです。
 
-公開後に確認します。
+公開できたかはOAuth metadataを直接見て確認しました。
 
 ```bash
 curl -s https://vault.example.com/.well-known/oauth-authorization-server | jq
@@ -195,7 +195,7 @@ Dynamic Client Registrationにより、Claudeが自分のredirect URIを登録�
 
 Connectを押し、`VAULT_OAUTH_USERNAME`と`VAULT_OAUTH_PASSWORD`でログインします。一度登録されれば、モバイル版Claudeからも使えます。
 
-## 実際につまずいた5つの点
+## 構築中につまずいた5つの点
 
 ### 1. PortainerのRemote deploymentは`build:`に対応しない
 
@@ -246,7 +246,7 @@ OAuth client registryはデフォルトではコンテナのHOMEに保存され�
 OAUTH_CLIENTS_PATH: /data/oauth_clients.json
 ```
 
-## できるようになったこと
+## 動かしてみた結果
 
 MCPは20個のtoolを公開します。
 
@@ -257,13 +257,12 @@ MCPは20個のtoolを公開します。
 - Daily noteのpath取得、読み込み、追記
 - Vault health check
 
-最初のhealth analysisだけで、frontmatterがないファイルや壊れたWiki linkが数百件見つかりました。その多くは内容の欠損ではなく表現の不一致で、自動化と相性のよい修正対象です。
+最初にhealth analysisを走らせただけで、frontmatterがないファイルや壊れたWiki linkが数百件出てきました。中身が失われていたというより、表記のずれとして直せるものが多く、この種の整理は自動化と相性がよさそうです。
 
 ## 残る制約と運用上の注意
 
-`obsidian-headless`はオープンベータです。初回同期後にファイル数を照合し、スナップショットも残してください。同じ端末・同じpathに対してdesktop版Obsidian Syncとheadless Syncを同時に動かしてはいけません。
+運用に移しても、`obsidian-headless`がオープンベータであることは変わりません。初回同期後はファイル数を照合し、スナップショットも残します。同じ端末・同じpathでdesktop版Obsidian Syncとheadless Syncを同時に動かすのは避けます。
 
 MCPはインターネット上の公開endpointになります。推測されにくいOAuth passwordを使ってください。Cloudflare Accessを前段に置くと、ConnectorのOAuth handshakeが人間向けlogin画面で止まるため、ここでは使いません。接続完了後、必要であればWAFで国やIPを絞れます。
 
 n8nのように同じNAS上で動く自動化はVaultを直接mountできます。ただし競合を減らすため、機械が書き込む領域を`inbox/`などに分けておくのがおすすめです。
-

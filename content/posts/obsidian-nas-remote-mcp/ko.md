@@ -1,7 +1,7 @@
 ---
 title: Obsidian을 NAS에 셀프 호스팅하고 Remote MCP로 연결하기
 date: '2026-08-25'
-summary: Obsidian Sync Vault를 UGREEN NAS에 상시 동기화하고, OAuth를 지원하는 Remote MCP로 Claude에서 안전하게 읽고 쓰는 구성과 실제로 겪은 다섯 가지 함정을 정리합니다.
+summary: Mac이 꺼져 있어도 Obsidian Vault를 다룰 수 있도록 UGREEN NAS에 headless Sync와 OAuth 기반 Remote MCP를 올린 기록입니다.
 lang: ko
 tags:
   - obsidian
@@ -11,9 +11,9 @@ tags:
 draft: false
 ---
 
-MacBook 두 대에만 있던 Obsidian Vault를 UGREEN NAS에도 상시 동기화하도록 구성했습니다. 여기에 Vault를 원격에서 읽고 쓸 수 있는 독립적인 MCP 서버도 추가했습니다.
+제 Obsidian Vault는 오랫동안 MacBook 두 대 안에만 있었습니다. 이 Vault를 UGREEN NAS에도 계속 동기화하고, 원격에서 읽고 쓸 수 있는 MCP 서버를 그 위에 올렸습니다. 최종 구성은 컨테이너 3개와 Cloudflare Tunnel 하나입니다.
 
-전체 구성은 컨테이너 3개와 Cloudflare Tunnel 하나입니다. 이 글에서는 실제 구축 과정과 그 과정에서 마주친 다섯 가지 함정을 정리합니다.
+막상 해보니 설치 순서보다 Portainer의 제약, CLI 옵션, MCP SDK 버전 차이를 알아내는 데 시간이 더 들었습니다. 나중에 다시 구성할 때 헤매지 않도록 실제로 통과한 설정과 다섯 가지 실패 지점을 함께 남깁니다.
 
 ## 왜 셀프 호스팅하는가
 
@@ -23,20 +23,20 @@ Obsidian Sync는 MacBook과 iPhone을 동기화하기에 충분히 편리합니�
 - LLM에게 노트를 검색시킬 때마다 내용을 복사해 붙여넣어야 합니다.
 - n8n 같은 자동화에서 사용하려면 항상 켜져 있는 대상이 필요합니다.
 
-그래서 NAS를 네 번째 Sync 클라이언트로 만들었습니다.
+이 빈자리를 채우기 위해 NAS를 네 번째 Sync 클라이언트로 만들었습니다.
 
 동기화 계층에는 공식 `obsidian-headless`를 사용합니다. GUI 없이 동기화된 Vault를 일반 Markdown 파일로 펼쳐 줍니다. Syncthing, Git, Self-hosted LiveSync도 후보였지만 이미 Obsidian Sync를 구독하고 있으므로 동기화 방식을 하나 더 추가할 이유가 없었습니다.
 
-다만 `obsidian-headless`는 오픈 베타입니다. 시작하기 전에 반드시 Vault 스냅샷을 만들어 두세요.
+다만 `obsidian-headless`는 아직 오픈 베타라 안정판처럼 다루지는 않았습니다. 시작하기 전에 Vault 스냅샷을 만들어 두는 편이 안전합니다.
 
 접근 계층에서는 파일 시스템을 직접 읽는 독립 MCP 서버를 사용합니다. Local REST API 커뮤니티 플러그인은 Obsidian 앱이 실행 중이어야 하므로 NAS에서 상시 운영하기에는 적합하지 않습니다.
 
-MCP 서버의 선택 기준은 두 가지였습니다.
+MCP 서버를 고를 때는 두 조건을 먼저 정했습니다.
 
 - Claude 커스텀 커넥터에서 사용할 수 있도록 Streamable HTTP와 OAuth 2.0을 지원할 것. stdio 전용 MCP는 Remote Connector로 쓸 수 없습니다.
 - Obsidian Sync가 쓰다 만 파일을 보지 않도록 파일을 원자적으로 교체할 것.
 
-이 동기화 계층과 접근 계층 위에 Cloudflare Tunnel을 둡니다.
+이 두 계층을 Cloudflare Tunnel로 외부에 연결하는 것이 전체 구조입니다.
 
 ## 준비물
 
@@ -58,7 +58,7 @@ Tunnel은 별도 Stack으로 실행하고 MCP와 이 `edge` 네트워크를 공�
 
 NAS에 빈 `docker/obsidian-remote/vault` 디렉터리를 만들고 확인된 절대 경로를 복사합니다. 흔히 `/volume1/docker/obsidian-remote/vault`이지만 추측하지 말고 실제 경로를 확인하세요.
 
-Secret은 다음과 같이 생성합니다.
+필요한 Secret은 이때 한꺼번에 만들었습니다.
 
 ```bash
 openssl rand -hex 32   # MCP bearer token
@@ -70,7 +70,7 @@ openssl rand -hex 24   # OAuth login password
 
 Portainer에서 `obsidian-remote` Stack을 만들고 Web editor에 [전체 Compose 파일](https://gist.github.com/JeongJaeSoon/c7ba9387778a21116408830a655bc65b)을 붙여넣습니다.
 
-Stack에는 두 서비스가 있습니다.
+이 Compose에서 실행하는 서비스는 둘입니다.
 
 - `obsidian-sync`: `node:22-bookworm-slim`에 `obsidian-headless`를 설치하고 `ob sync --continuous`를 실행합니다. 초기 설정을 마칠 때까지 의도적으로 `/root/.ob-ready`가 생기기를 기다립니다.
 - `obsidian-mcp`: `python:3.12-slim`, uv, vault-mcp 소스로 실행됩니다. Sync와 같은 호스트 경로를 마운트하고 default 및 `edge` 네트워크에 참여합니다.
@@ -91,7 +91,7 @@ VAULT_OAUTH_PASSWORD=생성한 로그인 password
 
 `VAULT_OAUTH_PASSWORD`를 비워 두면 모든 로그인이 거부됩니다.
 
-배포하면 컨테이너 두 개가 생성됩니다. 이 시점에 `obsidian-sync`가 대기 중인 것은 정상입니다.
+배포 후 컨테이너는 두 개가 생깁니다. 아직 초기 설정 전이므로 `obsidian-sync`가 대기하는 것이 정상입니다.
 
 ## 3. Headless Sync 초기화하기
 
@@ -107,7 +107,7 @@ ls /vault | head
 touch /root/.ob-ready
 ```
 
-이후 컨테이너를 재시작합니다. 다음과 같은 로그가 나오면 동기화가 된 것입니다.
+ready file까지 만든 다음 컨테이너를 재시작합니다. 제 환경에서는 동기화가 정상적으로 붙으면 다음 로그가 나왔습니다.
 
 ```text
 Starting sync:
@@ -122,7 +122,7 @@ Fully synced
 
 ## 4. LAN에서 MCP 확인하기
 
-MCP의 첫 실행에는 1~2분이 걸릴 수 있습니다. 다음 로그를 확인합니다.
+첫 실행 때는 의존성을 준비하느라 MCP가 뜨기까지 1~2분 정도 걸렸습니다. 아래 네 줄을 기동 기준으로 삼았습니다.
 
 ```text
 INFO  Starting vault MCP server. Vault: /vault
@@ -175,7 +175,7 @@ Public Hostname은 다음과 같이 구성합니다.
 
 Path는 반드시 비워 두어야 합니다. OAuth discovery의 `/.well-known/...`과 `/oauth/...` 경로도 Tunnel을 통해 접근할 수 있어야 하기 때문입니다.
 
-공개 후 다음 명령으로 확인합니다.
+공개 여부는 OAuth metadata를 직접 조회해 확인했습니다.
 
 ```bash
 curl -s https://vault.example.com/.well-known/oauth-authorization-server | jq
@@ -195,7 +195,7 @@ Dynamic Client Registration 덕분에 Claude가 자신의 redirect URI를 등록
 
 Connect를 누르고 `VAULT_OAUTH_USERNAME`과 `VAULT_OAUTH_PASSWORD`로 로그인합니다. 한 번 등록하면 모바일 Claude에서도 보입니다.
 
-## 실제로 겪은 다섯 가지 함정
+## 구축하면서 걸렸던 다섯 가지 함정
 
 ### 1. Portainer Remote deployment는 `build:`를 지원하지 않는다
 
@@ -246,7 +246,7 @@ OAuth client registry는 기본적으로 컨테이너 HOME에 저장됩니다. �
 OAUTH_CLIENTS_PATH: /data/oauth_clients.json
 ```
 
-## 결과
+## 실제로 연결하고 나서
 
 MCP는 20개의 tool을 제공합니다.
 
@@ -257,13 +257,12 @@ MCP는 20개의 tool을 제공합니다.
 - Daily note 경로 조회, 읽기, 이어 쓰기
 - Vault health check
 
-첫 health analysis에서만 frontmatter가 없는 파일과 깨진 Wiki link가 수백 개 발견됐습니다. 대부분은 내용이 사라진 문제가 아니라 표현 방식의 불일치였고, 자동화로 고치기에 적합한 대상입니다.
+처음 health analysis를 돌렸을 때 frontmatter가 없는 파일과 깨진 Wiki link가 수백 개 나왔습니다. 내용을 잃어버린 문제라기보다 표기 방식이 어긋난 경우가 많아서, 이런 정리는 자동화에 잘 맞았습니다.
 
 ## 남은 제약과 운영 시 주의사항
 
-`obsidian-headless`는 오픈 베타입니다. 첫 동기화 후 파일 수를 확인하고 스냅샷을 남겨 두세요. 같은 기기와 같은 경로에서 desktop Obsidian Sync와 headless Sync를 동시에 실행해서는 안 됩니다.
+운영을 시작한 뒤에도 `obsidian-headless`가 오픈 베타라는 점은 그대로입니다. 첫 동기화가 끝나면 파일 수를 대조하고 스냅샷을 남깁니다. 같은 기기의 같은 경로에서 desktop Obsidian Sync와 headless Sync를 동시에 실행하지 않습니다.
 
 MCP는 인터넷에 공개된 endpoint입니다. 추측하기 어려운 OAuth password를 사용하세요. Cloudflare Access를 앞에 두면 Connector의 OAuth handshake가 사람용 로그인 화면에서 멈추기 때문에 여기서는 사용하지 않습니다. 연결을 마친 뒤 필요하다면 WAF에서 국가나 IP를 제한할 수 있습니다.
 
 n8n처럼 같은 NAS에서 실행되는 자동화는 Vault를 직접 mount할 수도 있습니다. 다만 충돌을 줄이려면 기계가 쓰는 영역을 `inbox/`처럼 분리하는 편이 좋습니다.
-
