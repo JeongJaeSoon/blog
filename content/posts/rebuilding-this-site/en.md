@@ -34,7 +34,7 @@ Three places, and that is the whole mental model:
 ```text
 content/profile.ts      → facts: dates, URLs, repos, stacks
 content/i18n/{en,ko,ja} → every translatable string
-content/posts/*.md      → the blog
+content/posts/<slug>/{en,ko,ja}.md → the blog
 ```
 
 The split between the first two is the part worth explaining. A fact is stored
@@ -57,7 +57,10 @@ draft: true
 ---
 ```
 
-`lang` decides which language's blog the post appears under.
+One directory represents one article, and its three Markdown files are the
+English, Korean and Japanese renditions. The directory name is their shared URL
+slug, while `lang` must match the filename. A missing rendition fails the build
+instead of sending the language switcher to a 404.
 
 Setting `draft: true` keeps a post visible in `next dev` and out of the build,
 the RSS feed and the sitemap.

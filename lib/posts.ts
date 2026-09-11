@@ -9,7 +9,7 @@ import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeShiki from '@shikijs/rehype'
 import rehypeStringify from 'rehype-stringify'
-import { defaultLocale, isLocale, type Locale } from './i18n'
+import { isLocale, locales, type Locale } from './i18n'
 
 const POSTS_DIR = path.join(process.cwd(), 'content/posts')
 
@@ -20,32 +20,94 @@ export type PostMeta = {
   summary: string
   tags: string[]
   draft: boolean
-  /** Language the post is written in. Defaults to the site default. */
   lang: Locale
   readingMinutes: number
 }
 
 export type Post = PostMeta & { html: string }
 
-function read(slug: string) {
-  const file = path.join(POSTS_DIR, `${slug}.md`)
-  if (!fs.existsSync(file)) return null
-  return matter(fs.readFileSync(file, 'utf8'))
+type PostSource = {
+  slug: string
+  lang: Locale
+  file: string
 }
 
-function toMeta(slug: string, data: Record<string, unknown>, body: string): PostMeta {
+/**
+ * One directory is one article. Every article must provide en.md, ko.md and
+ * ja.md so locale switching never points at a missing rendition.
+ */
+function getPostSources(): PostSource[] {
+  if (!fs.existsSync(POSTS_DIR)) return []
+
+  const entries = fs.readdirSync(POSTS_DIR, { withFileTypes: true })
+  const looseMarkdown = entries.find(
+    (entry) => entry.isFile() && entry.name.endsWith('.md'),
+  )
+  if (looseMarkdown) {
+    throw new Error(
+      `Move "content/posts/${looseMarkdown.name}" into content/posts/<slug>/<lang>.md`,
+    )
+  }
+
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .flatMap((entry) =>
+      locales.map((lang) => {
+        const file = path.join(POSTS_DIR, entry.name, `${lang}.md`)
+        if (!fs.existsSync(file)) {
+          throw new Error(`Post "${entry.name}" is missing ${lang}.md`)
+        }
+        return { slug: entry.name, lang, file }
+      }),
+    )
+}
+
+function read(source: PostSource) {
+  return matter(fs.readFileSync(source.file, 'utf8'))
+}
+
+function toMeta(
+  source: PostSource,
+  data: Record<string, unknown>,
+  body: string,
+): PostMeta {
   const words = body.trim().split(/\s+/).length
-  const lang = String(data.lang ?? defaultLocale)
+  const declaredLang = String(data.lang ?? source.lang)
+  if (!isLocale(declaredLang) || declaredLang !== source.lang) {
+    throw new Error(
+      `Post "${source.slug}/${source.lang}.md" must declare lang: ${source.lang}`,
+    )
+  }
+
   return {
-    slug,
-    title: String(data.title ?? slug),
+    slug: source.slug,
+    title: String(data.title ?? source.slug),
     date: String(data.date ?? ''),
     summary: String(data.summary ?? ''),
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
     draft: data.draft === true,
-    lang: isLocale(lang) ? lang : defaultLocale,
+    lang: source.lang,
     readingMinutes: Math.max(1, Math.round(words / 220)),
   }
+}
+
+function loadMeta(source: PostSource): PostMeta {
+  const parsed = read(source)
+  return toMeta(source, parsed.data, parsed.content)
+}
+
+function getValidatedPostMeta(): PostMeta[] {
+  const posts = getPostSources().map(loadMeta)
+  for (const slug of new Set(posts.map((post) => post.slug))) {
+    const renditions = posts.filter((post) => post.slug === slug)
+    if (new Set(renditions.map((post) => post.date)).size !== 1) {
+      throw new Error(`Post "${slug}" must use the same date in every language`)
+    }
+    if (new Set(renditions.map((post) => post.draft)).size !== 1) {
+      throw new Error(`Post "${slug}" must use the same draft state in every language`)
+    }
+  }
+  return posts
 }
 
 /** Drafts stay out of the build; they are visible in `next dev`. */
@@ -53,19 +115,11 @@ function isVisible(post: PostMeta) {
   return !post.draft || process.env.NODE_ENV === 'development'
 }
 
-/** Newest first. Pass a locale to get only posts written in that language. */
+/** Newest first. Pass a locale to get only that rendition of every post. */
 export function getAllPosts(locale?: Locale): PostMeta[] {
-  if (!fs.existsSync(POSTS_DIR)) return []
-  return fs
-    .readdirSync(POSTS_DIR)
-    .filter((name) => name.endsWith('.md'))
-    .map((name) => {
-      const slug = name.replace(/\.md$/, '')
-      const parsed = read(slug)!
-      return toMeta(slug, parsed.data, parsed.content)
-    })
-    .filter(isVisible)
+  return getValidatedPostMeta()
     .filter((post) => !locale || post.lang === locale)
+    .filter(isVisible)
     .sort((a, b) => b.date.localeCompare(a.date))
 }
 
@@ -89,6 +143,10 @@ export function slugifyTag(tag: string): string {
   return tag.trim().toLowerCase().replace(/\s+/g, '-')
 }
 
+export function getPostAlternates(slug: string): PostMeta[] {
+  return getAllPosts().filter((post) => post.slug === slug)
+}
+
 const processor = unified()
   .use(remarkParse)
   .use(remarkGfm)
@@ -101,10 +159,16 @@ const processor = unified()
   })
   .use(rehypeStringify)
 
-export async function getPost(slug: string): Promise<Post | null> {
-  const parsed = read(slug)
-  if (!parsed) return null
-  const meta = toMeta(slug, parsed.data, parsed.content)
+export async function getPost(slug: string, lang: Locale): Promise<Post | null> {
+  const source = getPostSources().find(
+    (candidate) => candidate.slug === slug && candidate.lang === lang,
+  )
+  if (!source) return null
+
+  const meta = getValidatedPostMeta().find(
+    (candidate) => candidate.slug === slug && candidate.lang === lang,
+  )!
+  const parsed = read(source)
   if (!isVisible(meta)) return null
   const html = String(await processor.process(parsed.content))
   return { ...meta, html }

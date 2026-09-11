@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getAllPosts, getPost, slugifyTag } from '@/lib/posts'
+import { getAllPosts, getPost, getPostAlternates, slugifyTag } from '@/lib/posts'
 import { getDictionary } from '@/content/i18n'
 import { locales, isLocale, localeTags } from '@/lib/i18n'
 import { formatDate } from '@/lib/format'
@@ -17,13 +17,24 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, slug } = await params
-  const post = await getPost(slug)
-  if (!post || !isLocale(lang)) return {}
+  if (!isLocale(lang)) return {}
+  const post = await getPost(slug, lang)
+  if (!post) return {}
+
+  const languages = Object.fromEntries(
+    getPostAlternates(slug).map((alternate) => [
+      localeTags[alternate.lang],
+      `/${alternate.lang}/blog/${alternate.slug}`,
+    ]),
+  )
 
   return {
     title: post.title,
     description: post.summary,
-    alternates: { canonical: `/${lang}/blog/${post.slug}` },
+    alternates: {
+      canonical: `/${lang}/blog/${post.slug}`,
+      languages,
+    },
     openGraph: {
       type: 'article',
       title: post.title,
@@ -38,9 +49,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PostPage({ params }: Props) {
   const { lang, slug } = await params
   if (!isLocale(lang)) notFound()
-  const post = await getPost(slug)
-  // A post only exists under the language it is written in.
-  if (!post || post.lang !== lang) notFound()
+  const post = await getPost(slug, lang)
+  if (!post) notFound()
   const t = getDictionary(lang)
 
   return (
