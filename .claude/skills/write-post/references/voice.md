@@ -60,9 +60,12 @@ Both name something real. Neither announces what the paragraph is going to do.
 
   C-4 takes everything that cannot be a possessive: `n't` and
   `'m/'re/'ve/'ll/'d` on any word, and `'s` after a pronoun or a wh-word
-  (`it's`, `he's`, `what's`, `let's`). Either apostrophe, any case, in the
-  body and in `title` and `summary` — those two render on the index and in
-  the feed, so they are part of the post. Every match is a violation.
+  (`it's`, `he's`, `what's`, `let's`). Either apostrophe, any case. Every
+  match is a violation.
+
+  It reads wherever the reader does: the body, the cells of a table, and
+  `title` and `summary`, which render on the index and in the feed. A table
+  cell is prose that happens to sit between pipes.
 
   **C-5 is the part a script cannot close.** `everyone's ready` and
   `everyone's coat` are the same string, so C-5 counts `'s` after an
@@ -72,9 +75,10 @@ Both name something real. Neither announces what the paragraph is going to do.
   and not the counter.
 
   Fence pasted output rather than indenting it. A fence is stripped wherever
-  it sits, nested under a list item included, but a bare four-space code
-  block is read as prose — the stripper cannot tell it from a list's
-  continuation paragraph, and keeping the paragraph matters more.
+  it sits — nested under a list item, or drawing a table — but a bare
+  four-space code block is read as prose, because the stripper cannot tell
+  it from a list's continuation paragraph and keeping the paragraph matters
+  more.
 
 ## Structure, all three languages
 

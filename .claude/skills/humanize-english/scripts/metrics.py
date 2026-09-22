@@ -90,7 +90,8 @@ INLINE_CODE = re.compile(r"`[^`\n]*`")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BLOCKQUOTE = re.compile(r"(?m)^>.*$")
 HEADING_MARK = re.compile(r"(?m)^#{1,6}\s*")
-TABLE_ROW = re.compile(r"(?m)^\|.*\|\s*$")
+TABLE_ROW = re.compile(r"(?m)^\|.*\|[ \t]*$")
+TABLE_RULE = re.compile(r"\A[\s|:-]+\Z")
 URL = re.compile(r"https?://\S+")
 
 
@@ -125,6 +126,11 @@ def front_matter_prose(text: str) -> str:
     return "\n\n".join(v for v in values if v)
 
 
+def normalize_newlines(text: str) -> str:
+    """`$`-anchored patterns below assume LF; stdin may hand us CRLF."""
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def strip_nonprose(text: str) -> str:
     """Remove everything that is not editable prose."""
     for pattern, repl in ((FRONT_MATTER, ""), (FENCED, " "),
@@ -133,6 +139,20 @@ def strip_nonprose(text: str) -> str:
                           (BLOCKQUOTE, " ")):
         text = pattern.sub(repl, text)
     return HEADING_MARK.sub("", text)
+
+
+def table_prose(text: str) -> str:
+    """Cell text from Markdown tables, which `strip_nonprose` drops whole."""
+    body = FENCED.sub(" ", FRONT_MATTER.sub("", text))
+    cells: list[str] = []
+    for row in TABLE_ROW.findall(body):
+        if TABLE_RULE.match(row):
+            continue
+        cells.extend(c.strip() for c in row.strip().strip("|").split("|"))
+    joined = "\n\n".join(c for c in cells if c)
+    for pattern, repl in ((INLINE_CODE, " "), (LINK_TARGET, "]"), (URL, " ")):
+        joined = pattern.sub(repl, joined)
+    return joined
 
 
 def mask_protected(text: str, protected: Iterable[str]) -> str:
@@ -173,6 +193,7 @@ def load_thresholds(path: str | Path | None) -> dict[str, Any]:
 
 def analyze(text: str, protected: Iterable[str] = (), baseline: str | None = None) -> dict[str, Any]:
     th = load_thresholds(baseline)
+    text = normalize_newlines(text)
     prose = mask_protected(strip_nonprose(text), protected)
 
     sentences = split_sentences(prose)
@@ -203,7 +224,9 @@ def analyze(text: str, protected: Iterable[str] = (), baseline: str | None = Non
 
     counts: dict[str, int] = {}
     findings: list[Finding] = []
-    scanned = prose + "\n\n" + mask_protected(front_matter_prose(text), protected)
+    elsewhere = (front_matter_prose(text), table_prose(text))
+    scanned = "\n\n".join(
+        [prose, *(mask_protected(part, protected) for part in elsewhere if part)])
     for pid, sev, rx in COMPILED:
         hits = list(rx.finditer(scanned))
         counts[pid] = len(hits)
@@ -276,6 +299,7 @@ def count_token(text: str, term: str) -> int:
 
 
 def compare(before: str, after: str, protected: Iterable[str]) -> dict[str, Any]:
+    before, after = normalize_newlines(before), normalize_newlines(after)
     lost = protected_tokens(before) - protected_tokens(after)
     added = protected_tokens(after) - protected_tokens(before)
     bw, aw = words(strip_nonprose(before)), words(strip_nonprose(after))
