@@ -85,7 +85,7 @@ PASSIVE = re.compile(
 NOMINALIZATION = re.compile(r"\b\w{4,}(?:tion|ment|ance|ence|ity|ness)\b", re.I)
 
 FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
-FENCED = re.compile(r"(?ms)^[ \t]*(```+|~~~+).*?^[ \t]*\1[`~]*[ \t]*$")
+FENCE_LINE = re.compile(r"\A([ \t]*)(`{3,}|~{3,})([^`]*)\Z")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BLOCKQUOTE = re.compile(r"(?m)^>.*$")
@@ -131,10 +131,38 @@ def normalize_newlines(text: str) -> str:
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
 
+def strip_fences(text: str) -> str:
+    """Blank out fenced blocks.
+
+    A closing fence repeats the opener's character at least as many times,
+    carries no info string, and sits no more than three spaces past the
+    opener's indentation. A marker indented further is content, which is why
+    one regex cannot do this. An unclosed fence runs to the end.
+    """
+    out: list[str] = []
+    opener: tuple[int, str, int] | None = None
+    for line in text.split("\n"):
+        fence = FENCE_LINE.match(line)
+        if opener is None:
+            if not fence:
+                out.append(line)
+                continue
+            opener = (len(fence.group(1).expandtabs()), fence.group(2)[0],
+                      len(fence.group(2)))
+        elif fence:
+            indent, char, length = opener
+            if (fence.group(2)[0] == char and len(fence.group(2)) >= length
+                    and not fence.group(3).strip()
+                    and len(fence.group(1).expandtabs()) <= indent + 3):
+                opener = None
+        out.append(" ")
+    return "\n".join(out)
+
+
 def strip_nonprose(text: str) -> str:
     """Remove everything that is not editable prose."""
-    for pattern, repl in ((FRONT_MATTER, ""), (FENCED, " "),
-                          (TABLE_ROW, " "),
+    text = strip_fences(FRONT_MATTER.sub("", text))
+    for pattern, repl in ((TABLE_ROW, " "),
                           (INLINE_CODE, " "), (LINK_TARGET, "]"), (URL, " "),
                           (BLOCKQUOTE, " ")):
         text = pattern.sub(repl, text)
@@ -143,16 +171,19 @@ def strip_nonprose(text: str) -> str:
 
 def table_prose(text: str) -> str:
     """Cell text from Markdown tables, which `strip_nonprose` drops whole."""
-    body = FENCED.sub(" ", FRONT_MATTER.sub("", text))
+    body = strip_fences(FRONT_MATTER.sub("", text))
     cells: list[str] = []
     for row in TABLE_ROW.findall(body):
         if TABLE_RULE.match(row):
             continue
+        # An escaped pipe belongs to the cell, so hide it before splitting,
+        # and drop code spans first or a pipe inside one tears them apart.
+        row = INLINE_CODE.sub(" ", row.replace("\\|", "\x00"))
         cells.extend(c.strip() for c in row.strip().strip("|").split("|"))
     joined = "\n\n".join(c for c in cells if c)
     for pattern, repl in ((INLINE_CODE, " "), (LINK_TARGET, "]"), (URL, " ")):
         joined = pattern.sub(repl, joined)
-    return joined
+    return joined.replace("\x00", "|")
 
 
 def mask_protected(text: str, protected: Iterable[str]) -> str:
