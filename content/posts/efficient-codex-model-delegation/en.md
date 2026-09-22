@@ -23,7 +23,7 @@ usually faster to do in the main thread. That rules out a lot of tempting splits
 What stays with the main agent is the work that needs judgment: deciding what to
 do, where to split it, and how to combine the result.
 
-## When the call is close, I don't split
+## When the call is close, I do not split
 
 I keep a task in the main thread when a couple of checks or a small change will
 finish it, when the brief would be longer than the work, or when its result is
@@ -41,7 +41,7 @@ specific task.
 | General | `gpt-5.6-terra` | Research or implementation that can complete independently |
 | Complex | `gpt-5.6-sol` | Analysis or design that must weigh several conditions |
 
-I don't use Astra for subagents. The main model stays on judgment and
+I do not use Astra for subagents. The main model stays on judgment and
 integration, and separable work gets the least expensive model that can meet
 the bar.
 
