@@ -41,7 +41,7 @@ PATTERNS: list[tuple[str, str, re.Pattern[str]]] = [
                   r"|\brobust\b|\bseamless(?:ly)?\b|\bpowerful tool\b|\bgame[- ]chang(?:er|ing)\b|\bcutting[- ]edge\b|\btransformative\b"),
     ("C-2", "S2", r"\b(?:simply|just|easily|effortlessly)\b"),
     ("C-3", "S2", r"\bthe \w+(?:tion|ment|ance|ence|ity) of the \w+(?:tion|ment|ance|ence|ity) of\b"),
-    ("C-4", "S1", r"\w+n[’']t\b|\w+[’'](?:m|re|ve|ll|d)\b"),
+    ("C-4", "S1", r"(?i)\w+n[’']t\b|\w+[’'](?:m|re|ve|ll|d)\b"),
     ("C-5", "S3", r"(?i)\b(?:it|that|there|here|what|who|where|how|he|she|let|everyone|everybody|someone|somebody|anyone|anybody|nobody|nothing|something)[’']s\b"),
 
     ("D-1", "S2", r"(?m)^(?:Additionally|Furthermore|Moreover|That said|In addition|On the other hand)\b[,.]"),
