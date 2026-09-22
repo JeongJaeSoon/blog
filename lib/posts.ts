@@ -110,9 +110,16 @@ function getValidatedPostMeta(): PostMeta[] {
   return posts
 }
 
-/** Drafts stay out of the build; they are visible in `next dev`. */
+/**
+ * Drafts stay out of production. They are visible in `next dev` and on Vercel
+ * preview deployments, which is where a draft gets reviewed before it ships.
+ */
 function isVisible(post: PostMeta) {
-  return !post.draft || process.env.NODE_ENV === 'development'
+  return (
+    !post.draft ||
+    process.env.NODE_ENV === 'development' ||
+    process.env.VERCEL_ENV === 'preview'
+  )
 }
 
 /** Newest first. Pass a locale to get only that rendition of every post. */

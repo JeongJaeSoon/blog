@@ -22,7 +22,10 @@ content/posts/<slug>/ja.md
 - `date` (`'YYYY-MM-DD'`, quoted) and `draft` — identical in all three, or the build fails.
 - `lang` — must equal the filename.
 - `tags` — lowercase kebab, shared across the three files. Reuse existing tags before inventing one: `rg '^  - ' content/posts/*/en.md | sort -u`.
-- `draft: true` hides the post from `bun run build` while leaving it visible in `next dev`.
+- `draft: true` keeps the post out of production. It stays visible in
+  `next dev` and on Vercel preview deployments (`VERCEL_ENV=preview`), which
+  is where a draft gets reviewed. Publishing means flipping `draft` to
+  `false` in all three files at once.
 
 Verify with `bun run build` and paste the result. A post is not done until that passes.
 
