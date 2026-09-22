@@ -68,7 +68,7 @@ COMPILED = [(pid, sev, re.compile(rx)) for pid, sev, rx in PATTERNS]
 # write-post/references/voice.md admits no contractions. C-5 cannot decide,
 # because the same `'s` is a possessive.
 NOTES = {
-    "C-4": "Every match is a violation; this register takes no contractions.",
+    "C-4": "A violation unless it sits inside a verbatim quotation, which this cannot see.",
     "C-5": "Possessive or contraction — read each match in context.",
 }
 
@@ -85,8 +85,8 @@ PASSIVE = re.compile(
 NOMINALIZATION = re.compile(r"\b\w{4,}(?:tion|ment|ance|ence|ity|ness)\b", re.I)
 
 FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
-FENCE_LINE = re.compile(r"\A([ \t]*)(`{3,}|~{3,})([^`]*)\Z")
-INLINE_CODE = re.compile(r"`[^`\n]*`")
+FENCE_LINE = re.compile(r"\A([ \t]*)(`{3,}|~{3,})(.*)\Z")
+INLINE_CODE = re.compile(r"(`+)(?:(?!\1)[^\n])*\1")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BLOCKQUOTE = re.compile(r"(?m)^>.*$")
 HEADING_MARK = re.compile(r"(?m)^#{1,6}\s*")
@@ -131,31 +131,48 @@ def normalize_newlines(text: str) -> str:
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
 
+def fence_marker(line: str) -> tuple[int, str, int, str] | None:
+    """Indentation, character, length and info string of a fence line."""
+    m = FENCE_LINE.match(line)
+    if not m:
+        return None
+    indent, mark, info = m.group(1), m.group(2), m.group(3)
+    if mark[0] == "`" and "`" in info:
+        return None
+    return len(indent.expandtabs()), mark[0], len(mark), info
+
+
 def strip_fences(text: str) -> str:
     """Blank out fenced blocks.
 
     A closing fence repeats the opener's character at least as many times,
     carries no info string, and sits no more than three spaces past the
     opener's indentation. A marker indented further is content, which is why
-    one regex cannot do this. An unclosed fence runs to the end.
+    one regex cannot do this.
+
+    Container indentation is not tracked, so a four-space marker reads as an
+    opener even where CommonMark calls it content. An opener with no closer is
+    therefore left alone rather than swallowing the rest of the document: a gate
+    that scans too much only costs a reading, while one that scans nothing
+    reports zero and passes.
     """
-    out: list[str] = []
-    opener: tuple[int, str, int] | None = None
-    for line in text.split("\n"):
-        fence = FENCE_LINE.match(line)
+    lines = text.split("\n")
+    out = list(lines)
+    opener: tuple[int, int] | None = None
+    char = ""
+    length = 0
+    for i, line in enumerate(lines):
+        fence = fence_marker(line)
         if opener is None:
             if not fence:
-                out.append(line)
                 continue
-            opener = (len(fence.group(1).expandtabs()), fence.group(2)[0],
-                      len(fence.group(2)))
-        elif fence:
-            indent, char, length = opener
-            if (fence.group(2)[0] == char and len(fence.group(2)) >= length
-                    and not fence.group(3).strip()
-                    and len(fence.group(1).expandtabs()) <= indent + 3):
-                opener = None
-        out.append(" ")
+            indent, char, length, _info = fence
+            opener = (i, indent)
+        elif fence and fence[1] == char and fence[2] >= length \
+                and not fence[3].strip() and fence[0] <= opener[1] + 3:
+            for j in range(opener[0], i + 1):
+                out[j] = " "
+            opener = None
     return "\n".join(out)
 
 

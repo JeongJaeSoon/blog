@@ -60,8 +60,14 @@ Both name something real. Neither announces what the paragraph is going to do.
 
   C-4 takes everything that cannot be a possessive: `n't` and
   `'m/'re/'ve/'ll/'d` on any word, and `'s` after a pronoun or a wh-word
-  (`it's`, `he's`, `what's`, `let's`). Either apostrophe, any case. Every
-  match is a violation.
+  (`it's`, `he's`, `what's`, `let's`). Either apostrophe, any case.
+
+  Every match is a violation with one exception: a contraction inside a
+  verbatim quotation stays, because §0.1 of `humanize-english` preserves
+  quotations and someone else's words are not yours to expand. The counter
+  cannot see a quotation span, so it reports the match and you keep it, with
+  the reason in the findings. Quote in a fence or a code span and the
+  question does not arise.
 
   It reads wherever the reader does: the body, the cells of a table, and
   `title` and `summary`, which render on the index and in the feed. A table
@@ -79,6 +85,12 @@ Both name something real. Neither announces what the paragraph is going to do.
   four-space code block is read as prose, because the stripper cannot tell
   it from a list's continuation paragraph and keeping the paragraph matters
   more.
+
+  The stripper does not track container indentation, which a Markdown parser
+  would. A four-space marker therefore opens a fence even where CommonMark
+  calls it content, so an opener with no closer is left alone instead of
+  swallowing the rest of the file. Scanning too much costs a reading;
+  scanning nothing reports zero and passes.
 
 ## Structure, all three languages
 
