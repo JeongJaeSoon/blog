@@ -13,6 +13,24 @@ Do not re-derive their rules here. A flat ban list is worse than a taxonomy that
 weighs repetition, co-occurrence and register — and worse than one that knows
 `-습니다` and `です・ます` are not AI tells.
 
+### Why English has no skill
+
+Searched, nothing worth a dependency. The English anti-slop skills that exist
+are single-author one-offs with no taxonomy IDs, no severity levels, no
+protected-term handling and no metrics — nothing like the two above. The best of
+them (`willcheung/no-ai-slop-writing-skill`, MIT) is well written and this file
+borrows two of its ideas, but it teaches a *conversational* voice — contractions,
+sentence-opening "And", spoken rhythm — and this blog's English is measured and
+declarative. Adopting it would fight the register.
+
+English here is also a rendition, not the origin. The author thinks in Korean,
+so the English failure mode is translationese and flattening, not native slop.
+That is a different job from what a humanizer does.
+
+Revisit if something with a real taxonomy appears. Until then this file is the
+owner, and it is held to the same standard as the two skills: evidence over
+blacklist, protect what was measured, never normalise the register.
+
 The voice itself is already on disk. Before editing, read one existing post in
 the language you are working in: `content/posts/rebuilding-this-site/en.md` and
 `content/posts/obsidian-nas-remote-mcp/ko.md` are the reference renditions.
@@ -53,6 +71,30 @@ and ja taxonomies do — a single "just" in a 1,500-word post is not the problem
 Hedging is the loudest tell. "This might potentially help improve performance in
 some cases" describes nothing. Either it got faster and you have the number, or
 you do not mention it.
+
+### Shapes, not words
+
+The word list is the easy half. These are the structural ones, and they survive
+a find-and-replace:
+
+- Repeated "not X, but Y" — once is a sentence, three times is a template.
+- Throat-clearing openers: "Here's the thing", "The thing is".
+- Faux insight: "what everyone gets wrong", "the real reason".
+- A colon reveal, or a rhetorical question the next sentence answers.
+- Takeaways generic enough to belong to any post on the subject.
+- Decorative em dashes in short copy.
+
+The language-agnostic shapes are below under *Structural tells*; they apply here
+too.
+
+### Protect before editing
+
+The ko and ja skills take protected terms explicitly. English gets no tool for
+it, so hold the same line by hand: identifiers, file paths, config keys,
+versions, every number, and any pasted output are not editable prose. A tone
+pass that "improves" `fsSelection` or rounds 1,185.8 has broken the post, not
+polished it. The same goes for stated uncertainty — if the draft says something
+was not verified, it stays not verified.
 
 ## Korean and Japanese — what stays here
 

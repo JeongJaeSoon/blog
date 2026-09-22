@@ -16,6 +16,8 @@ EN="$EN"'|powerful tool|game changer|seamless|robust|cutting-edge|delve|unpack'
 EN="$EN"'|\b(simply|just|easily|effortlessly)\b|\b(leverage|utilize)\b'
 EN="$EN"'|Whether you'"'"'re|Not only .* but also|In conclusion|To sum up|At the end of the day'
 EN="$EN"'|might potentially|can be (beneficial|useful|helpful)'
+# Shapes that survive a word swap - see references/voice.md.
+EN="$EN"'|[Hh]ere'"'"'s the thing|[Tt]he thing is,|what everyone gets wrong|the real reason'
 
 KO='이 글에서는|본 글에서는|알아보겠습니다|살펴보겠습니다|알아봅시다|소개하겠습니다'
 KO="$KO"'|중요합니다|하는 것이 좋습니다|바람직합니다|권장됩니다'
