@@ -41,7 +41,7 @@ specific task.
 | General | `gpt-5.6-terra` | Research or implementation that can complete independently |
 | Complex | `gpt-5.6-sol` | Analysis or design that must weigh several conditions |
 
-Astra never runs as a subagent. The main model stays on judgment and
+I don't use Astra for subagents. The main model stays on judgment and
 integration, and separable work gets the least expensive model that can meet
 the bar.
 
