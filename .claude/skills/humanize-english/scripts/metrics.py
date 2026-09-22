@@ -84,7 +84,7 @@ PASSIVE = re.compile(
     r"\b(?:is|are|was|were|be|been|being|gets?|got)\s+(?:\w+ly\s+)?\w+(?:ed|en)\b", re.I)
 NOMINALIZATION = re.compile(r"\b\w{4,}(?:tion|ment|ance|ence|ity|ness)\b", re.I)
 
-FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
+FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---\n", re.S)
 FENCE_LINE = re.compile(r"\A([ \t]*)(`{3,}|~{3,})(.*)\Z")
 BACKTICK_RUN = re.compile(r"`+")
 BLANK_LINE = re.compile(r"\n[ \t]*\n")
@@ -93,8 +93,8 @@ LIST_PREFIX = re.compile(r"\A {0,3}(?:[-*+]|\d{1,9}[.)])[ \t]+")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BLOCKQUOTE = re.compile(r"(?m)^ {0,3}>.*$")
 HEADING_MARK = re.compile(r"(?m)^#{1,6}\s*")
-TABLE_ROW = re.compile(r"(?m)^\|.*\|[ \t]*$")
-TABLE_RULE = re.compile(r"\A[\s|:-]+\Z")
+TABLE_RULE = re.compile(
+    r"\A {0,3}\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*\Z")
 URL = re.compile(r"https?://\S+")
 
 
@@ -118,7 +118,7 @@ def front_matter_prose(text: str) -> str:
     if not fm:
         return ""
     values = []
-    for m in FM_FIELD.finditer(fm.group(0)):
+    for m in FM_FIELD.finditer(fm.group(1)):
         value = re.sub(r"\A>-?[ \t]*\n?", "", m.group(1))
         value = re.sub(r"\s+", " ", value).strip()
         if len(value) > 1 and value[0] == value[-1] == "'":
@@ -212,6 +212,7 @@ def strip_fences(text: str) -> str:
     char = ""
     length = 0
     in_list = False
+    list_margin = 0
     for i, line in enumerate(lines):
         if opener is not None:
             fence = fence_marker(line)
@@ -221,15 +222,17 @@ def strip_fences(text: str) -> str:
                     out[j] = " "
                 opener = None
             continue
-        if line.strip():
-            if LIST_MARKER.match(line):
-                in_list = True
-            elif not line[:1].isspace():
-                in_list = False
         # A fence may start on the list-marker line, where its indentation is
         # measured from the item's content column.
         prefix = LIST_PREFIX.match(line)
         offset = len(prefix.group(0).expandtabs()) if prefix else 0
+        if line.strip():
+            if LIST_MARKER.match(line):
+                in_list = True
+                list_margin = offset or len(
+                    LIST_MARKER.match(line).group(0).expandtabs())
+            elif not line[:1].isspace():
+                in_list, list_margin = False, 0
         fence = fence_marker(line[prefix.end():] if prefix else line)
         if not fence:
             continue
@@ -237,18 +240,49 @@ def strip_fences(text: str) -> str:
         indent += offset
         if indent > 3 and not in_list:
             continue
-        # The closer is measured from the container margin, which is zero at
-        # the top level and the item's content column inside a list.
-        opener = (i, indent if in_list else 0)
+        # The closer is measured from the container margin — zero at the top
+        # level, the item's content column inside a list — and not from
+        # wherever the fence happened to open inside that item.
+        opener = (i, list_margin if in_list else 0)
     return "\n".join(out)
+
+
+def table_lines(text: str) -> tuple[set[int], list[str]]:
+    """Which lines belong to a table, and the rows worth reading.
+
+    A pipe does not make a table — prose is full of them — so the rule row
+    underneath the header is what identifies one. Outer pipes are optional,
+    which is why matching the row shape alone does not work.
+    """
+    lines = text.split("\n")
+    owned: set[int] = set()
+    rows: list[str] = []
+    i = 0
+    while i + 1 < len(lines):
+        if "|" not in lines[i] or not TABLE_RULE.match(lines[i + 1]) \
+                or "|" not in lines[i + 1]:
+            i += 1
+            continue
+        owned.update((i, i + 1))
+        rows.append(lines[i])
+        j = i + 2
+        while j < len(lines) and lines[j].strip() and "|" in lines[j]:
+            owned.add(j)
+            rows.append(lines[j])
+            j += 1
+        i = j
+    return owned, rows
 
 
 def strip_nonprose(text: str) -> str:
     """Remove everything that is not editable prose."""
-    text = strip_fences(FRONT_MATTER.sub("", text))
+    text = strip_fences(FRONT_MATTER.sub("", text, count=1))
     # Rows go before the span scan: each row is its own inline block, and
     # `table_prose` reads their cells.
-    text = strip_code_spans(TABLE_ROW.sub(" ", text))
+    owned, _rows = table_lines(text)
+    text = strip_code_spans("\n".join(
+        " " if n in owned else line
+        for n, line in enumerate(text.split("\n"))))
     for pattern, repl in ((LINK_TARGET, "]"), (URL, " "), (BLOCKQUOTE, " ")):
         text = pattern.sub(repl, text)
     return HEADING_MARK.sub("", text)
@@ -256,11 +290,9 @@ def strip_nonprose(text: str) -> str:
 
 def table_prose(text: str) -> str:
     """Cell text from Markdown tables, which `strip_nonprose` drops whole."""
-    body = strip_fences(FRONT_MATTER.sub("", text))
+    body = strip_fences(FRONT_MATTER.sub("", text, count=1))
     cells: list[str] = []
-    for row in TABLE_ROW.findall(body):
-        if TABLE_RULE.match(row):
-            continue
+    for row in table_lines(body)[1]:
         # A span cannot cross a cell, so split first — on the pipes that
         # divide cells, not on an escaped one, which belongs to the cell.
         # An even backslash run escapes itself and leaves the pipe a delimiter.
