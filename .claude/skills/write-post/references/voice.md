@@ -66,10 +66,15 @@ Both name something real. Neither announces what the paragraph is going to do.
 
   **C-5 is the part a script cannot close.** `everyone's ready` and
   `everyone's coat` are the same string, so C-5 counts `'s` after an
-  indefinite pronoun and leaves the call to you. A `'s` after a name or a
-  plain noun is not reported at all, and neither is a four-space indented
-  code block, which the stripper cannot tell from a list's continuation
-  paragraph — fence pasted output instead.
+  indefinite pronoun — `every`, `some`, `any` or `no`, followed by `one`,
+  `body` or `thing` — and leaves the call to you. A `'s` after a name or a
+  plain noun is not reported at all; if the draft has one, it needs your eye
+  and not the counter.
+
+  Fence pasted output rather than indenting it. A fence is stripped wherever
+  it sits, nested under a list item included, but a bare four-space code
+  block is read as prose — the stripper cannot tell it from a list's
+  continuation paragraph, and keeping the paragraph matters more.
 
 ## Structure, all three languages
 

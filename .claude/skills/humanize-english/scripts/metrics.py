@@ -43,7 +43,7 @@ PATTERNS: list[tuple[str, str, re.Pattern[str]]] = [
     ("C-3", "S2", r"\bthe \w+(?:tion|ment|ance|ence|ity) of the \w+(?:tion|ment|ance|ence|ity) of\b"),
     ("C-4", "S1", r"(?i)\w+n[’']t\b|\w+[’'](?:m|re|ve|ll|d)\b"
                   r"|\b(?:it|that|there|here|what|who|where|when|why|how|he|she|let)[’']s\b"),
-    ("C-5", "S3", r"(?i)\b(?:everyone|everybody|someone|somebody|anyone|anybody|nobody|nothing|something)[’']s\b"),
+    ("C-5", "S3", r"(?i)\b(?:every|some|any|no)(?:\s+one|one|body|thing)[’']s\b"),
 
     ("D-1", "S2", r"(?m)^(?:Additionally|Furthermore|Moreover|That said|In addition|On the other hand)\b[,.]"),
     ("D-2", "S2", r"(?m)^(?:First(?:ly)?|Next|Then|Finally|Lastly)\b,"),
@@ -85,7 +85,7 @@ PASSIVE = re.compile(
 NOMINALIZATION = re.compile(r"\b\w{4,}(?:tion|ment|ance|ence|ity|ness)\b", re.I)
 
 FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
-FENCED = re.compile(r"(?ms)^ {0,3}(```+|~~~+).*?^ {0,3}\1[`~]*[ \t]*$")
+FENCED = re.compile(r"(?ms)^[ \t]*(```+|~~~+).*?^[ \t]*\1[`~]*[ \t]*$")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BLOCKQUOTE = re.compile(r"(?m)^>.*$")
