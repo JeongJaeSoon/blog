@@ -113,10 +113,10 @@ class Fixtures(unittest.TestCase):
 # so both need a reading. A match that survived that reading is recorded here
 # by slug, and the post ships with it; anything else is a regression.
 #
-# ponytail: an entry records the text and the count, not where it sits, so
-# swapping an approved quoted match for an unquoted one elsewhere in the same
-# post would still pass. Record the surrounding line once this stops being
-# empty.
+# An entry records the text and the count, not where it sits, so swapping an
+# approved quoted match for an unquoted one elsewhere in the same post would
+# still pass. That costs nothing while this is empty; record the surrounding
+# line as soon as it is not.
 ALLOWED: dict[str, tuple[list[str], list[str]]] = {}
 
 
