@@ -113,7 +113,7 @@ class Finding:
 
 
 FM_FIELD = re.compile(r"(?ms)^(?:title|summary):[ \t]*(.*?)(?=^\S+:|\Z)")
-BLOCK_SCALAR = re.compile(r"\A[>|][-+0-9]*[ \t]*\n?")
+BLOCK_SCALAR = re.compile(r"\A[>|][-+0-9]*[ \t]*(?:#[^\n]*)?\n?")
 QUOTED_SCALAR = re.compile(
     r"\A'((?:[^']|'')*)'"
     r'|\A"((?:[^"\\]|\\.)*)"')
@@ -181,7 +181,15 @@ def strip_code_spans(text: str) -> str:
     between.
     """
     runs = [m.span() for m in BACKTICK_RUN.finditer(text)]
+    # A span lives inside one block, so a heading or a fence ends the
+    # search just as a blank line does.
     breaks = [m.start() for m in BLANK_LINE.finditer(text)]
+    at = 0
+    for line in text.split("\n"):
+        if BLOCK_START.match(line):
+            breaks.append(at)
+        at += len(line) + 1
+    breaks.sort()
     out = list(text)
     i = 0
     while i < len(runs):
@@ -294,15 +302,23 @@ def strip_blockquotes(text: str) -> str:
     """Blank out block quotes, lazy continuations included.
 
     A quoted paragraph may drop the `>` on its later lines, so a line-marked
-    match leaves the rest of the quotation sitting in the prose. The run ends
+    match leaves the rest of the quotation sitting in the prose. Only a
+    paragraph runs on that way: after a quoted heading, fence or list item the
+    quote is closed and the next unmarked line is ordinary prose. It also ends
     at a blank line or at a line that starts a block of its own.
     """
     out = []
     quoting = False
+    lazy = False
     for line in text.split("\n"):
-        if BLOCKQUOTE_MARK.match(line):
+        marked = BLOCKQUOTE_MARK.match(line)
+        if marked:
             quoting = True
-        elif quoting and (not line.strip() or BLOCK_START.match(line)):
+            quoted = line[marked.end():]
+            quoted = quoted[1:] if quoted[:1] == " " else quoted
+            lazy = bool(quoted.strip()) and not BLOCK_START.match(quoted)
+        elif quoting and (not lazy or not line.strip()
+                          or BLOCK_START.match(line)):
             quoting = False
         elif not quoting:
             out.append(line)
