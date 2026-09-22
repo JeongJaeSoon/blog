@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "im-not-ai-ja": {
+      "source": {
+        "source": "github",
+        "repo": "JeongJaeSoon/im-not-ai-ja"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "humanize-japanese@im-not-ai-ja": true
+  }
+}
