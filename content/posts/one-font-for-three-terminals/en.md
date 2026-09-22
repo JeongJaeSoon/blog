@@ -49,7 +49,7 @@ D2Coding is in there for one reason: UDEV Gothic NF has no Hangul. Japanese and 
 
 Vertical metrics get overwritten with Menlo's. `ascent`, `descent` and `lineGap` from `hhea`, plus the typo and win metrics from `OS/2`, have to come across or the line spacing shifts. Advance widths are untouched: `A` is 1233 (0.602em), `가` and `漢` are 2048, and all twelve faces built later carry the same values. Leaving the widths alone keeps the terminal grid intact and puts every glyph where the old fallback chain put it.
 
-The merged font carries 54,587 glyphs. A build takes about six minutes on my Mac — that's a rough figure, not a measured one.
+The merged font carries 54,587 glyphs. A build takes 6.4 minutes on my Mac.
 
 ## The weight ramp is pinned to a 27-unit grid
 
@@ -70,7 +70,24 @@ Six roman and six italic, twelve faces. The synthesised ones come from skia-path
 
 Name IDs 16 (typographic family) and 17 (subfamily) are what make macOS treat all twelve as one family.
 
-There's a cost. 700 is no longer Menlo's drawn Bold but one step heavier than it, and ANSI bold in a terminal reaches for 700, so bold text comes out thicker than the original. Pointing the app's bold weight at 600 gets the drawn Bold back — `Bold Font Weight` in Orca, `terminal.integrated.fontWeightBold` in VSCode.
+There's a cost. 700 is no longer Menlo's drawn Bold but one step heavier than it, and ANSI bold in a terminal reaches for 700, so bold text comes out thicker than the original. Orca and VSCode can point their bold weight at 600 and get the drawn Bold back (`Bold Font Weight`, `terminal.integrated.fontWeightBold`). iTerm2 has no such setting: it picks the bold face by the bold bit in `fsSelection`, and that bit only exists on 700. If the goal is three apps that match, 700 is the default and 600 is an option for the other two only.
+
+## 1,412 glyphs got emboldened twice
+
+`embolden()` was walking the glyph order and replacing entries in `glyf` in place. A composite glyph pulls its components out of `glyf` at draw time, so whenever a component came earlier in the order, the composite was drawn from an already-thickened component and got stroked a second time. Measuring the glyph width of `A` against `Aacute` shows it directly.
+
+| Face | A | Aacute | Difference |
+|---|---:|---:|---:|
+| Regular (untouched) | 1159.0 | 1159.0 | 0.0 |
+| Medium | 1185.8 | 1212.6 | +26.8 |
+| Bold | 1193.5 | 1220.7 | +27.2 |
+| Black | 1247.3 | 1327.7 | +80.4 |
+
+The difference equals the stroke that face was given: Medium took one step (27) twice, Black took three (81) twice. 1,412 glyphs were affected, across all ten emboldened faces — accented Latin like `Agrave`, `Aacute` and `Adieresis`, and fractions like `onehalf`. Hangul syllables are simple contours, so they came through clean.
+
+The fix is to snapshot every outline before transforming anything. After a rebuild the difference across the six roman faces is 0.0. The 42 and 88 left on the italics are the slanted accent widening the bounding box on its own; they hold constant within a base (42 for 400 and 500, 88 for 600 through 900), so they aren't a double stroke.
+
+I didn't find this. `Aacute` doesn't come up in a 14px terminal, and I'm not sure I'd have caught it if it had. A Codex review reading the code rather than the screen did ([menlocjk#1](https://github.com/JeongJaeSoon/menlocjk/pull/1)).
 
 ## One font, three apps, three renderings
 
