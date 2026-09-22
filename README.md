@@ -43,23 +43,55 @@ link, and reveals the contact handles so the PDF still carries them.
 
 ### Adding a post
 
-Create `content/posts/my-post.md`:
+Create `content/posts/my-post/`, then `en.md`, `ko.md` and `ja.md` inside it.
+Each one carries the same frontmatter except `title`, `summary` and `lang`:
 
 ```yaml
 ---
 title: My post
 date: '2026-09-01'
 summary: One or two sentences, used on the index and in the RSS feed.
-tags: [platform, mcp]
+lang: en
+tags:
+  - platform
+  - mcp
 draft: false
 ---
 ```
 
-`draft: true` keeps a post visible in `bun dev` and out of the build, the RSS
-feed and the sitemap. Reading time is computed; do not set it.
+`lang` must match the filename, and `date` and `draft` must agree across the
+three or the build fails. `draft: true` keeps a post out of production while
+leaving it visible in `bun dev` and on Vercel preview deployments, which is
+where a draft gets reviewed; it never reaches the RSS feed or the sitemap.
+Reading time is computed; do not set it.
+
+`.claude/skills/write-post/` carries the rest — the contract `lib/posts.ts`
+enforces, the house voice, the opening rules, and which humanizer runs on
+which language.
 
 Tag pages (`/blog/tag/<tag>`), `/rss.xml`, `/sitemap.xml` and `/robots.txt` are
 generated from the posts — nothing to register by hand.
+
+### A note on the writing skills
+
+`write-post` and `humanize-english` under `.claude/skills/` are written for
+this repo. Before the opening rules went into `write-post`, these were looked
+at and none of them was used:
+
+- [NomaDamas/k-skill](https://github.com/NomaDamas/k-skill) — its
+  `korean-humanizer` states in its own README that the taxonomy, severity
+  levels and change-rate guards are a repackaging of
+  [epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai), which this
+  repo already pins directly at `v2.3.2`.
+- [modu-ai/cc-plugins](https://github.com/modu-ai/cc-plugins) —
+  `astory-blog-writers` synthesises author personas, which a blog that refuses
+  to write anything unmeasured has no use for.
+- [eyedroot/marketplace](https://github.com/eyedroot/marketplace) —
+  `korean-style` flags sentence length and clause density, which the three
+  humanizers already measure at document scope.
+
+The opening rules come from this repo's own drafts instead: each bullet is
+something a finished post got wrong after every humanizer had passed it.
 
 ## Deploy
 

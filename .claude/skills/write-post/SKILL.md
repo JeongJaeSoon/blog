@@ -49,10 +49,40 @@ Say so rather than padding it out.
 Never invent an experience, a measurement or a source. A number nobody measured
 is worse than no post.
 
+## The opening
+
+Drafts fail here, and no humanizer catches it — every tell below survived a
+clean pass in all three languages. Read the opening of
+`content/posts/obsidian-nas-remote-mcp/ko.md` before writing one: situation,
+what was built, what actually took the time, and no author in sight.
+
+- **No self-introduction.** A fact about the author earns its place inside a
+  sentence already doing work — "일본에서 개발자로 일하다 보면 …" — never as its
+  own declaration. A paragraph of background is a profile page.
+- **Reach the evidence within three or four sentences.** Whatever the reader
+  has to see — the pasted line, the error text, the measurement — comes early.
+  Everything before it is setup, and setup is what bloats.
+- **After a block, go to the cause, not to a description.** "That is Latin,
+  kana and Hangul inside three lines" tells the reader what they just read.
+  The next sentence says why it is a problem.
+- **Vary sentence length.** Three short declaratives in a row read like a
+  syllogism. One of them usually belongs inside the sentence before it.
+- **Repository and install links are not opening material.** They go where
+  installation is discussed, or at the end. A link handed out before the story
+  starts has nothing to hold on to.
+- **The `summary` says it differently.** It is read on the index and in the
+  feed with nothing beside it, so it carries the same facts in its own words.
+  A phrase in both `summary` and the first paragraph means one of them changes.
+
+Banned outright: "この記事では〜を紹介します", "In this post I'll walk through…",
+"이 글에서는 ~를 소개합니다".
+
+A shape that works: the situation, the thing about it that bothered you, then
+the example. The reader knows what to look for before they see it.
+
 ## Structure
 
-- Open on the concrete situation. "この記事では〜を紹介します" / "In this post
-  I'll walk through…" / "이 글에서는 ~를 소개합니다" are banned openings.
+- The opening has its own rules, above.
 - Headings state what the section concludes, not what it is about — "Where the
   content lives", not "Content".
 - Code blocks and tables hold pasted, real content. A table that restates the
@@ -127,8 +157,10 @@ structural rules, for all three languages. Read it alongside, not instead.
 2. At least one thing that did not work is in the post.
 3. At least one real number, path or pasted output is in the post.
 4. Nothing asserted that was not observed.
-5. Each language went through its skill — ko `humanize-korean`, ja
+5. The opening survives its own checklist — no self-introduction, evidence
+   early, no restatement after a block, `summary` worded differently.
+6. Each language went through its skill — ko `humanize-korean`, ja
    `humanize-japanese`, en `humanize-english` — with the identifiers passed as
    protected terms. Findings reported by taxonomy ID, with a reason for
    anything kept, and no protected token lost.
-6. `bun run build` passes, with the output shown.
+7. `bun run build` passes, with the output shown.
