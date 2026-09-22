@@ -49,14 +49,21 @@ Both name something real. Neither announces what the paragraph is going to do.
   contraction is as wrong when it comes from the first draft as when a
   humanizer adds one. Possessives (`Menlo's`) are not contractions.
 
+  `humanize-english` checks this as **C-4**, on the prose it extracts — a raw
+  search over the Markdown would flag pasted output like `error: can't open
+  file`, which this guide requires keeping verbatim.
+
   ```sh
-  rg -in "\w+n[’']t\b|\w+[’'](m|re|ve|ll|d)\b|\b(it|that|there|here|what|who|where|how|he|she|let)[’']s\b" content/posts/*/en.md
+  python3 .claude/skills/humanize-english/scripts/metrics.py \
+    content/posts/<slug>/en.md --compact | rg -o '"C-[45]": [0-9]+'
   ```
 
-  Three alternatives, because `'s` is the only ambiguous one. `n't` and
-  `'m/'re/'ve/'ll/'d` are never possessive, so they match on any word; `'s`
-  matches only after the pronouns and wh-words that cannot take a possessive.
-  Both apostrophes are covered, and `-i` catches a capitalised `It's`.
+  C-4 covers `n't` and `'m/'re/'ve/'ll/'d` on any word, both apostrophes, any
+  case. Every match is a violation. **C-5 is the part a script cannot close:**
+  `everyone's ready` and `everyone's coat` are the same string, so C-5 reports
+  `'s` after a pronoun and leaves the call to you. A `'s` after a name or a
+  plain noun is not reported at all — if the draft has one, it needs your eye,
+  not the counter.
 
 ## Structure, all three languages
 

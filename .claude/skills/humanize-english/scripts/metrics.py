@@ -41,6 +41,8 @@ PATTERNS: list[tuple[str, str, re.Pattern[str]]] = [
                   r"|\brobust\b|\bseamless(?:ly)?\b|\bpowerful tool\b|\bgame[- ]chang(?:er|ing)\b|\bcutting[- ]edge\b|\btransformative\b"),
     ("C-2", "S2", r"\b(?:simply|just|easily|effortlessly)\b"),
     ("C-3", "S2", r"\bthe \w+(?:tion|ment|ance|ence|ity) of the \w+(?:tion|ment|ance|ence|ity) of\b"),
+    ("C-4", "S1", r"\w+n[’']t\b|\w+[’'](?:m|re|ve|ll|d)\b"),
+    ("C-5", "S3", r"(?i)\b(?:it|that|there|here|what|who|where|how|he|she|let|everyone|everybody|someone|somebody|anyone|anybody|nobody|nothing|something)[’']s\b"),
 
     ("D-1", "S2", r"(?m)^(?:Additionally|Furthermore|Moreover|That said|In addition|On the other hand)\b[,.]"),
     ("D-2", "S2", r"(?m)^(?:First(?:ly)?|Next|Then|Finally|Lastly)\b,"),
@@ -60,6 +62,14 @@ PATTERNS: list[tuple[str, str, re.Pattern[str]]] = [
     ("I-6", "S2", r"(?m)^(?:Also|On the other hand|In addition)\b,"),
 ]
 COMPILED = [(pid, sev, re.compile(rx)) for pid, sev, rx in PATTERNS]
+
+# C-4 is the one pattern where a single match already decides: the register in
+# write-post/references/voice.md admits no contractions. C-5 cannot decide,
+# because the same `'s` is a possessive.
+NOTES = {
+    "C-4": "Every match is a violation; this register takes no contractions.",
+    "C-5": "Possessive or contraction — read each match in context.",
+}
 
 HEDGES = re.compile(
     r"\b(?:might|maybe|perhaps|possibly|potentially|arguably|somewhat|"
@@ -178,7 +188,7 @@ def analyze(text: str, protected: Iterable[str] = (), baseline: str | None = Non
             findings.append(Finding(
                 pid, sev, "span", len(hits),
                 f"{pid}: {len(hits)} match(es)",
-                "A single match is not evidence; check context first.",
+                NOTES.get(pid, "A single match is not evidence; check context first."),
                 [{"text": h.group(0)[:60], "start": h.start()} for h in hits[:8]]))
 
     warnings: list[str] = []
