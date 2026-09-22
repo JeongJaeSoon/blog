@@ -7,7 +7,11 @@ description: Write, render into the other languages, or revise an article in thi
 
 ## The contract
 
-`lib/posts.ts` throws at build time when any of this is wrong, so get it right first.
+`lib/posts.ts` throws at build time for five of these, so get those right
+first: a `.md` loose in `content/posts/`, a missing `<lang>.md`, a `lang`
+that does not match its filename, and a `date` or `draft` that differs
+across the three. Everything else below is convention that nothing checks —
+a missing `summary` or a tag in the wrong case builds clean and ships wrong.
 
 One directory per article, three files, no exceptions:
 
@@ -18,7 +22,8 @@ content/posts/<slug>/ja.md
 ```
 
 - `<slug>` — lowercase kebab, names the subject and not the format, carries no date.
-- `title`, `summary` — per language, written in that language.
+- `title`, `summary` — per language, written in that language. Both render
+  on the index and in the feed, so the tone pass reads them too.
 - `date` (`'YYYY-MM-DD'`, quoted) and `draft` — identical in all three, or the build fails.
 - `lang` — must equal the filename.
 - `tags` — lowercase kebab, shared across the three files. Reuse existing tags before inventing one: `rg '^  - ' content/posts/*/en.md | sort -u`.
@@ -138,7 +143,9 @@ Drive all three the same way:
   full of identifiers clusters around the median legitimately, and all three
   taxonomies say not to rewrite on the number alone.
 
-Verify each language with its own script:
+Verify each language with its own script. All three live in the plugin the
+skill came from, and `humanize-korean` keeps its runner under `references/`
+rather than `scripts/`:
 
 ```sh
 python3 .claude/skills/humanize-english/scripts/metrics.py \
@@ -146,7 +153,19 @@ python3 .claude/skills/humanize-english/scripts/metrics.py \
 
 python3 ~/.claude/plugins/marketplaces/im-not-ai-ja/skills/humanize-japanese/scripts/metrics.py \
   content/posts/<slug>/ja.md --compact
+
+python3 ~/.claude/plugins/marketplaces/im-not-ai/skills/humanize-korean/references/metrics_v2.py \
+  --input content/posts/<slug>/ko.md --genre blog --output /tmp/ko.json
 ```
+
+The Korean runner prints only the risk band and writes the rest to
+`--output`, so read that file. Read it against the plugin's own thresholds
+rather than against zero: its scorer counts `conclusion_pivot_count` and
+`safe_balance_count` from two occurrences, its density rules want three or
+four, and a single `~에 의해` passive is an S2 that is often just Korean. A
+`risk_band` above `low` is the signal to look; one hit of anything is a
+span to read in context, not a defect to edit out. The `blog` genre falls
+back to the `essay` baseline, which the output says in `warning`.
 
 `references/voice.md` holds what no humanizer can know: the house voice and the
 structural rules, for all three languages. Read it alongside, not instead.
@@ -163,4 +182,8 @@ structural rules, for all three languages. Read it alongside, not instead.
    `humanize-japanese`, en `humanize-english` — with the identifiers passed as
    protected terms. Findings reported by taxonomy ID, with a reason for
    anything kept, and no protected token lost.
-7. `bun run build` passes, with the output shown.
+7. The en rendition has no contractions — `humanize-english` reports `C-4: 0`,
+   or every remaining match sits inside a quotation and says so in the
+   findings, and every `C-5` match was read in context. Neither catches a
+   `'s` after a name, so this one is on you as well as the script.
+8. `bun run build` passes, with the output shown.

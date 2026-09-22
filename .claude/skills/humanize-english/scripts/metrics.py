@@ -41,6 +41,9 @@ PATTERNS: list[tuple[str, str, re.Pattern[str]]] = [
                   r"|\brobust\b|\bseamless(?:ly)?\b|\bpowerful tool\b|\bgame[- ]chang(?:er|ing)\b|\bcutting[- ]edge\b|\btransformative\b"),
     ("C-2", "S2", r"\b(?:simply|just|easily|effortlessly)\b"),
     ("C-3", "S2", r"\bthe \w+(?:tion|ment|ance|ence|ity) of the \w+(?:tion|ment|ance|ence|ity) of\b"),
+    ("C-4", "S1", r"(?i)\w+n[’']t\b|\w+[’'](?:m|re|ve|ll|d)\b"
+                  r"|\b(?:it|that|there|here|what|who|where|when|why|how|he|she|let)[’']s\b"),
+    ("C-5", "S3", r"(?i)\b(?:every|some|any|no)(?:\s+one|one|body|thing)[’']s\b"),
 
     ("D-1", "S2", r"(?m)^(?:Additionally|Furthermore|Moreover|That said|In addition|On the other hand)\b[,.]"),
     ("D-2", "S2", r"(?m)^(?:First(?:ly)?|Next|Then|Finally|Lastly)\b,"),
@@ -61,6 +64,14 @@ PATTERNS: list[tuple[str, str, re.Pattern[str]]] = [
 ]
 COMPILED = [(pid, sev, re.compile(rx)) for pid, sev, rx in PATTERNS]
 
+# C-4 is the one pattern where a single match already decides: the register in
+# write-post/references/voice.md admits no contractions. C-5 cannot decide,
+# because the same `'s` is a possessive.
+NOTES = {
+    "C-4": "A violation unless it sits inside a verbatim quotation, which this cannot see.",
+    "C-5": "Possessive or contraction — read each match in context.",
+}
+
 HEDGES = re.compile(
     r"\b(?:might|maybe|perhaps|possibly|potentially|arguably|somewhat|"
     r"relatively|fairly|rather|seems? to|appears? to|tends? to|"
@@ -73,13 +84,22 @@ PASSIVE = re.compile(
     r"\b(?:is|are|was|were|be|been|being|gets?|got)\s+(?:\w+ly\s+)?\w+(?:ed|en)\b", re.I)
 NOMINALIZATION = re.compile(r"\b\w{4,}(?:tion|ment|ance|ence|ity|ness)\b", re.I)
 
-FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
-FENCED = re.compile(r"```.*?```", re.S)
-INLINE_CODE = re.compile(r"`[^`\n]*`")
+FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---\n", re.S)
+FENCE_LINE = re.compile(r"\A([ \t]*)(`{3,}|~{3,})(.*)\Z")
+BACKTICK_RUN = re.compile(r"`+")
+BLANK_LINE = re.compile(r"\n[ \t]*\n")
+LIST_MARKER = re.compile(r"\A {0,3}(?:[-*+]|\d{1,9}[.)])(?:[ \t]|\Z)")
+LIST_PREFIX = re.compile(r"\A {0,3}(?:[-*+]|\d{1,9}[.)])[ \t]+")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
-BLOCKQUOTE = re.compile(r"(?m)^>.*$")
+BLOCKQUOTE_MARK = re.compile(r"\A {0,3}>")
+# `=+` and `-+` are Setext underlines, which turn the line above into a heading
+# and so end the block as surely as a `#` starts one.
+BLOCK_START = re.compile(r"\A {0,3}(?:#{1,6}[ \t]|[-*+][ \t]|\d{1,9}[.)][ \t]"
+                         r"|>|(?:`{3,}|~{3,})|(?:\*[ \t]*){3,}$|(?:_[ \t]*){3,}$"
+                         r"|=+[ \t]*$|-+[ \t]*$)")
 HEADING_MARK = re.compile(r"(?m)^#{1,6}\s*")
-TABLE_ROW = re.compile(r"(?m)^\|.*\|\s*$")
+TABLE_RULE = re.compile(
+    r"\A {0,3}\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*\Z")
 URL = re.compile(r"https?://\S+")
 
 
@@ -94,13 +114,255 @@ class Finding:
     matches: list[dict[str, Any]] | None = None
 
 
+FM_FIELD = re.compile(r"(?ms)^(?:title|summary):[ \t]*(.*?)(?=^\S+:|\Z)")
+BLOCK_SCALAR = re.compile(r"\A[>|][-+0-9]*[ \t]*(?:#[^\n]*)?\n?")
+QUOTED_SCALAR = re.compile(
+    r"\A'((?:[^']|'')*)'"
+    r'|\A"((?:[^"\\]|\\.)*)"')
+COMMENT_TAIL = re.compile(r"(?:(?<=\s)|\A)#.*\Z")
+
+
+def front_matter_prose(text: str) -> str:
+    """The `title` and `summary` values, which readers see on the index."""
+    fm = FRONT_MATTER.match(text)
+    if not fm:
+        return ""
+    values = []
+    for m in FM_FIELD.finditer(fm.group(1)):
+        raw = m.group(1)
+        block = BLOCK_SCALAR.match(raw)
+        value = re.sub(r"\s+", " ", raw[block.end():] if block else raw).strip()
+        if block:
+            values.append(value)
+            continue
+        quoted = QUOTED_SCALAR.match(value)
+        if quoted and quoted.group(1) is not None:
+            value = quoted.group(1).replace("''", "'")
+        elif quoted:
+            value = quoted.group(2).replace('\\"', '"')
+        else:
+            # An unquoted scalar ends at a comment, which never renders.
+            value = COMMENT_TAIL.sub("", value).strip()
+        values.append(value)
+    return "\n\n".join(v for v in values if v)
+
+
+def normalize_newlines(text: str) -> str:
+    """`$`-anchored patterns below assume LF; stdin may hand us CRLF."""
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def fence_marker(line: str) -> tuple[int, str, int, str] | None:
+    """Indentation, character, length and info string of a fence line."""
+    m = FENCE_LINE.match(line)
+    if not m:
+        return None
+    indent, mark, info = m.group(1), m.group(2), m.group(3)
+    if mark[0] == "`" and "`" in info:
+        return None
+    return len(indent.expandtabs()), mark[0], len(mark), info
+
+
+def escaped(text: str, position: int) -> bool:
+    """An odd run of backslashes before `position` escapes what follows."""
+    backslashes = 0
+    while position - backslashes > 0 and text[position - backslashes - 1] == "\\":
+        backslashes += 1
+    return backslashes % 2 == 1
+
+
+def strip_code_spans(text: str) -> str:
+    """Blank out code spans, keeping the newlines so the layout survives.
+
+    A backtick run opens a span and the next run of exactly the same length
+    closes it, across line breaks but not across a blank line, because a span
+    is inline. A run with no equal-length partner in the same block is
+    literal text, and a backslash escapes an opening run but never a closing
+    one. None of that survives a backtracking regex, which is happy
+    to close a run of three with a run of two and carry off the prose in
+    between.
+    """
+    runs = [m.span() for m in BACKTICK_RUN.finditer(text)]
+    # A span lives inside one block, so a heading or a fence ends the
+    # search just as a blank line does.
+    breaks = [m.start() for m in BLANK_LINE.finditer(text)]
+    at = 0
+    for line in text.split("\n"):
+        if BLOCK_START.match(line):
+            breaks.append(at)
+        at += len(line) + 1
+    breaks.sort()
+    out = list(text)
+    i = 0
+    while i < len(runs):
+        start, end = runs[i]
+        # A backslash escapes a backtick in prose but not inside a span, so
+        # only an opener can be escaped away.
+        if escaped(text, start):
+            i += 1
+            continue
+        width = end - start
+        limit = next((b for b in breaks if b > start), len(text))
+        closer = next((j for j in range(i + 1, len(runs))
+                       if runs[j][1] <= limit and runs[j][1] - runs[j][0] == width),
+                      None)
+        if closer is None:
+            i += 1
+            continue
+        for k in range(start, runs[closer][1]):
+            if out[k] != "\n":
+                out[k] = " "
+        i = closer + 1
+    return "".join(out)
+
+
+def strip_fences(text: str) -> str:
+    """Blank out fenced blocks.
+
+    A closing fence repeats the opener's character at least as many times,
+    carries no info string, and sits no more than three spaces past the
+    container margin — zero at the top level, the item's content column
+    inside a list. A marker indented further is content, which is why one
+    regex cannot do this.
+
+    The container stack is not tracked, only whether a list is open, which is
+    what decides whether a marker indented past three spaces is a fence or
+    content. Nesting deeper than that needs a parser. An opener with no closer
+    is left alone rather than swallowing the rest of the document: a gate that
+    scans too much only costs a reading, while one that scans nothing reports
+    zero and passes.
+    """
+    lines = text.split("\n")
+    out = list(lines)
+    opener: tuple[int, int] | None = None  # line, container margin
+    char = ""
+    length = 0
+    in_list = False
+    list_margin = 0
+    for i, line in enumerate(lines):
+        if opener is not None:
+            fence = fence_marker(line)
+            if fence and fence[1] == char and fence[2] >= length \
+                    and not fence[3].strip() and fence[0] <= opener[1] + 3:
+                for j in range(opener[0], i + 1):
+                    out[j] = " "
+                opener = None
+            continue
+        # A fence may start on the list-marker line, where its indentation is
+        # measured from the item's content column.
+        prefix = LIST_PREFIX.match(line)
+        offset = len(prefix.group(0).expandtabs()) if prefix else 0
+        if line.strip():
+            if LIST_MARKER.match(line):
+                in_list = True
+                list_margin = offset or len(
+                    LIST_MARKER.match(line).group(0).expandtabs())
+            elif not line[:1].isspace():
+                in_list, list_margin = False, 0
+        fence = fence_marker(line[prefix.end():] if prefix else line)
+        if not fence:
+            continue
+        indent, char, length, _info = fence
+        indent += offset
+        if indent > 3 and not in_list:
+            continue
+        # The closer is measured from the container margin — zero at the top
+        # level, the item's content column inside a list — and not from
+        # wherever the fence happened to open inside that item.
+        opener = (i, list_margin if in_list else 0)
+    return "\n".join(out)
+
+
+def table_lines(text: str) -> tuple[set[int], list[str]]:
+    """Which lines belong to a table, and the rows worth reading.
+
+    A pipe does not make a table — prose is full of them — so the rule row
+    underneath the header is what identifies one. Outer pipes are optional,
+    which is why matching the row shape alone does not work.
+    """
+    lines = text.split("\n")
+    owned: set[int] = set()
+    rows: list[str] = []
+    i = 0
+    while i + 1 < len(lines):
+        if "|" not in lines[i] or not TABLE_RULE.match(lines[i + 1]) \
+                or "|" not in lines[i + 1]:
+            i += 1
+            continue
+        owned.update((i, i + 1))
+        rows.append(lines[i])
+        j = i + 2
+        while j < len(lines) and lines[j].strip() and "|" in lines[j]:
+            owned.add(j)
+            rows.append(lines[j])
+            j += 1
+        i = j
+    return owned, rows
+
+
+def strip_blockquotes(text: str) -> str:
+    """Blank out block quotes, lazy continuations included.
+
+    A quoted paragraph may drop the `>` on its later lines, so a line-marked
+    match leaves the rest of the quotation sitting in the prose. Only a
+    paragraph runs on that way: after a quoted heading, fence or list item the
+    quote is closed and the next unmarked line is ordinary prose. It also ends
+    at a blank line or at a line that starts a block of its own.
+    """
+    out = []
+    quoting = False
+    lazy = False
+    for line in text.split("\n"):
+        marked = BLOCKQUOTE_MARK.match(line)
+        if marked:
+            quoting = True
+            quoted = line[marked.end():]
+            quoted = quoted[1:] if quoted[:1] == " " else quoted
+            # Four spaces inside the quote is an indented code block, which no
+            # more continues lazily than a heading does.
+            lazy = (bool(quoted.strip()) and not BLOCK_START.match(quoted)
+                    and not quoted[:4].isspace())
+        elif quoting and (not lazy or not line.strip()
+                          or BLOCK_START.match(line)):
+            quoting = False
+        elif not quoting:
+            out.append(line)
+            continue
+        out.append(" " if quoting else line)
+    return "\n".join(out)
+
+
 def strip_nonprose(text: str) -> str:
     """Remove everything that is not editable prose."""
-    for pattern, repl in ((FRONT_MATTER, ""), (FENCED, " "), (TABLE_ROW, " "),
-                          (INLINE_CODE, " "), (LINK_TARGET, "]"), (URL, " "),
-                          (BLOCKQUOTE, " ")):
+    text = strip_fences(FRONT_MATTER.sub("", text, count=1))
+    # Rows go before the span scan: each row is its own inline block, and
+    # `table_prose` reads their cells.
+    owned, _rows = table_lines(text)
+    text = strip_code_spans("\n".join(
+        " " if n in owned else line
+        for n, line in enumerate(text.split("\n"))))
+    text = strip_blockquotes(text)
+    for pattern, repl in ((LINK_TARGET, "]"), (URL, " ")):
         text = pattern.sub(repl, text)
     return HEADING_MARK.sub("", text)
+
+
+def table_prose(text: str) -> str:
+    """Cell text from Markdown tables, which `strip_nonprose` drops whole."""
+    body = strip_fences(FRONT_MATTER.sub("", text, count=1))
+    cells: list[str] = []
+    for row in table_lines(body)[1]:
+        # A span cannot cross a cell, so split first — on the pipes that
+        # divide cells, not on an escaped one, which belongs to the cell.
+        # An even backslash run escapes itself and leaves the pipe a delimiter.
+        row = "".join("\x00" if ch == "|" and escaped(row, i) else ch
+                      for i, ch in enumerate(row))
+        cells.extend(strip_code_spans(c).strip()
+                     for c in row.strip().strip("|").split("|"))
+    joined = "\n\n".join(c for c in cells if c)
+    for pattern, repl in ((LINK_TARGET, "]"), (URL, " ")):
+        joined = pattern.sub(repl, joined)
+    return joined.replace("\x00", "|")
 
 
 def mask_protected(text: str, protected: Iterable[str]) -> str:
@@ -141,6 +403,7 @@ def load_thresholds(path: str | Path | None) -> dict[str, Any]:
 
 def analyze(text: str, protected: Iterable[str] = (), baseline: str | None = None) -> dict[str, Any]:
     th = load_thresholds(baseline)
+    text = normalize_newlines(text)
     prose = mask_protected(strip_nonprose(text), protected)
 
     sentences = split_sentences(prose)
@@ -171,14 +434,17 @@ def analyze(text: str, protected: Iterable[str] = (), baseline: str | None = Non
 
     counts: dict[str, int] = {}
     findings: list[Finding] = []
+    elsewhere = (front_matter_prose(text), table_prose(text))
+    scanned = "\n\n".join(
+        [prose, *(mask_protected(part, protected) for part in elsewhere if part)])
     for pid, sev, rx in COMPILED:
-        hits = list(rx.finditer(prose))
+        hits = list(rx.finditer(scanned))
         counts[pid] = len(hits)
         if hits:
             findings.append(Finding(
                 pid, sev, "span", len(hits),
                 f"{pid}: {len(hits)} match(es)",
-                "A single match is not evidence; check context first.",
+                NOTES.get(pid, "A single match is not evidence; check context first."),
                 [{"text": h.group(0)[:60], "start": h.start()} for h in hits[:8]]))
 
     warnings: list[str] = []
@@ -231,7 +497,9 @@ def analyze(text: str, protected: Iterable[str] = (), baseline: str | None = Non
     }
 
 
-PROTECTED_TOKEN = re.compile(r"\d[\d,.]*|`[^`\n]+`|\b[A-Za-z]+[A-Z][A-Za-z]*\b|[\w./~-]+\.(?:py|sh|json|ttf|md)\b")
+# A number ends in a digit: `2026.` at the end of a sentence is the same
+# measurement as `2026`, and counting the full stop made it a different one.
+PROTECTED_TOKEN = re.compile(r"\d(?:[\d,.]*\d)?|`[^`\n]+`|\b[A-Za-z]+[A-Z][A-Za-z]*\b|[\w./~-]+\.(?:py|sh|json|ttf|md)\b")
 
 
 def protected_tokens(text: str) -> Counter[str]:
@@ -243,6 +511,7 @@ def count_token(text: str, term: str) -> int:
 
 
 def compare(before: str, after: str, protected: Iterable[str]) -> dict[str, Any]:
+    before, after = normalize_newlines(before), normalize_newlines(after)
     lost = protected_tokens(before) - protected_tokens(after)
     added = protected_tokens(after) - protected_tokens(before)
     bw, aw = words(strip_nonprose(before)), words(strip_nonprose(after))
@@ -256,6 +525,9 @@ def compare(before: str, after: str, protected: Iterable[str]) -> dict[str, Any]
         "explicit_protected_lost": {
             t: n for t in protected
             if (n := count_token(before, t) - count_token(after, t)) > 0},
+        "explicit_protected_added": {
+            t: n for t in protected
+            if (n := count_token(after, t) - count_token(before, t)) > 0},
     }
 
 

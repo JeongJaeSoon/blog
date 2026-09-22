@@ -42,8 +42,57 @@ Both name something real. Neither announces what the paragraph is going to do.
 - **Keep stated uncertainty uncertain.** If the draft says something was not
   verified, it stays not verified in all three languages.
 - **One register per language, matching the existing posts.** Korean is
-  `-습니다`체 throughout. English is measured and declarative, not
-  conversational — do not let a humanizer add contractions and spoken rhythm.
+  `-습니다`체 throughout. Japanese is 丁寧体. English is measured and
+  declarative, which here means **no contractions anywhere in the prose** —
+  `did not`, not `didn't`; `it is`, not `it's`; `cannot`, not `can't`. This
+  is a property of the finished post, not a restriction on the tone pass: a
+  contraction is as wrong when it comes from the first draft as when a
+  humanizer adds one. Possessives (`Menlo's`) are not contractions.
+
+  `humanize-english` checks this as **C-4**, on the prose it extracts — a raw
+  search over the Markdown would flag pasted output like `error: can't open
+  file`, which this guide requires keeping verbatim.
+
+  ```sh
+  python3 .claude/skills/humanize-english/scripts/metrics.py \
+    content/posts/<slug>/en.md --compact | rg -o '"C-[45]": [0-9]+'
+  ```
+
+  C-4 takes everything that cannot be a possessive: `n't` and
+  `'m/'re/'ve/'ll/'d` on any word, and `'s` after a pronoun or a wh-word
+  (`it's`, `he's`, `what's`, `let's`). Either apostrophe, any case.
+
+  Every match is a violation with one exception: a contraction inside a
+  verbatim quotation stays, because §0.1 of `humanize-english` preserves
+  quotations and someone else's words are not yours to expand. The counter
+  cannot see a quotation span, so it reports the match and you keep it, with
+  the reason in the findings. Quote in a fence or a code span and the
+  question does not arise.
+
+  It reads wherever the reader does: the body, the cells of a table, and
+  `title` and `summary`, which render on the index and in the feed. A table
+  cell is prose that happens to sit between pipes.
+
+  **C-5 is the part a script cannot close.** `everyone's ready` and
+  `everyone's coat` are the same string, so C-5 counts `'s` after an
+  indefinite pronoun — `every`, `some`, `any` or `no`, followed by `one`,
+  `body` or `thing` — and leaves the call to you. A `'s` after a name or a
+  plain noun is not reported at all; if the draft has one, it needs your eye
+  and not the counter.
+
+  Fence pasted output rather than indenting it. A fence is stripped wherever
+  it sits — nested under a list item, or drawing a table — but a bare
+  four-space code block is read as prose, because the stripper cannot tell
+  it from a list's continuation paragraph and keeping the paragraph matters
+  more.
+
+  The stripper is not a Markdown parser. It knows whether a list is open,
+  which is enough to tell a fence indented four spaces from a stray marker at
+  the margin, and it stops there — a fence nested two containers deep is
+  beyond it. Where it has to guess it guesses towards reading: an opener with
+  no closer is left alone instead of swallowing the rest of the file, because
+  scanning too much costs a reading while scanning nothing reports zero and
+  passes.
 
 ## Structure, all three languages
 

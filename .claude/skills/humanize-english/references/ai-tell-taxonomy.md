@@ -46,6 +46,8 @@ languages can be driven the same way.
 | C-1 | S1 | Inflated verbs and adjectives: leverage, utilize, delve, unpack, streamline, elevate, unlock, robust, seamless, powerful tool, game changer, cutting-edge, transformative | Use the plain verb for what was done. | J/E |
 | C-2 | S2 | Empty intensifiers: simply, just, easily, effortlessly, very | Delete. It was not easy or the post would not exist. | J/E |
 | C-3 | S2 | Nominalization chains: "the implementation of the configuration of…" | Return to verbs. | J/E |
+| C-4 | S1 | Contractions: `didn't`, `it's`, `we're`, `you've`, `I'd` — either apostrophe, any case | Expand. `I'd` is `I would` in one place and `I had` in another, so read each one. | E |
+| C-5 | S3 | `'s` after an indefinite pronoun — `every`, `some`, `any` or `no` plus `one`, `body` or `thing`: `everyone's`, `everything's`, `no one's` | Possessive or contraction; the script cannot tell. Read the match. | E |
 
 ## D. Connectives and scaffolding
 
