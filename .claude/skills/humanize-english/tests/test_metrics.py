@@ -29,13 +29,14 @@ FIXTURES = HERE / "fixtures"
 
 # fixture -> (C-4 matches, C-5 matches). Order follows the text.
 EXPECTED: dict[str, tuple[list[str], list[str]]] = {
-    "apostrophes-both-shapes": (
-        ["We're", "you've", "He'll", "It's", "didn't", "I'm",
-         "didn’t", "I’m", "they’ve"],
-        ["Everyone's"],
+    "straight-apostrophes": (
+        ["We're", "you've", "He'll", "It's", "didn't", "I'm"], ["Everyone's"],
+    ),
+    "curly-apostrophes": (
+        ["didn’t", "I’m", "they’ve"], ["Everyone’s"],
     ),
     "all-caps": (["DON'T", "WE'RE", "I'M", "YOU'VE", "HE'LL", "DiDn'T"], []),
-    "front-matter-fields": (["it's", "We're", "doesn't"], []),
+    "front-matter-fields": (["We're", "doesn't"], []),
     "wh-words-and-possessives": (["When's", "Why's"], ["Everyone's"]),
     "quoted-scalar-and-indented-fence": (["it's", "It's", "Why's"], ["Everyone's"]),
     "indefinite-pronouns-and-list-fences": (
@@ -48,7 +49,7 @@ EXPECTED: dict[str, tuple[list[str], list[str]]] = {
     "wide-runs-and-multiline-span": (["isn't", "aren't"], []),
     "escaped-backticks-and-stray-markers": (["doesn't", "wasn't"], []),
     "fence-on-marker-line": (["can't", "can't"], []),
-    "escaped-pipe-and-deep-closer": (["can't", "wasn't"], []),
+    "escaped-pipe-and-deep-closer": (["wasn't"], []),
     "table-without-outer-pipes": (["isn't", "doesn't"], []),
     "yaml-comment-and-lazy-quote": (["isn't", "isn't"], []),
     "span-across-blocks": (["can't", "can't"], []),
@@ -98,6 +99,11 @@ class Fixtures(unittest.TestCase):
 # verbatim quotation, and C-5 catches possessives as readily as contractions,
 # so both need a reading. A match that survived that reading is recorded here
 # by slug, and the post ships with it; anything else is a regression.
+#
+# ponytail: an entry records the text and the count, not where it sits, so
+# swapping an approved quoted match for an unquoted one elsewhere in the same
+# post would still pass. Record the surrounding line once this stops being
+# empty.
 ALLOWED: dict[str, tuple[list[str], list[str]]] = {}
 
 
@@ -154,6 +160,24 @@ class Extraction(unittest.TestCase):
         cells = metrics.table_prose(text)
         self.assertIn("doesn't", cells)
         self.assertNotIn("can't", cells)
+
+    def test_a_cell_count_mismatch_is_not_a_table(self):
+        """Verified against this repo's own remark-gfm: it renders a paragraph,
+        and the backtick span there still hides what it holds."""
+        text = "| a | b | c |\n|---|---|\n| `can't` | d | e |\n"
+        self.assertEqual(metrics.table_prose(text), "")
+        self.assertNotIn("can't", metrics.strip_nonprose(text))
+
+    @unittest.expectedFailure
+    def test_top_level_indented_code_is_not_prose(self):
+        """A known limit, recorded so the day it is fixed does not pass silently.
+
+        Reading a four-space block right means tracking paragraph and list
+        context, which nothing here does. `write-post/references/voice.md` says
+        to fence pasted output rather than indent it, so the cost is a reading,
+        not a wrong edit."""
+        text = "Before.\n\n    it's pasted output\n\nAfter.\n"
+        self.assertNotIn("it's", metrics.strip_nonprose(text))
 
 
 class Protection(unittest.TestCase):

@@ -71,7 +71,10 @@ Both name something real. Neither announces what the paragraph is going to do.
 
   It reads wherever the reader does: the body, the cells of a table, and
   `title` and `summary`, which render on the index and in the feed. A table
-  cell is prose that happens to sit between pipes.
+  cell is prose that happens to sit between pipes. A header row and a rule
+  row that divide into different numbers of cells are not a table at all —
+  `remark-gfm` renders them as one paragraph — and the gate reads them the
+  same way, so a code span there still hides what it holds.
 
   **C-5 is the part a script cannot close.** `everyone's ready` and
   `everyone's coat` are the same string, so C-5 counts `'s` after an

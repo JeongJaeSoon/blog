@@ -12,4 +12,3 @@ The body has no contraction at all.
 error: can't open file
 ~~~
 
-    indented: it's fine here too

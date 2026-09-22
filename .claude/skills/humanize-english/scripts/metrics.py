@@ -273,12 +273,28 @@ def strip_fences(text: str) -> str:
     return "\n".join(out)
 
 
+def row_cells(row: str) -> list[str]:
+    """A row's cells, split on the pipes that divide them.
+
+    An escaped pipe belongs to the cell. An even backslash run escapes itself
+    and leaves the pipe a delimiter. GFM splits rows before inline parsing, so
+    a backtick span does not shield a pipe either.
+    """
+    marked = "".join("\x00" if ch == "|" and escaped(row, i) else ch
+                     for i, ch in enumerate(row))
+    return [c.replace("\x00", "|")
+            for c in marked.strip().strip("|").split("|")]
+
+
 def table_lines(text: str) -> tuple[set[int], list[str]]:
     """Which lines belong to a table, and the rows worth reading.
 
     A pipe does not make a table — prose is full of them — so the rule row
     underneath the header is what identifies one. Outer pipes are optional,
-    which is why matching the row shape alone does not work.
+    which is why matching the row shape alone does not work. The header and
+    the rule must also divide into the same number of cells; GFM renders a
+    mismatch as an ordinary paragraph, where a backtick span still hides its
+    contents.
     """
     lines = text.split("\n")
     owned: set[int] = set()
@@ -286,7 +302,8 @@ def table_lines(text: str) -> tuple[set[int], list[str]]:
     i = 0
     while i + 1 < len(lines):
         if "|" not in lines[i] or not TABLE_RULE.match(lines[i + 1]) \
-                or "|" not in lines[i + 1]:
+                or "|" not in lines[i + 1] \
+                or len(row_cells(lines[i])) != len(row_cells(lines[i + 1])):
             i += 1
             continue
         owned.update((i, i + 1))
@@ -352,17 +369,12 @@ def table_prose(text: str) -> str:
     body = strip_fences(FRONT_MATTER.sub("", text, count=1))
     cells: list[str] = []
     for row in table_lines(body)[1]:
-        # A span cannot cross a cell, so split first — on the pipes that
-        # divide cells, not on an escaped one, which belongs to the cell.
-        # An even backslash run escapes itself and leaves the pipe a delimiter.
-        row = "".join("\x00" if ch == "|" and escaped(row, i) else ch
-                      for i, ch in enumerate(row))
-        cells.extend(strip_code_spans(c).strip()
-                     for c in row.strip().strip("|").split("|"))
+        # A span cannot cross a cell, so split before scanning for one.
+        cells.extend(strip_code_spans(c).strip() for c in row_cells(row))
     joined = "\n\n".join(c for c in cells if c)
     for pattern, repl in ((LINK_TARGET, "]"), (URL, " ")):
         joined = pattern.sub(repl, joined)
-    return joined.replace("\x00", "|")
+    return joined
 
 
 def mask_protected(text: str, protected: Iterable[str]) -> str:
