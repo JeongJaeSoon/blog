@@ -1,5 +1,12 @@
 {
   "extraKnownMarketplaces": {
+    "im-not-ai": {
+      "source": {
+        "source": "github",
+        "repo": "epoko77-ai/im-not-ai",
+        "ref": "v2.3.2"
+      }
+    },
     "im-not-ai-ja": {
       "source": {
         "source": "github",
@@ -8,6 +15,7 @@
     }
   },
   "enabledPlugins": {
+    "humanize-korean@im-not-ai": true,
     "humanize-japanese@im-not-ai-ja": true
   }
 }

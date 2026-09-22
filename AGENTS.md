@@ -13,8 +13,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 Read `.claude/skills/write-post/SKILL.md` before touching anything under
 `content/posts/`, including translations and tone edits. It carries the
 three-file contract that `lib/posts.ts` enforces, the house voice, and the
-AI-tone pass — `humanize-japanese` for `ja.md`, `references/voice.md` plus
-`scripts/tells.sh` for `en.md` and `ko.md`.
+AI-tone pass — `humanize-korean` for `ko.md`, `humanize-japanese` for `ja.md`,
+and `references/voice.md` plus `scripts/tells.sh` for `en.md`.
 
-The `humanize-japanese` plugin comes from `JeongJaeSoon/im-not-ai-ja` and is
-enabled for this repo in `.claude/settings.json`.
+Both plugins are enabled in `.claude/settings.json`, **for this repo only**:
+`humanize-korean` from `epoko77-ai/im-not-ai` (pinned `v2.3.2`) and
+`humanize-japanese` from `JeongJaeSoon/im-not-ai-ja`. Nothing goes into
+`~/.claude` — do not run either repo's `install.sh`.

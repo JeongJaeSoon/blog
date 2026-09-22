@@ -75,12 +75,43 @@ subject stated.
 Do this as a separate pass, after the draft is finished. Editing for tone while
 drafting produces neither.
 
-- **ja** — invoke the `humanize-japanese` skill (plugin `im-not-ai-ja`, enabled
-  in `.claude/settings.json`). It owns the Japanese taxonomy and the register
-  rules; do not hand-roll Japanese style guidance here. `です・ます` and 敬語 are
-  not evidence of AI.
-- **en / ko** — apply `references/voice.md`, then run `scripts/tells.sh` over the
-  files and resolve every hit or justify it.
+Two of the three languages have a real taxonomy behind them. Use it — do not
+hand-roll style rules for ko or ja in this repo.
+
+| | Owner | Enabled by |
+|---|---|---|
+| ko | `humanize-korean` skill — 10 categories, 70 patterns | `.claude/settings.json` (plugin `im-not-ai`, pinned `v2.3.2`) |
+| ja | `humanize-japanese` skill — taxonomy + `metrics.py` | `.claude/settings.json` (plugin `im-not-ai-ja`) |
+| en | `references/voice.md` + `scripts/tells.sh` | this repo — no equivalent skill exists |
+
+Both plugins are enabled for **this repo only**. Nothing is installed into
+`~/.claude`; do not run either repo's `install.sh`.
+
+How to drive them:
+
+- Default (Fast) is right for a post of this length. Reach for `--strict` only
+  past ~8,000 characters.
+- Pass the identifiers as protected terms so they cannot be "improved":
+  `MenloCJK`, `Orca`, `iTerm2`, `Chromium`, `fsSelection`, file paths, every
+  number. The Japanese skill takes them via `metrics.py --protect`.
+- `--diagnose-only` when you want the findings without a rewrite.
+- Politeness is not an AI tell. `です・ます` and `-습니다` stay; both skills say
+  so explicitly and both are this blog's register.
+- Report findings by their taxonomy ID, and say why you kept anything you kept.
+
+For ja you can check the result yourself:
+
+```sh
+python3 ~/.claude/plugins/marketplaces/im-not-ai-ja/skills/humanize-japanese/scripts/metrics.py \
+  content/posts/<slug>/ja.md --compact
+```
+
+A `G-1` (low sentence-length CV) finding is document-scope and advisory — the
+taxonomy says not to rewrite on the number alone. Technical prose full of
+identifiers clusters around the median legitimately.
+
+For **en**, apply `references/voice.md`, then run `scripts/tells.sh` and resolve
+every hit or justify it.
 
 ## Checklist
 
@@ -88,5 +119,7 @@ drafting produces neither.
 2. At least one thing that did not work is in the post.
 3. At least one real number, path or pasted output is in the post.
 4. Nothing asserted that was not observed.
-5. ja passed through `humanize-japanese`; en and ko passed `scripts/tells.sh`.
+5. ko went through `humanize-korean`, ja through `humanize-japanese`, en
+   through `references/voice.md` + `scripts/tells.sh`. Findings reported by
+   taxonomy ID, with a reason for anything kept.
 6. `bun run build` passes, with the output shown.

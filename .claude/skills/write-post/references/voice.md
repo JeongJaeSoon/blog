@@ -1,10 +1,21 @@
-# House voice — English and Korean
+# House voice
 
-Japanese is not covered here. Use the `humanize-japanese` skill for `ja.md`.
+Scope: this file owns **English** style, plus the structural rules that apply to
+all three languages.
 
-The voice is already on disk. Before editing, read one existing post in the
-language you are working in — `content/posts/obsidian-nas-remote-mcp/ko.md` and
-`content/posts/rebuilding-this-site/en.md` are the reference renditions.
+It does **not** own Korean or Japanese sentence style. Those have real
+taxonomies behind them and the skills are enabled for this repo:
+
+- ko → `humanize-korean` (plugin `im-not-ai`, 10 categories / 70 patterns)
+- ja → `humanize-japanese` (plugin `im-not-ai-ja`)
+
+Do not re-derive their rules here. A flat ban list is worse than a taxonomy that
+weighs repetition, co-occurrence and register — and worse than one that knows
+`-습니다` and `です・ます` are not AI tells.
+
+The voice itself is already on disk. Before editing, read one existing post in
+the language you are working in: `content/posts/rebuilding-this-site/en.md` and
+`content/posts/obsidian-nas-remote-mcp/ko.md` are the reference renditions.
 
 ## What the voice is
 
@@ -18,8 +29,6 @@ were observed, not reasoned about.
 > 알아내는 데 시간이 더 들었습니다.
 
 Both name something real. Neither announces what the paragraph is going to do.
-
-Korean runs on `-습니다`. English uses contractions where speech would.
 
 ## Cut on sight — English
 
@@ -38,29 +47,28 @@ Korean runs on `-습니다`. English uses contractions where speech would.
 | Em-dash asides in three consecutive sentences | One per paragraph at most |
 | Rule-of-three lists that fill out to three | Two is a fine number of reasons |
 
+One hit is not a finding. Judge on repetition and co-occurrence, the way the ko
+and ja taxonomies do — a single "just" in a 1,500-word post is not the problem.
+
 Hedging is the loudest tell. "This might potentially help improve performance in
 some cases" describes nothing. Either it got faster and you have the number, or
 you do not mention it.
 
-## Cut on sight — Korean
+## Korean and Japanese — what stays here
 
-| Pattern | Instead |
-|---|---|
-| "이 글에서는 ~에 대해 알아보겠습니다" | 첫 문장부터 실제 상황 |
-| "~에 대해 살펴보겠습니다", "함께 알아봅시다" | 삭제 |
-| "~하는 것이 중요합니다", "~하는 것이 좋습니다" | 실제로 무엇이 일어났는지 |
-| "효율적으로", "적절히", "손쉽게", "간편하게" | 삭제하거나 수치로 |
-| "다양한", "여러 가지", "많은" (수량 없이) | 실제 개수 |
-| "~할 수 있습니다"의 반복 | "~합니다" / "~했습니다" |
-| "~라고 할 수 있습니다", "~인 것 같습니다" (관찰한 사실에) | 단정 |
-| "먼저 / 다음으로 / 마지막으로" 문단 머리 | 접속 없이 이어 쓰기 |
-| "정리하자면", "결론적으로" | 삭제하고 발견만 남기기 |
-| 번역투 "~에 대한", "~을 통해", "~에 의해" 남용 | 능동태로 다시 쓰기 |
-| 소제목마다 같은 길이의 요약 문단 | 필요한 곳에만 |
+Only the things a general-purpose humanizer cannot know, because they are about
+this blog rather than about the language:
 
-`-는다`체와 `-습니다`체를 한 글에서 섞지 않습니다. 기존 글은 전부 `-습니다`체입니다.
+- `-습니다`체로 통일합니다. 기존 글이 전부 그렇습니다. 문체 판단 자체는
+  `humanize-korean`에 맡기고, 여기서는 기존 글과의 일관성만 봅니다.
+- 첫 문장은 실제 상황입니다. "이 글에서는 ~를 살펴보겠습니다" 같은 예고로 열지
+  않습니다.
+- 실패한 시도와 막힌 지점을 지우지 않습니다. 윤문 과정에서 가장 먼저 매끈하게
+  다듬어 없어지는 부분이고, 이 블로그에서 가장 읽을 만한 부분입니다.
+- 수치, 파일 경로, 설정 키, 식별자는 보호어로 넘깁니다. 윤문이 이것들을
+  "자연스럽게" 바꾸면 글이 틀려집니다.
 
-## Structural tells, both languages
+## Structural tells, all three languages
 
 - Every section the same length.
 - Every section ending with a sentence that restates the section.
@@ -76,6 +84,6 @@ you do not mention it.
 .claude/skills/write-post/scripts/tells.sh content/posts/<slug>
 ```
 
-Every hit needs a fix or a reason. The script is a net for the obvious cases,
-not the standard — a draft can pass it and still read like an essay generated
-from a heading list.
+This is a grep net for the obvious English cases, with a thin Korean net kept as
+a pre-check before `humanize-korean` runs. It is not the standard — a draft can
+pass it and still read like an essay generated from a heading list.
