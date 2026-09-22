@@ -42,7 +42,7 @@ PATTERNS: list[tuple[str, str, re.Pattern[str]]] = [
     ("C-2", "S2", r"\b(?:simply|just|easily|effortlessly)\b"),
     ("C-3", "S2", r"\bthe \w+(?:tion|ment|ance|ence|ity) of the \w+(?:tion|ment|ance|ence|ity) of\b"),
     ("C-4", "S1", r"(?i)\w+n[’']t\b|\w+[’'](?:m|re|ve|ll|d)\b"),
-    ("C-5", "S3", r"(?i)\b(?:it|that|there|here|what|who|where|how|he|she|let|everyone|everybody|someone|somebody|anyone|anybody|nobody|nothing|something)[’']s\b"),
+    ("C-5", "S3", r"(?i)\b(?:it|that|there|here|what|who|where|how|he|she|let|when|why|everyone|everybody|someone|somebody|anyone|anybody|nobody|nothing|something)[’']s\b"),
 
     ("D-1", "S2", r"(?m)^(?:Additionally|Furthermore|Moreover|That said|In addition|On the other hand)\b[,.]"),
     ("D-2", "S2", r"(?m)^(?:First(?:ly)?|Next|Then|Finally|Lastly)\b,"),
@@ -84,7 +84,8 @@ PASSIVE = re.compile(
 NOMINALIZATION = re.compile(r"\b\w{4,}(?:tion|ment|ance|ence|ity|ness)\b", re.I)
 
 FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
-FENCED = re.compile(r"```.*?```", re.S)
+FENCED = re.compile(r"(?ms)^(```+|~~~+).*?^\1[`~]*[ \t]*$")
+INDENTED_CODE = re.compile(r"(?m)^(?: {4}|\t).*$")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BLOCKQUOTE = re.compile(r"(?m)^>.*$")
@@ -104,9 +105,25 @@ class Finding:
     matches: list[dict[str, Any]] | None = None
 
 
+FM_FIELD = re.compile(r"(?ms)^(?:title|summary):[ \t]*(.*?)(?=^\S+:|\Z)")
+
+
+def front_matter_prose(text: str) -> str:
+    """The `title` and `summary` values, which readers see on the index."""
+    fm = FRONT_MATTER.match(text)
+    if not fm:
+        return ""
+    values = []
+    for m in FM_FIELD.finditer(fm.group(0)):
+        value = re.sub(r"\A>-?[ \t]*\n?", "", m.group(1))
+        values.append(re.sub(r"\s+", " ", value).strip())
+    return "\n\n".join(v for v in values if v)
+
+
 def strip_nonprose(text: str) -> str:
     """Remove everything that is not editable prose."""
-    for pattern, repl in ((FRONT_MATTER, ""), (FENCED, " "), (TABLE_ROW, " "),
+    for pattern, repl in ((FRONT_MATTER, ""), (FENCED, " "),
+                          (INDENTED_CODE, " "), (TABLE_ROW, " "),
                           (INLINE_CODE, " "), (LINK_TARGET, "]"), (URL, " "),
                           (BLOCKQUOTE, " ")):
         text = pattern.sub(repl, text)
@@ -181,8 +198,9 @@ def analyze(text: str, protected: Iterable[str] = (), baseline: str | None = Non
 
     counts: dict[str, int] = {}
     findings: list[Finding] = []
+    scanned = prose + "\n\n" + mask_protected(front_matter_prose(text), protected)
     for pid, sev, rx in COMPILED:
-        hits = list(rx.finditer(prose))
+        hits = list(rx.finditer(scanned))
         counts[pid] = len(hits)
         if hits:
             findings.append(Finding(

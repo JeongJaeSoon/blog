@@ -59,10 +59,11 @@ Both name something real. Neither announces what the paragraph is going to do.
   ```
 
   C-4 covers `n't` and `'m/'re/'ve/'ll/'d` on any word, both apostrophes, any
-  case. Every match is a violation. **C-5 is the part a script cannot close:**
+  case, in the body and in `title` and `summary` — those two render on the
+  index and in the feed, so they are part of the post. Every match is a violation. **C-5 is the part a script cannot close:**
   `everyone's ready` and `everyone's coat` are the same string, so C-5 reports
-  `'s` after a pronoun and leaves the call to you. A `'s` after a name or a
-  plain noun is not reported at all — if the draft has one, it needs your eye,
+  `'s` after a pronoun, a wh-word or an indefinite pronoun and leaves the call
+  to you. A `'s` after a name or a plain noun is not reported at all — if the draft has one, it needs your eye,
   not the counter.
 
 ## Structure, all three languages
