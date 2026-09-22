@@ -280,8 +280,10 @@ def row_cells(row: str) -> list[str]:
     and leaves the pipe a delimiter. GFM splits rows before inline parsing, so
     a backtick span does not shield a pipe either.
     """
+    # Only spaces and tabs are Markdown whitespace. A non-breaking space at an
+    # edge is cell content, and trimming it would move the outer delimiter.
     marked = "".join("\x00" if ch == "|" and escaped(row, i) else ch
-                     for i, ch in enumerate(row)).strip()
+                     for i, ch in enumerate(row)).strip(" \t")
     # One optional delimiter comes off each side, not every pipe there: `||`
     # at an edge is an empty first or last cell, and dropping both loses it.
     marked = marked[1:] if marked[:1] == "|" else marked
