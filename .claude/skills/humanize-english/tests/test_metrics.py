@@ -34,6 +34,7 @@ EXPECTED: dict[str, tuple[list[str], list[str]]] = {
     ),
     "empty-edge-cells": (["can't", "isn't"], []),
     "nbsp-edged-row": (["can't"], []),
+    "table-on-a-list-marker": (["can't"], []),
     "curly-apostrophes": (
         ["didn’t", "I’m", "they’ve"], ["Everyone’s"],
     ),

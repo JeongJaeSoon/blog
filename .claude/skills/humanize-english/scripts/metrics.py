@@ -280,6 +280,9 @@ def row_cells(row: str) -> list[str]:
     and leaves the pipe a delimiter. GFM splits rows before inline parsing, so
     a backtick span does not shield a pipe either.
     """
+    # A table may open on the list marker's own line, where the marker is not
+    # cell content. GFM reads `- | a | b |` as a two-cell row.
+    row = LIST_PREFIX.sub("", row, count=1)
     # Only spaces and tabs are Markdown whitespace. A non-breaking space at an
     # edge is cell content, and trimming it would move the outer delimiter.
     marked = "".join("\x00" if ch == "|" and escaped(row, i) else ch
@@ -300,6 +303,12 @@ def table_lines(text: str) -> tuple[set[int], list[str]]:
     the rule must also divide into the same number of cells; GFM renders a
     mismatch as an ordinary paragraph, where a backtick span still hides its
     contents.
+
+    ponytail: that count is the one rule here that guesses towards reading
+    less — a row shape this does not know becomes a paragraph, and a span may
+    then pair across what were cells. Three container forms have already had
+    to be taught to `row_cells`. If a fourth costs a real contraction in a
+    post, drop the count and take the false positive instead.
     """
     lines = text.split("\n")
     owned: set[int] = set()
