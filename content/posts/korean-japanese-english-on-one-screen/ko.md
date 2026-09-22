@@ -102,7 +102,7 @@ macOS가 12개를 한 패밀리로 묶게 name ID 16(typographic family)과 17(s
 
 변형에 들어가기 전에 아웃라인을 전부 스냅샷하도록 고쳤습니다. 다시 빌드하고 재니 로만 6종은 차이가 전부 0.0입니다. 이탤릭에 남는 42와 88은 기울어진 악센트가 원래 바운딩 박스를 넓히는 값이고 같은 베이스 안에서 일정해서(400·500이 42, 600~900이 88) 이중 스트로크가 아닙니다.
 
-이건 제가 못 찾았습니다. 14px 터미널에서 `Aacute`를 마주칠 일이 없고 마주쳤어도 알아봤을 것 같지 않습니다. 코드를 읽은 Codex 리뷰가 잡아냈습니다([menlocjk#1](https://github.com/JeongJaeSoon/menlocjk/pull/1)).
+이건 제가 못 찾았습니다. 14px 터미널에서 `Aacute`를 마주칠 일이 없고 마주쳤어도 알아봤을 것 같지 않습니다. 코드를 읽은 Codex 리뷰가 잡아냈습니다([JeongJaeSoon/menlocjk#1](https://github.com/JeongJaeSoon/menlocjk/pull/1)).
 
 ## 같은 폰트를 물렸는데 세 앱이 다르게 그렸습니다
 

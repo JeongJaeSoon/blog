@@ -103,7 +103,7 @@ The difference equals the stroke that face was given. Medium took one step (27) 
 
 The fix is to snapshot every outline before transforming anything. After a rebuild the difference across the six roman faces is 0.0. The 42 and 88 left on the italics are the slanted accent widening the bounding box on its own; they hold constant within a base (42 for 400 and 500, 88 for 600 through 900), so they aren't a double stroke.
 
-I didn't find this. `Aacute` doesn't come up in a 14px terminal, and I'm not sure I'd have caught it if it had. A Codex review reading the code rather than the screen did ([menlocjk#1](https://github.com/JeongJaeSoon/menlocjk/pull/1)).
+I didn't find this. `Aacute` doesn't come up in a 14px terminal, and I'm not sure I'd have caught it if it had. A Codex review reading the code rather than the screen did ([JeongJaeSoon/menlocjk#1](https://github.com/JeongJaeSoon/menlocjk/pull/1)).
 
 ## One font, three apps, three renderings
 
