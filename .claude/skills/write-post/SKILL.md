@@ -163,4 +163,6 @@ structural rules, for all three languages. Read it alongside, not instead.
    `humanize-japanese`, en `humanize-english` — with the identifiers passed as
    protected terms. Findings reported by taxonomy ID, with a reason for
    anything kept, and no protected token lost.
-7. `bun run build` passes, with the output shown.
+7. The en rendition has no contractions — the one-line `rg` in
+   `references/voice.md` comes back empty.
+8. `bun run build` passes, with the output shown.

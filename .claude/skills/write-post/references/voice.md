@@ -42,8 +42,16 @@ Both name something real. Neither announces what the paragraph is going to do.
 - **Keep stated uncertainty uncertain.** If the draft says something was not
   verified, it stays not verified in all three languages.
 - **One register per language, matching the existing posts.** Korean is
-  `-습니다`체 throughout. English is measured and declarative, not
-  conversational — do not let a humanizer add contractions and spoken rhythm.
+  `-습니다`체 throughout. Japanese is 丁寧体. English is measured and
+  declarative, which here means **no contractions anywhere in the prose** —
+  `did not`, not `didn't`; `it is`, not `it's`; `cannot`, not `can't`. This
+  is a property of the finished post, not a restriction on the tone pass: a
+  contraction is as wrong when it comes from the first draft as when a
+  humanizer adds one. Possessives (`Menlo's`) are not contractions.
+
+  ```sh
+  rg -o "\b\w+n't\b|\bI'(m|d|ve|ll)\b|\b(it|that|there)'s\b" content/posts/*/en.md
+  ```
 
 ## Structure, all three languages
 
