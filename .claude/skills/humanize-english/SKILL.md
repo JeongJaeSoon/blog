@@ -35,6 +35,17 @@ languages in this repo are driven the same way.
 
 Paths resolve relative to this `SKILL.md`.
 
+Changing `scripts/metrics.py` means running its suite and pasting the result:
+
+```sh
+python3 .claude/skills/humanize-english/tests/test_metrics.py
+```
+
+Every file under `tests/fixtures/` is one Markdown or YAML construct the prose
+extraction once read wrong, and `EXPECTED` in the suite names the exact strings
+the gate must report for it. A gate that stops seeing a contraction reports zero
+and passes, so a new construct gets a fixture and an expectation, not a count.
+
 ## 2. Modes
 
 **Fast** (default) — diagnose, rewrite and self-check in one pass. Right for
