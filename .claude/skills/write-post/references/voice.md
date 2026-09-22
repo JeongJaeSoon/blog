@@ -50,8 +50,13 @@ Both name something real. Neither announces what the paragraph is going to do.
   humanizer adds one. Possessives (`Menlo's`) are not contractions.
 
   ```sh
-  rg -o "\b\w+n't\b|\bI'(m|d|ve|ll)\b|\b(it|that|there)'s\b" content/posts/*/en.md
+  rg -in "\w+n[’']t\b|\w+[’'](m|re|ve|ll|d)\b|\b(it|that|there|here|what|who|where|how|he|she|let)[’']s\b" content/posts/*/en.md
   ```
+
+  Three alternatives, because `'s` is the only ambiguous one. `n't` and
+  `'m/'re/'ve/'ll/'d` are never possessive, so they match on any word; `'s`
+  matches only after the pronouns and wh-words that cannot take a possessive.
+  Both apostrophes are covered, and `-i` catches a capitalised `It's`.
 
 ## Structure, all three languages
 
