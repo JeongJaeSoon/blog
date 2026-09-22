@@ -46,6 +46,10 @@ extraction once read wrong, and `EXPECTED` in the suite names the exact strings
 the gate must report for it. A gate that stops seeing a contraction reports zero
 and passes, so a new construct gets a fixture and an expectation, not a count.
 
+A C-4 match inside a verbatim quotation, or a C-5 possessive, is allowed to
+ship once it has been read. Record it in `ALLOWED` by slug so the suite knows
+the difference between a match that was judged and one that appeared.
+
 ## 2. Modes
 
 **Fast** (default) — diagnose, rewrite and self-check in one pass. Right for

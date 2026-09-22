@@ -58,13 +58,16 @@ EXPECTED: dict[str, tuple[list[str], list[str]]] = {
 POSTS = HERE.parents[3] / "content" / "posts"
 
 
-def matches(text: str, pattern_id: str, protect: list[str] | None = None) -> list[str]:
-    """What the gate reports for one pattern, in the order it reports it."""
-    found = metrics.analyze(text, protect or [])["findings"]
-    for finding in found:
+def reported(text: str, pattern_id: str) -> tuple[int, list[str]]:
+    """The gate's total for one pattern, and the spans it shows for it.
+
+    `analyze` shows at most eight matches, so the list alone cannot tell a
+    ninth contraction from a lost one. The count comes back beside it.
+    """
+    for finding in metrics.analyze(text, [])["findings"]:
         if finding["id"] == pattern_id:
-            return [m["text"] for m in finding["matches"]]
-    return []
+            return finding["count"], [m["text"] for m in finding["matches"]]
+    return 0, []
 
 
 class Fixtures(unittest.TestCase):
@@ -79,30 +82,38 @@ class Fixtures(unittest.TestCase):
         for name, (c4, c5) in EXPECTED.items():
             with self.subTest(fixture=name):
                 text = (FIXTURES / f"{name}.md").read_text(encoding="utf-8")
-                # `matches` caps its list at eight; compare what it can show.
-                self.assertEqual(matches(text, "C-4"), c4[:8])
-                self.assertEqual(matches(text, "C-5"), c5[:8])
+                self.assertEqual(reported(text, "C-4"), (len(c4), c4[:8]))
+                self.assertEqual(reported(text, "C-5"), (len(c5), c5[:8]))
 
     def test_crlf_input_reads_the_same(self):
         """`-` takes stdin verbatim, and a CRLF file must not change a count."""
         for name in EXPECTED:
             with self.subTest(fixture=name):
                 text = (FIXTURES / f"{name}.md").read_text(encoding="utf-8")
-                self.assertEqual(matches(text.replace("\n", "\r\n"), "C-4"),
-                                 matches(text, "C-4"))
+                self.assertEqual(reported(text.replace("\n", "\r\n"), "C-4"),
+                                 reported(text, "C-4"))
+
+
+# Neither pattern is an automatic defect. C-4 allows a contraction inside a
+# verbatim quotation, and C-5 catches possessives as readily as contractions,
+# so both need a reading. A match that survived that reading is recorded here
+# by slug, and the post ships with it; anything else is a regression.
+ALLOWED: dict[str, tuple[list[str], list[str]]] = {}
 
 
 class Posts(unittest.TestCase):
-    """The rule this gate exists for: no contractions in the published prose."""
+    """The rule this gate exists for, as the posts actually stand."""
 
-    def test_no_contractions_in_english_renditions(self):
+    def test_english_renditions_report_only_what_was_read_and_kept(self):
         found = sorted(POSTS.glob("*/en.md"))
         self.assertTrue(found, f"no posts under {POSTS}")
         for path in found:
-            with self.subTest(post=path.parent.name):
+            slug = path.parent.name
+            c4, c5 = ALLOWED.get(slug, ([], []))
+            with self.subTest(post=slug):
                 text = path.read_text(encoding="utf-8")
-                self.assertEqual(matches(text, "C-4"), [])
-                self.assertEqual(matches(text, "C-5"), [])
+                self.assertEqual(reported(text, "C-4"), (len(c4), c4[:8]))
+                self.assertEqual(reported(text, "C-5"), (len(c5), c5[:8]))
 
 
 class Extraction(unittest.TestCase):
