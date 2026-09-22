@@ -401,7 +401,9 @@ def analyze(text: str, protected: Iterable[str] = (), baseline: str | None = Non
     }
 
 
-PROTECTED_TOKEN = re.compile(r"\d[\d,.]*|`[^`\n]+`|\b[A-Za-z]+[A-Z][A-Za-z]*\b|[\w./~-]+\.(?:py|sh|json|ttf|md)\b")
+# A number ends in a digit: `2026.` at the end of a sentence is the same
+# measurement as `2026`, and counting the full stop made it a different one.
+PROTECTED_TOKEN = re.compile(r"\d(?:[\d,.]*\d)?|`[^`\n]+`|\b[A-Za-z]+[A-Z][A-Za-z]*\b|[\w./~-]+\.(?:py|sh|json|ttf|md)\b")
 
 
 def protected_tokens(text: str) -> Counter[str]:
@@ -427,6 +429,9 @@ def compare(before: str, after: str, protected: Iterable[str]) -> dict[str, Any]
         "explicit_protected_lost": {
             t: n for t in protected
             if (n := count_token(before, t) - count_token(after, t)) > 0},
+        "explicit_protected_added": {
+            t: n for t in protected
+            if (n := count_token(after, t) - count_token(before, t)) > 0},
     }
 
 

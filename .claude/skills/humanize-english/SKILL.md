@@ -84,8 +84,12 @@ python3 .claude/skills/humanize-english/scripts/metrics.py \
   before.md --compare content/posts/<slug>/en.md --protect MenloCJK --compact
 ```
 
-`explicit_protected_lost` and `protected_lost` must both come back empty. If a
-number or identifier changed, the edit is wrong — revert it, do not reword it.
+`explicit_protected_lost` and `protected_lost` must both come back empty. If
+a number or identifier changed, the edit is wrong — revert it, do not reword
+it. `explicit_protected_added` and `protected_added` are the other direction:
+a term the pass introduced. That is not automatically wrong — a pronoun
+resolved back to the name it stands for is an improvement — but it is never
+something to do silently, so read each one.
 
 ## 5. Translationese
 
