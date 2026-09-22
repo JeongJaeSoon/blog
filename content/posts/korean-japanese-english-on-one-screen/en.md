@@ -14,7 +14,7 @@ tags:
 draft: true
 ---
 
-Developing in Japan puts Korean, Japanese and English on the same screen, and I never found a monospace font that made all three look right together. Here is what a line of it looks like.
+Developing in Japan means Korean, Japanese and English all end up in the same IDE or terminal. But I never found a monospace font that made all three look right together. Here is what a line of it looks like.
 
 ```text
 a1b2c3d 청구서 재발행 시 pending 이 남던 문제 수정
