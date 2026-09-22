@@ -2,8 +2,9 @@
 title: Rebuilding this site as a résumé and a blog
 date: '2026-08-30'
 summary: >-
-  The old site was a purchased portfolio theme carrying a decade of jQuery-era
-  plugins. Here is what replaced it, and why the content now lives in two files.
+  A bought theme carrying a decade of jQuery-era plugins came out, and Next.js went
+  in. Facts and translated strings ended up in separate files because two
+  translators, working separately, got stuck in the same place.
 lang: en
 tags:
   - meta
@@ -62,8 +63,9 @@ directory name becomes the shared URL slug, and `lang` has to agree with the
 filename. If one translation is missing, I would rather stop the build than let
 the language button ship with a 404.
 
-Setting `draft: true` keeps a post visible in `next dev` and out of the build,
-the RSS feed and the sitemap.
+Setting `draft: true` keeps a post visible in `next dev` and on Vercel preview
+deployments, which is where a draft gets read before it ships, and out of the
+production build, the RSS feed and the sitemap.
 
 ## The résumé part
 

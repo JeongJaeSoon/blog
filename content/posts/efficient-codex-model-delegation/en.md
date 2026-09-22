@@ -2,8 +2,8 @@
 title: Using Codex model delegation where it actually pays off
 date: '2026-09-11'
 summary: >-
-  Delegation is not a default. I use a subagent only when the expected savings
-  exceed the overhead of briefing it, transferring context, and reviewing its work.
+  A subagent is not the default. A task has to clear a bar before I hand it over —
+  this is the bar, the model each difficulty gets, and what I still have not measured.
 lang: en
 tags:
   - codex
@@ -11,23 +11,26 @@ tags:
   - workflow
 ---
 
-I use the main agent for the work that needs judgment: deciding what to do,
-where to split it, and how to combine the result. A subagent earns its place
-only when the time saved is greater than the time spent briefing it, handing
-over context, and checking its output.
+On September 11, 2026, my local Codex settings had `gpt-6-astra` as the main
+model and `gpt-5.6-terra` as the default subagent model. On paper that means
+handing work off lands on something cheaper, which makes every splittable task
+look worth splitting.
 
-That rules out a lot of tempting splits. A small edit or a question whose
-answer is needed for the next step is usually faster to do in the main thread.
-Breaking it out adds a hand-off, a wait, and another result to verify.
+Every hand-off also adds a brief to write, a wait, and another result to verify,
+so a small edit or a question whose answer is needed for the next step is
+usually faster to do in the main thread. That rules out a lot of tempting splits.
 
-## Decide whether to delegate first
+What stays with the main agent is the work that needs judgment: deciding what to
+do, where to split it, and how to combine the result.
+
+## When the call is close, I do not split
 
 I keep a task in the main thread when a couple of checks or a small change will
 finish it, when the brief would be longer than the work, or when its result is
 needed immediately. I delegate bounded research, review, and implementation
-that can run independently. If the calculation is close, I do it directly.
+that can run independently. When it is a close call, it stays in the main thread.
 
-## Pick the subagent model by difficulty
+## Each difficulty has a different cheapest model
 
 Once a task is worth delegating, I choose the model by the difficulty of that
 specific task.
@@ -38,16 +41,15 @@ specific task.
 | General | `gpt-5.6-terra` | Research or implementation that can complete independently |
 | Complex | `gpt-5.6-sol` | Analysis or design that must weigh several conditions |
 
-The rule is simple: Astra is not used for subagents. The main model stays on
-judgment and integration; separable work gets the least expensive model that
-can meet the bar.
+I do not use Astra for subagents. The main model stays on judgment and
+integration, and separable work gets the least expensive model that can meet
+the bar.
 
 ## What is confirmed, and what is not
 
-On September 11, 2026, I confirmed that the local configuration used
-`gpt-6-astra` with `high` reasoning effort for the main model, and
-`gpt-5.6-terra` as the default subagent model. The delegation policy records
-the Luna, Terra, and Sol choices above.
+The settings above came out of that day's local configuration, where the main
+model also carried `high` reasoning effort. The delegation policy records the
+Luna, Terra, and Sol choices above.
 
 The runtime record also showed a main Astra run and a subagent explicitly
 started with Luna. In an isolated check, CLI 0.153.4 read back the Terra

@@ -56,7 +56,7 @@ The tunnel runs in a separate stack and shares this `edge` network with the MCP 
 
 ## 1. Create the vault directory and secrets
 
-Create an empty `docker/obsidian-remote/vault` directory on the NAS and copy its verified absolute path. It is often `/volume1/docker/obsidian-remote/vault`, but do not guess—confirm the actual path on your NAS.
+Create an empty `docker/obsidian-remote/vault` directory on the NAS and copy its verified absolute path. It is often `/volume1/docker/obsidian-remote/vault`, but do not guess — confirm the actual path on your NAS.
 
 I generated the required secrets together at this point:
 
@@ -217,7 +217,7 @@ error: unknown option '--conflict-strategy'
 
 `ob sync` only accepts `--path` and `--continuous`. The direction, conflict strategy, exclusions, file types, and related settings belong to `ob sync-config` and are stored as vault settings. The defaults are already bidirectional with merge conflict handling, so I did not need to change them.
 
-Also, Portainer may let you open a console while the container's main process is dead. Use the container Status and Logs—not console access—to determine whether it is running.
+Portainer may also let you open a console while the container's main process is dead. Judge whether it is running by the container Status and Logs, not by console access.
 
 ### 3. MCP SDK 2.0 removed `mcp.server.fastmcp`
 
