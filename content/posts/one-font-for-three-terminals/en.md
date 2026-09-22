@@ -3,8 +3,9 @@ title: Making three terminals agree took everything except a font
 date: '2026-09-22'
 summary: >-
   Merging Menlo, UDEV Gothic NF and D2Coding into one family was the quick part.
-  VSCode, iTerm2 and Orca still drew it three different ways, and every reason
-  turned out to live outside the font file.
+  VSCode, iTerm2 and Orca still drew it three different ways. Most of the reasons
+  turned out to live outside the font file; the one inside it was metadata only
+  iTerm2 reads.
 lang: en
 tags:
   - fonts
@@ -15,7 +16,7 @@ draft: true
 
 With VSCode, iTerm2 and Orca open side by side on the same file, Korean looked different in all three. All three were set to 14px, and they still didn't match: each one was pulling Hangul out of a different font.
 
-Merging them into one font looked like the whole job. The merge really did come down to three scripts. What came after is what took the time: same font, same size, three different results, and none of the causes were in the font file.
+Merging them into one font looked like the whole job. The merge really did come down to three scripts. What came after is what took the time: same font, same size, three different results. Most of the causes were outside the font file, and the one inside it was metadata only iTerm2 reads.
 
 The scripts are at [JeongJaeSoon/menlocjk](https://github.com/JeongJaeSoon/menlocjk). Installation is written up there, so this is only what I learned along the way.
 
@@ -35,7 +36,7 @@ Off the shelf there is Sarasa Term K and friends. I built my own because I wante
 
 ## fontTools does most of the merging
 
-`prep.py` normalises the three sources to 2048 upem and drops `GSUB`, `GPOS`, `GDEF`, `DSIG`, `morx` and `kern`. Terminals never ask for shaping features. D2Coding ships at 1000 upem, so `scaleUpem` takes it to 2048.
+`prep.py` normalises the three sources to 2048 upem and drops `GSUB`, `GPOS`, `GDEF`, `DSIG`, `morx` and `kern`. That drops shaping, which a terminal does not need here — keeping ligatures on would mean keeping `GSUB`. D2Coding ships at 1000 upem, so `scaleUpem` takes it to 2048.
 
 `merge.py` fuses them. Cmap conflicts resolve to the first font, so the order is the priority.
 
@@ -83,7 +84,7 @@ There's a cost. 700 is no longer Menlo's drawn Bold but one step heavier than it
 | Bold | 1193.5 | 1220.7 | +27.2 |
 | Black | 1247.3 | 1327.7 | +80.4 |
 
-The difference equals the stroke that face was given: Medium took one step (27) twice, Black took three (81) twice. 1,412 glyphs were affected, across all ten emboldened faces — accented Latin like `Agrave`, `Aacute` and `Adieresis`, and fractions like `onehalf`. Hangul syllables are simple contours, so they came through clean.
+The difference equals the stroke that face was given: Medium took one step (27) twice, Black took three (81) twice. 1,412 glyphs were affected, across all eight faces that actually run through `embolden()` — Medium, Bold, ExtraBold, Black and their italics. They are accented Latin like `Agrave`, `Aacute` and `Adieresis`, plus fractions like `onehalf`. Hangul syllables are simple contours, so they came through clean. Regular and SemiBold, and their italics, have `steps` of 0 and never enter `embolden()` at all, which is why Regular reads 0.0 in the table.
 
 The fix is to snapshot every outline before transforming anything. After a rebuild the difference across the six roman faces is 0.0. The 42 and 88 left on the italics are the slanted accent widening the bounding box on its own; they hold constant within a base (42 for 400 and 500, 88 for 600 through 900), so they aren't a double stroke.
 
