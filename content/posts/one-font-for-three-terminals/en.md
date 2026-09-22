@@ -14,9 +14,9 @@ tags:
 draft: true
 ---
 
-With VSCode, iTerm2 and Orca open side by side on the same file, Korean looked different in all three. All three were set to 14px, and they still didn't match: each one was pulling Hangul out of a different font.
+With VSCode, iTerm2 and Orca open side by side on the same file, Korean looked different in all three. All three were set to 14px and they still didn't match. Each one was pulling Hangul out of a different font.
 
-Merging them into one font looked like the whole job. The merge really did come down to three scripts. What came after is what took the time: same font, same size, three different results. Most of the causes were outside the font file, and the one inside it was metadata only iTerm2 reads.
+Merging them into one font looked like the whole job. The merge really did come down to three scripts. What came after took the time. Same font, same size, three different results. Most of the causes were outside the font file, and the one inside it was metadata only iTerm2 reads.
 
 The scripts are at [JeongJaeSoon/menlocjk](https://github.com/JeongJaeSoon/menlocjk). Installation is written up there, so this is only what I learned along the way.
 
@@ -46,9 +46,9 @@ Off the shelf there is Sarasa Term K and friends. I built my own because I wante
 | Kana and kanji, Nerd Font icons, Powerline | UDEV Gothic NF |
 | Hangul syllables and jamo | D2Coding |
 
-D2Coding is in there for one reason: UDEV Gothic NF has no Hangul. Japanese and the icons are covered by UDEV alone, Hangul leaves a hole, and that is how a two-font merge became a three-font one.
+D2Coding is in there for one reason. UDEV Gothic NF has no Hangul. Japanese and the icons are covered by UDEV alone, Hangul leaves a hole, and that is how a two-font merge became a three-font one.
 
-Vertical metrics get overwritten with Menlo's. `ascent`, `descent` and `lineGap` from `hhea`, plus the typo and win metrics from `OS/2`, have to come across or the line spacing shifts. Advance widths are untouched: `A` is 1233 (0.602em), `가` and `漢` are 2048, and all twelve faces built later carry the same values. Leaving the widths alone keeps the terminal grid intact and puts every glyph where the old fallback chain put it.
+`merge.py` overwrites the vertical metrics with Menlo's. `ascent`, `descent` and `lineGap` from `hhea`, plus the typo and win metrics from `OS/2`, have to come across or the line spacing shifts. Advance widths are untouched: `A` is 1233 (0.602em), `가` and `漢` are 2048, and all twelve faces built later carry the same values. Leaving the widths alone keeps the terminal grid intact and puts every glyph where the old fallback chain put it.
 
 The merged font carries 54,587 glyphs. A build takes 6.4 minutes on my Mac.
 
@@ -71,7 +71,7 @@ Six roman and six italic, twelve faces. The synthesised ones come from skia-path
 
 Name IDs 16 (typographic family) and 17 (subfamily) are what make macOS treat all twelve as one family.
 
-There's a cost. 700 is no longer Menlo's drawn Bold but one step heavier than it, and ANSI bold in a terminal reaches for 700, so bold text comes out thicker than the original. Orca and VSCode can point their bold weight at 600 and get the drawn Bold back (`Bold Font Weight`, `terminal.integrated.fontWeightBold`). iTerm2 has no such setting: it picks the bold face by the bold bit in `fsSelection`, and that bit only exists on 700. If the goal is three apps that match, 700 is the default and 600 is an option for the other two only.
+There's a cost. 700 is no longer Menlo's drawn Bold but one step heavier than it, and ANSI bold in a terminal reaches for 700, so bold text comes out thicker than the original. Orca and VSCode can point their bold weight at 600 and get the drawn Bold back (`Bold Font Weight`, `terminal.integrated.fontWeightBold`). iTerm2 has no such setting. It picks the bold face by the bold bit in `fsSelection`, and that bit only exists on 700. If the goal is three apps that match, 700 is the default and 600 is an option for the other two only.
 
 ## 1,412 glyphs got emboldened twice
 
@@ -84,7 +84,7 @@ There's a cost. 700 is no longer Menlo's drawn Bold but one step heavier than it
 | Bold | 1193.5 | 1220.7 | +27.2 |
 | Black | 1247.3 | 1327.7 | +80.4 |
 
-The difference equals the stroke that face was given: Medium took one step (27) twice, Black took three (81) twice. 1,412 glyphs were affected, across all eight faces that actually run through `embolden()` — Medium, Bold, ExtraBold, Black and their italics. They are accented Latin like `Agrave`, `Aacute` and `Adieresis`, plus fractions like `onehalf`. Hangul syllables are simple contours, so they came through clean. Regular and SemiBold, and their italics, have `steps` of 0 and never enter `embolden()` at all, which is why Regular reads 0.0 in the table.
+The difference equals the stroke that face was given. Medium took one step (27) twice, Black took three (81) twice. The bug hit 1,412 glyphs, across all eight faces that actually run through `embolden()` — Medium, Bold, ExtraBold, Black and their italics. They are accented Latin like `Agrave`, `Aacute` and `Adieresis`, plus fractions like `onehalf`. Hangul syllables are simple contours, so they came through clean. Regular and SemiBold, and their italics, have `steps` of 0 and never enter `embolden()` at all, which is why Regular reads 0.0 in the table.
 
 The fix is to snapshot every outline before transforming anything. After a rebuild the difference across the six roman faces is 0.0. The 42 and 88 left on the italics are the slanted accent widening the bounding box on its own; they hold constant within a base (42 for 400 and 500, 88 for 600 through 900), so they aren't a double stroke.
 
@@ -114,7 +114,7 @@ It was the CSS weight matching rules. With only 400 and 700 in a family, 500 res
 
 Flipping that symptom from "the font is wrong" to "the app hasn't seen the font yet" was the turn. Until then I was rebuilding the font.
 
-### iTerm2 doesn't find bold through usWeightClass
+### iTerm2 doesn't find bold by usWeightClass
 
 When I first generated the twelve faces, every non-italic one got `fsSelection = 0x40` and `macStyle = 0`. `usWeightClass` was correct, 400 through 900. VSCode and Orca were fine; only iTerm2 got bold wrong.
 
@@ -140,7 +140,7 @@ Keys the public API doesn't expose — `Thin Strokes`, `Special Font Config` —
 
 Orca is the mirror image. It rewrites `orca-data.json` from memory every few seconds. I wrote the values in, watched the file with a background watcher, and saw them revert. Orca's font input wraps whatever you type in quotes before it reaches CSS, so injecting a quote of your own lets you smuggle in a fallback chain. It does land in the CSS — and then the running app writes the value back and it's gone.
 
-Orca can only be edited while it's closed, and closing it is cheap. Cmd+Q doesn't kill the agent sessions: the PTYs belong to a detached daemon (`daemon-entry.js`, ppid 1) and the app is a viewer that attaches and detaches. Quit, edit, relaunch actually works.
+Orca can only be edited while it's closed, and closing it is cheap. Cmd+Q doesn't kill the agent sessions. The PTYs belong to a detached daemon (`daemon-entry.js`, ppid 1), and the app is a viewer that attaches and detaches. Quit, edit, relaunch actually works.
 
 `apply.py --check` reports the whole state:
 
