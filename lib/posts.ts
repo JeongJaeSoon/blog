@@ -110,9 +110,16 @@ function getValidatedPostMeta(): PostMeta[] {
   return posts
 }
 
-/** Drafts stay out of the build; they are visible in `next dev`. */
+/**
+ * Drafts stay out of production. They are visible in `next dev` and on Vercel
+ * preview deployments, which is where a draft gets reviewed before it ships.
+ */
 function isVisible(post: PostMeta) {
-  return !post.draft || process.env.NODE_ENV === 'development'
+  return (
+    !post.draft ||
+    process.env.NODE_ENV === 'development' ||
+    process.env.VERCEL_ENV === 'preview'
+  )
 }
 
 /** Newest first. Pass a locale to get only that rendition of every post. */
@@ -123,15 +130,27 @@ export function getAllPosts(locale?: Locale): PostMeta[] {
     .sort((a, b) => b.date.localeCompare(a.date))
 }
 
+/**
+ * Newest first, drafts always excluded. Feeds and the sitemap build absolute
+ * URLs from `site.url`, which is the production origin even in a preview build,
+ * so a draft listed there points at a page that does not exist yet.
+ */
+export function getPublishedPosts(locale?: Locale): PostMeta[] {
+  return getAllPosts(locale).filter((post) => !post.draft)
+}
+
 export function getPostsByTag(tag: string, locale: Locale): PostMeta[] {
   return getAllPosts(locale).filter((post) =>
     post.tags.some((t) => slugifyTag(t) === tag),
   )
 }
 
-export function getAllTags(locale: Locale): { tag: string; slug: string; count: number }[] {
+export function getAllTags(
+  locale: Locale,
+  posts: PostMeta[] = getAllPosts(locale),
+): { tag: string; slug: string; count: number }[] {
   const counts = new Map<string, number>()
-  for (const post of getAllPosts(locale)) {
+  for (const post of posts) {
     for (const tag of post.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
   }
   return [...counts.entries()]

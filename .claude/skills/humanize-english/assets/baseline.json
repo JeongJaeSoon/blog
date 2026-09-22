@@ -1,0 +1,20 @@
+{
+  "version": "0.1.0",
+  "purpose": "Diagnostic thresholds, not authorship detection cutoffs",
+  "min_sentences": 5,
+  "min_words": 150,
+  "sentence_length_cv_warning": 0.45,
+  "paragraph_length_cv_warning": 0.35,
+  "top_opening_share_warning": 0.3,
+  "connective_initial_ratio_warning": 0.15,
+  "hedge_per_100_words_warning": 1.5,
+  "em_dash_per_1000_words_warning": 12.0,
+  "passive_ratio_warning": 0.25,
+  "nominalization_per_100_words_warning": 6.0,
+  "notes": [
+    "Compare texts only after matching genre and register.",
+    "Rhythm thresholds do not apply to lists, specifications or short samples.",
+    "First person and flat declarative sentences are this blog's register, not tells.",
+    "Repeating a technical term is correct English technical writing."
+  ]
+}
