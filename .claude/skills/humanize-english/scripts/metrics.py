@@ -92,9 +92,11 @@ LIST_MARKER = re.compile(r"\A {0,3}(?:[-*+]|\d{1,9}[.)])(?:[ \t]|\Z)")
 LIST_PREFIX = re.compile(r"\A {0,3}(?:[-*+]|\d{1,9}[.)])[ \t]+")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BLOCKQUOTE_MARK = re.compile(r"\A {0,3}>")
+# `=+` and `-+` are Setext underlines, which turn the line above into a heading
+# and so end the block as surely as a `#` starts one.
 BLOCK_START = re.compile(r"\A {0,3}(?:#{1,6}[ \t]|[-*+][ \t]|\d{1,9}[.)][ \t]"
-                         r"|>|(?:`{3,}|~{3,})|(?:\*[ \t]*){3,}$|(?:-[ \t]*){3,}$"
-                         r"|(?:_[ \t]*){3,}$)")
+                         r"|>|(?:`{3,}|~{3,})|(?:\*[ \t]*){3,}$|(?:_[ \t]*){3,}$"
+                         r"|=+[ \t]*$|-+[ \t]*$)")
 HEADING_MARK = re.compile(r"(?m)^#{1,6}\s*")
 TABLE_RULE = re.compile(
     r"\A {0,3}\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*\Z")
@@ -316,7 +318,10 @@ def strip_blockquotes(text: str) -> str:
             quoting = True
             quoted = line[marked.end():]
             quoted = quoted[1:] if quoted[:1] == " " else quoted
-            lazy = bool(quoted.strip()) and not BLOCK_START.match(quoted)
+            # Four spaces inside the quote is an indented code block, which no
+            # more continues lazily than a heading does.
+            lazy = (bool(quoted.strip()) and not BLOCK_START.match(quoted)
+                    and not quoted[:4].isspace())
         elif quoting and (not lazy or not line.strip()
                           or BLOCK_START.match(line)):
             quoting = False
