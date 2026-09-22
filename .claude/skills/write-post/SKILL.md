@@ -158,11 +158,14 @@ python3 ~/.claude/plugins/marketplaces/im-not-ai/skills/humanize-korean/referenc
   --input content/posts/<slug>/ko.md --genre blog --output /tmp/ko.json
 ```
 
-The Korean runner prints only the risk band and writes the rest to `--output`,
-so read that file. `risk_band` above `low`, a non-empty `conclusion_pivots` or
-`safe_balances`, or a `by_passive_count` above zero is what to act on; the
-`blog` genre falls back to the `essay` baseline, which the output says in
-`warning`.
+The Korean runner prints only the risk band and writes the rest to
+`--output`, so read that file. Read it against the plugin's own thresholds
+rather than against zero: its scorer counts `conclusion_pivot_count` and
+`safe_balance_count` from two occurrences, its density rules want three or
+four, and a single `~에 의해` passive is an S2 that is often just Korean. A
+`risk_band` above `low` is the signal to look; one hit of anything is a
+span to read in context, not a defect to edit out. The `blog` genre falls
+back to the `essay` baseline, which the output says in `warning`.
 
 `references/voice.md` holds what no humanizer can know: the house voice and the
 structural rules, for all three languages. Read it alongside, not instead.

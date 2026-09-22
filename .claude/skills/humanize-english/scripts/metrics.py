@@ -195,8 +195,9 @@ def strip_fences(text: str) -> str:
 
     A closing fence repeats the opener's character at least as many times,
     carries no info string, and sits no more than three spaces past the
-    opener's indentation. A marker indented further is content, which is why
-    one regex cannot do this.
+    container margin — zero at the top level, the item's content column
+    inside a list. A marker indented further is content, which is why one
+    regex cannot do this.
 
     The container stack is not tracked, only whether a list is open, which is
     what decides whether a marker indented past three spaces is a fence or
@@ -207,7 +208,7 @@ def strip_fences(text: str) -> str:
     """
     lines = text.split("\n")
     out = list(lines)
-    opener: tuple[int, int] | None = None
+    opener: tuple[int, int] | None = None  # line, container margin
     char = ""
     length = 0
     in_list = False
@@ -236,7 +237,9 @@ def strip_fences(text: str) -> str:
         indent += offset
         if indent > 3 and not in_list:
             continue
-        opener = (i, indent)
+        # The closer is measured from the container margin, which is zero at
+        # the top level and the item's content column inside a list.
+        opener = (i, indent if in_list else 0)
     return "\n".join(out)
 
 
@@ -260,7 +263,9 @@ def table_prose(text: str) -> str:
             continue
         # A span cannot cross a cell, so split first — on the pipes that
         # divide cells, not on an escaped one, which belongs to the cell.
-        row = row.replace("\\|", "\x00")
+        # An even backslash run escapes itself and leaves the pipe a delimiter.
+        row = "".join("\x00" if ch == "|" and escaped(row, i) else ch
+                      for i, ch in enumerate(row))
         cells.extend(strip_code_spans(c).strip()
                      for c in row.strip().strip("|").split("|"))
     joined = "\n\n".join(c for c in cells if c)
