@@ -41,8 +41,9 @@ PATTERNS: list[tuple[str, str, re.Pattern[str]]] = [
                   r"|\brobust\b|\bseamless(?:ly)?\b|\bpowerful tool\b|\bgame[- ]chang(?:er|ing)\b|\bcutting[- ]edge\b|\btransformative\b"),
     ("C-2", "S2", r"\b(?:simply|just|easily|effortlessly)\b"),
     ("C-3", "S2", r"\bthe \w+(?:tion|ment|ance|ence|ity) of the \w+(?:tion|ment|ance|ence|ity) of\b"),
-    ("C-4", "S1", r"(?i)\w+n[’']t\b|\w+[’'](?:m|re|ve|ll|d)\b"),
-    ("C-5", "S3", r"(?i)\b(?:it|that|there|here|what|who|where|how|he|she|let|when|why|everyone|everybody|someone|somebody|anyone|anybody|nobody|nothing|something)[’']s\b"),
+    ("C-4", "S1", r"(?i)\w+n[’']t\b|\w+[’'](?:m|re|ve|ll|d)\b"
+                  r"|\b(?:it|that|there|here|what|who|where|when|why|how|he|she|let)[’']s\b"),
+    ("C-5", "S3", r"(?i)\b(?:everyone|everybody|someone|somebody|anyone|anybody|nobody|nothing|something)[’']s\b"),
 
     ("D-1", "S2", r"(?m)^(?:Additionally|Furthermore|Moreover|That said|In addition|On the other hand)\b[,.]"),
     ("D-2", "S2", r"(?m)^(?:First(?:ly)?|Next|Then|Finally|Lastly)\b,"),
@@ -84,8 +85,7 @@ PASSIVE = re.compile(
 NOMINALIZATION = re.compile(r"\b\w{4,}(?:tion|ment|ance|ence|ity|ness)\b", re.I)
 
 FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
-FENCED = re.compile(r"(?ms)^(```+|~~~+).*?^\1[`~]*[ \t]*$")
-INDENTED_CODE = re.compile(r"(?m)^(?: {4}|\t).*$")
+FENCED = re.compile(r"(?ms)^ {0,3}(```+|~~~+).*?^ {0,3}\1[`~]*[ \t]*$")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BLOCKQUOTE = re.compile(r"(?m)^>.*$")
@@ -116,14 +116,19 @@ def front_matter_prose(text: str) -> str:
     values = []
     for m in FM_FIELD.finditer(fm.group(0)):
         value = re.sub(r"\A>-?[ \t]*\n?", "", m.group(1))
-        values.append(re.sub(r"\s+", " ", value).strip())
+        value = re.sub(r"\s+", " ", value).strip()
+        if len(value) > 1 and value[0] == value[-1] == "'":
+            value = value[1:-1].replace("''", "'")
+        elif len(value) > 1 and value[0] == value[-1] == '"':
+            value = value[1:-1].replace('\\"', '"')
+        values.append(value)
     return "\n\n".join(v for v in values if v)
 
 
 def strip_nonprose(text: str) -> str:
     """Remove everything that is not editable prose."""
     for pattern, repl in ((FRONT_MATTER, ""), (FENCED, " "),
-                          (INDENTED_CODE, " "), (TABLE_ROW, " "),
+                          (TABLE_ROW, " "),
                           (INLINE_CODE, " "), (LINK_TARGET, "]"), (URL, " "),
                           (BLOCKQUOTE, " ")):
         text = pattern.sub(repl, text)

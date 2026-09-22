@@ -58,13 +58,18 @@ Both name something real. Neither announces what the paragraph is going to do.
     content/posts/<slug>/en.md --compact | rg -o '"C-[45]": [0-9]+'
   ```
 
-  C-4 covers `n't` and `'m/'re/'ve/'ll/'d` on any word, both apostrophes, any
-  case, in the body and in `title` and `summary` — those two render on the
-  index and in the feed, so they are part of the post. Every match is a violation. **C-5 is the part a script cannot close:**
-  `everyone's ready` and `everyone's coat` are the same string, so C-5 reports
-  `'s` after a pronoun, a wh-word or an indefinite pronoun and leaves the call
-  to you. A `'s` after a name or a plain noun is not reported at all — if the draft has one, it needs your eye,
-  not the counter.
+  C-4 takes everything that cannot be a possessive: `n't` and
+  `'m/'re/'ve/'ll/'d` on any word, and `'s` after a pronoun or a wh-word
+  (`it's`, `he's`, `what's`, `let's`). Either apostrophe, any case, in the
+  body and in `title` and `summary` — those two render on the index and in
+  the feed, so they are part of the post. Every match is a violation.
+
+  **C-5 is the part a script cannot close.** `everyone's ready` and
+  `everyone's coat` are the same string, so C-5 counts `'s` after an
+  indefinite pronoun and leaves the call to you. A `'s` after a name or a
+  plain noun is not reported at all, and neither is a four-space indented
+  code block, which the stripper cannot tell from a list's continuation
+  paragraph — fence pasted output instead.
 
 ## Structure, all three languages
 
