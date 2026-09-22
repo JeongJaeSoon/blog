@@ -86,11 +86,13 @@ Both name something real. Neither announces what the paragraph is going to do.
   it from a list's continuation paragraph and keeping the paragraph matters
   more.
 
-  The stripper does not track container indentation, which a Markdown parser
-  would. A four-space marker therefore opens a fence even where CommonMark
-  calls it content, so an opener with no closer is left alone instead of
-  swallowing the rest of the file. Scanning too much costs a reading;
-  scanning nothing reports zero and passes.
+  The stripper is not a Markdown parser. It knows whether a list is open,
+  which is enough to tell a fence indented four spaces from a stray marker at
+  the margin, and it stops there — a fence nested two containers deep is
+  beyond it. Where it has to guess it guesses towards reading: an opener with
+  no closer is left alone instead of swallowing the rest of the file, because
+  scanning too much costs a reading while scanning nothing reports zero and
+  passes.
 
 ## Structure, all three languages
 

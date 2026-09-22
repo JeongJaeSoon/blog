@@ -88,8 +88,9 @@ FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
 FENCE_LINE = re.compile(r"\A([ \t]*)(`{3,}|~{3,})(.*)\Z")
 BACKTICK_RUN = re.compile(r"`+")
 BLANK_LINE = re.compile(r"\n[ \t]*\n")
+LIST_MARKER = re.compile(r"\A {0,3}(?:[-*+]|\d{1,9}[.)])(?:[ \t]|\Z)")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
-BLOCKQUOTE = re.compile(r"(?m)^>.*$")
+BLOCKQUOTE = re.compile(r"(?m)^ {0,3}>.*$")
 HEADING_MARK = re.compile(r"(?m)^#{1,6}\s*")
 TABLE_ROW = re.compile(r"(?m)^\|.*\|[ \t]*$")
 TABLE_RULE = re.compile(r"\A[\s|:-]+\Z")
@@ -143,6 +144,14 @@ def fence_marker(line: str) -> tuple[int, str, int, str] | None:
     return len(indent.expandtabs()), mark[0], len(mark), info
 
 
+def escaped(text: str, position: int) -> bool:
+    """An odd run of backslashes before `position` escapes what follows."""
+    backslashes = 0
+    while position - backslashes > 0 and text[position - backslashes - 1] == "\\":
+        backslashes += 1
+    return backslashes % 2 == 1
+
+
 def strip_code_spans(text: str) -> str:
     """Blank out code spans, keeping the newlines so the layout survives.
 
@@ -153,7 +162,8 @@ def strip_code_spans(text: str) -> str:
     to close a run of three with a run of two and carry off the prose in
     between.
     """
-    runs = [m.span() for m in BACKTICK_RUN.finditer(text)]
+    runs = [m.span() for m in BACKTICK_RUN.finditer(text)
+            if not escaped(text, m.start())]
     breaks = [m.start() for m in BLANK_LINE.finditer(text)]
     out = list(text)
     i = 0
@@ -182,23 +192,32 @@ def strip_fences(text: str) -> str:
     opener's indentation. A marker indented further is content, which is why
     one regex cannot do this.
 
-    Container indentation is not tracked, so a four-space marker reads as an
-    opener even where CommonMark calls it content. An opener with no closer is
-    therefore left alone rather than swallowing the rest of the document: a gate
-    that scans too much only costs a reading, while one that scans nothing
-    reports zero and passes.
+    The container stack is not tracked, only whether a list is open, which is
+    what decides whether a marker indented past three spaces is a fence or
+    content. Nesting deeper than that needs a parser. An opener with no closer
+    is left alone rather than swallowing the rest of the document: a gate that
+    scans too much only costs a reading, while one that scans nothing reports
+    zero and passes.
     """
     lines = text.split("\n")
     out = list(lines)
     opener: tuple[int, int] | None = None
     char = ""
     length = 0
+    in_list = False
     for i, line in enumerate(lines):
         fence = fence_marker(line)
         if opener is None:
+            if line.strip():
+                if LIST_MARKER.match(line):
+                    in_list = True
+                elif not line[:1].isspace():
+                    in_list = False
             if not fence:
                 continue
             indent, char, length, _info = fence
+            if indent > 3 and not in_list:
+                continue
             opener = (i, indent)
         elif fence and fence[1] == char and fence[2] >= length \
                 and not fence[3].strip() and fence[0] <= opener[1] + 3:
