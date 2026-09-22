@@ -273,42 +273,12 @@ def strip_fences(text: str) -> str:
     return "\n".join(out)
 
 
-def row_cells(row: str) -> list[str]:
-    """A row's cells, split on the pipes that divide them.
-
-    An escaped pipe belongs to the cell. An even backslash run escapes itself
-    and leaves the pipe a delimiter. GFM splits rows before inline parsing, so
-    a backtick span does not shield a pipe either.
-    """
-    # A table may open on the list marker's own line, where the marker is not
-    # cell content. GFM reads `- | a | b |` as a two-cell row.
-    row = LIST_PREFIX.sub("", row, count=1)
-    # Only spaces and tabs are Markdown whitespace. A non-breaking space at an
-    # edge is cell content, and trimming it would move the outer delimiter.
-    marked = "".join("\x00" if ch == "|" and escaped(row, i) else ch
-                     for i, ch in enumerate(row)).strip(" \t")
-    # One optional delimiter comes off each side, not every pipe there: `||`
-    # at an edge is an empty first or last cell, and dropping both loses it.
-    marked = marked[1:] if marked[:1] == "|" else marked
-    marked = marked[:-1] if marked[-1:] == "|" else marked
-    return [c.replace("\x00", "|") for c in marked.split("|")]
-
-
 def table_lines(text: str) -> tuple[set[int], list[str]]:
     """Which lines belong to a table, and the rows worth reading.
 
     A pipe does not make a table — prose is full of them — so the rule row
     underneath the header is what identifies one. Outer pipes are optional,
-    which is why matching the row shape alone does not work. The header and
-    the rule must also divide into the same number of cells; GFM renders a
-    mismatch as an ordinary paragraph, where a backtick span still hides its
-    contents.
-
-    ponytail: that count is the one rule here that guesses towards reading
-    less — a row shape this does not know becomes a paragraph, and a span may
-    then pair across what were cells. Three container forms have already had
-    to be taught to `row_cells`. If a fourth costs a real contraction in a
-    post, drop the count and take the false positive instead.
+    which is why matching the row shape alone does not work.
     """
     lines = text.split("\n")
     owned: set[int] = set()
@@ -316,8 +286,7 @@ def table_lines(text: str) -> tuple[set[int], list[str]]:
     i = 0
     while i + 1 < len(lines):
         if "|" not in lines[i] or not TABLE_RULE.match(lines[i + 1]) \
-                or "|" not in lines[i + 1] \
-                or len(row_cells(lines[i])) != len(row_cells(lines[i + 1])):
+                or "|" not in lines[i + 1]:
             i += 1
             continue
         owned.update((i, i + 1))
@@ -383,12 +352,17 @@ def table_prose(text: str) -> str:
     body = strip_fences(FRONT_MATTER.sub("", text, count=1))
     cells: list[str] = []
     for row in table_lines(body)[1]:
-        # A span cannot cross a cell, so split before scanning for one.
-        cells.extend(strip_code_spans(c).strip() for c in row_cells(row))
+        # A span cannot cross a cell, so split first — on the pipes that
+        # divide cells, not on an escaped one, which belongs to the cell.
+        # An even backslash run escapes itself and leaves the pipe a delimiter.
+        row = "".join("\x00" if ch == "|" and escaped(row, i) else ch
+                      for i, ch in enumerate(row))
+        cells.extend(strip_code_spans(c).strip()
+                     for c in row.strip().strip("|").split("|"))
     joined = "\n\n".join(c for c in cells if c)
     for pattern, repl in ((LINK_TARGET, "]"), (URL, " ")):
         joined = pattern.sub(repl, joined)
-    return joined
+    return joined.replace("\x00", "|")
 
 
 def mask_protected(text: str, protected: Iterable[str]) -> str:
