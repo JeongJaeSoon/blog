@@ -89,6 +89,7 @@ FENCE_LINE = re.compile(r"\A([ \t]*)(`{3,}|~{3,})(.*)\Z")
 BACKTICK_RUN = re.compile(r"`+")
 BLANK_LINE = re.compile(r"\n[ \t]*\n")
 LIST_MARKER = re.compile(r"\A {0,3}(?:[-*+]|\d{1,9}[.)])(?:[ \t]|\Z)")
+LIST_PREFIX = re.compile(r"\A {0,3}(?:[-*+]|\d{1,9}[.)])[ \t]+")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BLOCKQUOTE = re.compile(r"(?m)^ {0,3}>.*$")
 HEADING_MARK = re.compile(r"(?m)^#{1,6}\s*")
@@ -158,17 +159,22 @@ def strip_code_spans(text: str) -> str:
     A backtick run opens a span and the next run of exactly the same length
     closes it, across line breaks but not across a blank line, because a span
     is inline. A run with no equal-length partner in the same block is
-    literal text. None of that survives a backtracking regex, which is happy
+    literal text, and a backslash escapes an opening run but never a closing
+    one. None of that survives a backtracking regex, which is happy
     to close a run of three with a run of two and carry off the prose in
     between.
     """
-    runs = [m.span() for m in BACKTICK_RUN.finditer(text)
-            if not escaped(text, m.start())]
+    runs = [m.span() for m in BACKTICK_RUN.finditer(text)]
     breaks = [m.start() for m in BLANK_LINE.finditer(text)]
     out = list(text)
     i = 0
     while i < len(runs):
         start, end = runs[i]
+        # A backslash escapes a backtick in prose but not inside a span, so
+        # only an opener can be escaped away.
+        if escaped(text, start):
+            i += 1
+            continue
         width = end - start
         limit = next((b for b in breaks if b > start), len(text))
         closer = next((j for j in range(i + 1, len(runs))
@@ -206,24 +212,31 @@ def strip_fences(text: str) -> str:
     length = 0
     in_list = False
     for i, line in enumerate(lines):
-        fence = fence_marker(line)
-        if opener is None:
-            if line.strip():
-                if LIST_MARKER.match(line):
-                    in_list = True
-                elif not line[:1].isspace():
-                    in_list = False
-            if not fence:
-                continue
-            indent, char, length, _info = fence
-            if indent > 3 and not in_list:
-                continue
-            opener = (i, indent)
-        elif fence and fence[1] == char and fence[2] >= length \
-                and not fence[3].strip() and fence[0] <= opener[1] + 3:
-            for j in range(opener[0], i + 1):
-                out[j] = " "
-            opener = None
+        if opener is not None:
+            fence = fence_marker(line)
+            if fence and fence[1] == char and fence[2] >= length \
+                    and not fence[3].strip() and fence[0] <= opener[1] + 3:
+                for j in range(opener[0], i + 1):
+                    out[j] = " "
+                opener = None
+            continue
+        if line.strip():
+            if LIST_MARKER.match(line):
+                in_list = True
+            elif not line[:1].isspace():
+                in_list = False
+        # A fence may start on the list-marker line, where its indentation is
+        # measured from the item's content column.
+        prefix = LIST_PREFIX.match(line)
+        offset = len(prefix.group(0).expandtabs()) if prefix else 0
+        fence = fence_marker(line[prefix.end():] if prefix else line)
+        if not fence:
+            continue
+        indent, char, length, _info = fence
+        indent += offset
+        if indent > 3 and not in_list:
+            continue
+        opener = (i, indent)
     return "\n".join(out)
 
 
@@ -245,10 +258,11 @@ def table_prose(text: str) -> str:
     for row in TABLE_ROW.findall(body):
         if TABLE_RULE.match(row):
             continue
-        # A span cannot cross a cell, so read each row on its own, and an
-        # escaped pipe belongs to the cell rather than to the table.
-        row = strip_code_spans(row).replace("\\|", "\x00")
-        cells.extend(c.strip() for c in row.strip().strip("|").split("|"))
+        # A span cannot cross a cell, so split first — on the pipes that
+        # divide cells, not on an escaped one, which belongs to the cell.
+        row = row.replace("\\|", "\x00")
+        cells.extend(strip_code_spans(c).strip()
+                     for c in row.strip().strip("|").split("|"))
     joined = "\n\n".join(c for c in cells if c)
     for pattern, repl in ((LINK_TARGET, "]"), (URL, " ")):
         joined = pattern.sub(repl, joined)
