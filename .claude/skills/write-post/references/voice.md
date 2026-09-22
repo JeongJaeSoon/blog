@@ -1,35 +1,17 @@
 # House voice
 
-Scope: this file owns **English** style, plus the structural rules that apply to
-all three languages.
+What no humanizer can know, because it is about this blog rather than about a
+language. Applies to all three renditions equally.
 
-It does **not** own Korean or Japanese sentence style. Those have real
-taxonomies behind them and the skills are enabled for this repo:
+Language-level AI tells are not here. Each language has a skill with a
+taxonomy, and `write-post` says which:
 
-- ko → `humanize-korean` (plugin `im-not-ai`, 10 categories / 70 patterns)
-- ja → `humanize-japanese` (plugin `im-not-ai-ja`)
+- ko → `humanize-korean`
+- ja → `humanize-japanese`
+- en → `humanize-english`
 
-Do not re-derive their rules here. A flat ban list is worse than a taxonomy that
-weighs repetition, co-occurrence and register — and worse than one that knows
-`-습니다` and `です・ます` are not AI tells.
-
-### Why English has no skill
-
-Searched, nothing worth a dependency. The English anti-slop skills that exist
-are single-author one-offs with no taxonomy IDs, no severity levels, no
-protected-term handling and no metrics — nothing like the two above. The best of
-them (`willcheung/no-ai-slop-writing-skill`, MIT) is well written and this file
-borrows two of its ideas, but it teaches a *conversational* voice — contractions,
-sentence-opening "And", spoken rhythm — and this blog's English is measured and
-declarative. Adopting it would fight the register.
-
-English here is also a rendition, not the origin. The author thinks in Korean,
-so the English failure mode is translationese and flattening, not native slop.
-That is a different job from what a humanizer does.
-
-Revisit if something with a real taxonomy appears. Until then this file is the
-owner, and it is held to the same standard as the two skills: evidence over
-blacklist, protect what was measured, never normalise the register.
+Do not re-derive their rules here. A flat ban list is worse than a taxonomy
+that weighs repetition, co-occurrence and register.
 
 The voice itself is already on disk. Before editing, read one existing post in
 the language you are working in: `content/posts/rebuilding-this-site/en.md` and
@@ -48,69 +30,34 @@ were observed, not reasoned about.
 
 Both name something real. Neither announces what the paragraph is going to do.
 
-## Cut on sight — English
+## Non-negotiable
 
-| Pattern | Instead |
-|---|---|
-| "In this post, I'll walk through…" | The first real sentence of the story |
-| "Let's dive in", "Let's take a look at" | Nothing. Show the thing. |
-| "It's important to note that", "It's worth mentioning" | State it, or cut it |
-| "can be a powerful tool", "a game changer", "seamlessly", "robust" | What it does, measured |
-| "simply", "just", "easily" | Delete. It was not easy or you would not be writing about it. |
-| "leverage", "utilize" | "use" |
-| "delve into", "explore", "unpack" | The verb for what you actually did |
-| "Whether you're a beginner or an expert…" | Delete. There is one reader. |
-| "Not only … but also", "That said," opening every third paragraph | Vary or cut the connective |
-| "In conclusion", "To sum up" | Delete the sentence; keep the finding |
-| Em-dash asides in three consecutive sentences | One per paragraph at most |
-| Rule-of-three lists that fill out to three | Two is a fine number of reasons |
+- **Keep the dead ends.** The failed attempt and the wrong hypothesis are the
+  most useful part of the post. They are also the first thing a tone pass
+  smooths away — check they survived it.
+- **Protect what was measured.** Identifiers, file paths, config keys,
+  versions, every number, and any pasted output are not prose. An edit that
+  "improves" `fsSelection` or rounds 1,185.8 has broken the post. Pass them as
+  protected terms on every humanizer run.
+- **Keep stated uncertainty uncertain.** If the draft says something was not
+  verified, it stays not verified in all three languages.
+- **One register per language, matching the existing posts.** Korean is
+  `-습니다`체 throughout. English is measured and declarative, not
+  conversational — do not let a humanizer add contractions and spoken rhythm.
 
-One hit is not a finding. Judge on repetition and co-occurrence, the way the ko
-and ja taxonomies do — a single "just" in a 1,500-word post is not the problem.
+## Structure, all three languages
 
-Hedging is the loudest tell. "This might potentially help improve performance in
-some cases" describes nothing. Either it got faster and you have the number, or
-you do not mention it.
+- Open on the concrete situation, never on what the article will cover.
+- Headings say what the section concludes, not what it is about.
+- Code blocks and tables hold pasted, real content. A table that restates the
+  prose beside it is noise; delete it.
+- Sections differ in length. Three evenly sized sections means an outline got
+  published.
+- Stop when the content stops. A closing section is allowed only when it adds
+  something absent above: what is unsolved, what to do next, what you would do
+  differently.
 
-### Shapes, not words
-
-The word list is the easy half. These are the structural ones, and they survive
-a find-and-replace:
-
-- Repeated "not X, but Y" — once is a sentence, three times is a template.
-- Throat-clearing openers: "Here's the thing", "The thing is".
-- Faux insight: "what everyone gets wrong", "the real reason".
-- A colon reveal, or a rhetorical question the next sentence answers.
-- Takeaways generic enough to belong to any post on the subject.
-- Decorative em dashes in short copy.
-
-The language-agnostic shapes are below under *Structural tells*; they apply here
-too.
-
-### Protect before editing
-
-The ko and ja skills take protected terms explicitly. English gets no tool for
-it, so hold the same line by hand: identifiers, file paths, config keys,
-versions, every number, and any pasted output are not editable prose. A tone
-pass that "improves" `fsSelection` or rounds 1,185.8 has broken the post, not
-polished it. The same goes for stated uncertainty — if the draft says something
-was not verified, it stays not verified.
-
-## Korean and Japanese — what stays here
-
-Only the things a general-purpose humanizer cannot know, because they are about
-this blog rather than about the language:
-
-- `-습니다`체로 통일합니다. 기존 글이 전부 그렇습니다. 문체 판단 자체는
-  `humanize-korean`에 맡기고, 여기서는 기존 글과의 일관성만 봅니다.
-- 첫 문장은 실제 상황입니다. "이 글에서는 ~를 살펴보겠습니다" 같은 예고로 열지
-  않습니다.
-- 실패한 시도와 막힌 지점을 지우지 않습니다. 윤문 과정에서 가장 먼저 매끈하게
-  다듬어 없어지는 부분이고, 이 블로그에서 가장 읽을 만한 부분입니다.
-- 수치, 파일 경로, 설정 키, 식별자는 보호어로 넘깁니다. 윤문이 이것들을
-  "자연스럽게" 바꾸면 글이 틀려집니다.
-
-## Structural tells, all three languages
+## Structural tells
 
 - Every section the same length.
 - Every section ending with a sentence that restates the section.
@@ -119,13 +66,3 @@ this blog rather than about the language:
 - A table whose cells are adjectives.
 - No dead ends anywhere. Real work has them; a post without any was not written
   from real work.
-
-## Check
-
-```sh
-.claude/skills/write-post/scripts/tells.sh content/posts/<slug>
-```
-
-This is a grep net for the obvious English cases, with a thin Korean net kept as
-a pre-check before `humanize-korean` runs. It is not the standard — a draft can
-pass it and still read like an essay generated from a heading list.

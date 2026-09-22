@@ -75,43 +75,48 @@ subject stated.
 Do this as a separate pass, after the draft is finished. Editing for tone while
 drafting produces neither.
 
-Two of the three languages have a real taxonomy behind them. Use it — do not
-hand-roll style rules for ko or ja in this repo.
+One skill per language, same contract in all three — severity levels, taxonomy
+IDs, protected terms, Fast/Strict/diagnose-only modes, a metrics script:
 
-| | Owner | Enabled by |
+| | Skill | Where it comes from |
 |---|---|---|
-| ko | `humanize-korean` skill — 10 categories, 70 patterns | `.claude/settings.json` (plugin `im-not-ai`, pinned `v2.3.2`) |
-| ja | `humanize-japanese` skill — taxonomy + `metrics.py` | `.claude/settings.json` (plugin `im-not-ai-ja`) |
-| en | `references/voice.md` + `scripts/tells.sh` | this repo — no equivalent skill exists |
+| ko | `humanize-korean` | plugin `im-not-ai`, pinned `v2.3.2` |
+| ja | `humanize-japanese` | plugin `im-not-ai-ja` |
+| en | `humanize-english` | `.claude/skills/humanize-english/` in this repo |
 
-Both plugins are enabled for **this repo only**. Nothing is installed into
-`~/.claude`; do not run either repo's `install.sh`.
+The two plugins are enabled in `.claude/settings.json` **for this repo only**.
+Nothing is installed into `~/.claude`; do not run either upstream repo's
+`install.sh`. `humanize-english` is local because no English skill worth a
+dependency exists — its reasoning is in its taxonomy, section I.
 
-How to drive them:
+Drive all three the same way:
 
-- Default (Fast) is right for a post of this length. Reach for `--strict` only
-  past ~8,000 characters.
-- Pass the identifiers as protected terms so they cannot be "improved":
-  `MenloCJK`, `Orca`, `iTerm2`, `Chromium`, `fsSelection`, file paths, every
-  number. The Japanese skill takes them via `metrics.py --protect`.
-- `--diagnose-only` when you want the findings without a rewrite.
-- Politeness is not an AI tell. `です・ます` and `-습니다` stay; both skills say
-  so explicitly and both are this blog's register.
-- Report findings by their taxonomy ID, and say why you kept anything you kept.
+- Fast is the default and is right for a post of this length. `--strict` only
+  for a long one.
+- Pass the identifiers as protected terms every time: `MenloCJK`, `Orca`,
+  `iTerm2`, `Chromium`, `fsSelection`, file paths, config keys, and every
+  number. ko and ja take them as protected terms; `humanize-english` takes
+  `--protect`.
+- `--diagnose-only` when you want findings without a rewrite.
+- Politeness is not an AI tell. `-습니다` and `です・ます` stay. Neither is flat
+  declarative English — that is this blog's register.
+- Report findings by taxonomy ID and give a reason for anything kept.
+- A document-scope rhythm finding (`G-1`, `G-2`) is advisory. Technical prose
+  full of identifiers clusters around the median legitimately, and all three
+  taxonomies say not to rewrite on the number alone.
 
-For ja you can check the result yourself:
+Verify each language with its own script:
 
 ```sh
+python3 .claude/skills/humanize-english/scripts/metrics.py \
+  content/posts/<slug>/en.md --protect MenloCJK --compact
+
 python3 ~/.claude/plugins/marketplaces/im-not-ai-ja/skills/humanize-japanese/scripts/metrics.py \
   content/posts/<slug>/ja.md --compact
 ```
 
-A `G-1` (low sentence-length CV) finding is document-scope and advisory — the
-taxonomy says not to rewrite on the number alone. Technical prose full of
-identifiers clusters around the median legitimately.
-
-For **en**, apply `references/voice.md`, then run `scripts/tells.sh` and resolve
-every hit or justify it.
+`references/voice.md` holds what no humanizer can know: the house voice and the
+structural rules, for all three languages. Read it alongside, not instead.
 
 ## Checklist
 
@@ -119,7 +124,8 @@ every hit or justify it.
 2. At least one thing that did not work is in the post.
 3. At least one real number, path or pasted output is in the post.
 4. Nothing asserted that was not observed.
-5. ko went through `humanize-korean`, ja through `humanize-japanese`, en
-   through `references/voice.md` + `scripts/tells.sh`. Findings reported by
-   taxonomy ID, with a reason for anything kept.
+5. Each language went through its skill — ko `humanize-korean`, ja
+   `humanize-japanese`, en `humanize-english` — with the identifiers passed as
+   protected terms. Findings reported by taxonomy ID, with a reason for
+   anything kept, and no protected token lost.
 6. `bun run build` passes, with the output shown.
