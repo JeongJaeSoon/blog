@@ -86,7 +86,7 @@ NOMINALIZATION = re.compile(r"\b\w{4,}(?:tion|ment|ance|ence|ity|ness)\b", re.I)
 
 FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
 FENCE_LINE = re.compile(r"\A([ \t]*)(`{3,}|~{3,})(.*)\Z")
-INLINE_CODE = re.compile(r"(`+)(?:(?!\1)[^\n])*\1")
+INLINE_CODE = re.compile(r"(?<!`)(`+)(?:(?!\1)[^\n])*\1(?!`)")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BLOCKQUOTE = re.compile(r"(?m)^>.*$")
 HEADING_MARK = re.compile(r"(?m)^#{1,6}\s*")
