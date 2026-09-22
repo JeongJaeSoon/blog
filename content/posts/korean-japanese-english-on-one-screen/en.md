@@ -2,10 +2,10 @@
 title: Picking a font when Korean, Japanese and English share one screen
 date: '2026-09-22'
 summary: >-
-  Working in Japan means Latin, kana, kanji and Hangul arrive on the same line.
-  No monospace font has all three, so VSCode, iTerm2 and Orca each filled the
-  gaps with a different one. Merging them into one family was the quick part; the
-  time went into the apps' rendering settings.
+  Commit messages in Korean, comments and logs in Japanese, code in English, all
+  on one screen. No monospace font has all three, so VSCode, iTerm2 and Orca each
+  filled the gaps with a different one. Merging them into one family was the quick
+  part; the time went into the apps' rendering settings.
 lang: en
 tags:
   - fonts
@@ -14,7 +14,7 @@ tags:
 draft: true
 ---
 
-I work in Japan, so three scripts go past me in a day. The thinking is Korean, the tickets and comments and logs are Japanese, and the code is English. They don't get a file each, either. What lands on screen looks roughly like this.
+I work in Japan, so my screen ends up like this.
 
 ```text
 a1b2c3d 청구서 재발행 시 pending 이 남던 문제 수정
@@ -23,11 +23,9 @@ a1b2c3d 청구서 재발행 시 pending 이 남던 문제 수정
 await clearPendingFlag(invoiceId)
 ```
 
-That is Latin, kana and kanji, and Hangul inside three lines. No monospace font has all three, so the app falls back to fill the gaps — and VSCode, iTerm2 and Orca each picked a different font for it. With all three open side by side on the same file, Korean looked different in every one. All three were set to 14px and they still didn't match.
+No monospace font has all three. The app falls back to fill what is missing, and VSCode, iTerm2 and Orca each picked a different font for it. With all three open side by side on the same file, Korean looked different in every one. They were all set to 14px and still didn't match.
 
-Merging them into one font looked like the whole job. The merge really did come down to three scripts. What came after took the time. Same font, same size, three different results. Most of the causes were outside the font file, and the one inside it was metadata only iTerm2 reads.
-
-The scripts are at [JeongJaeSoon/menlocjk](https://github.com/JeongJaeSoon/menlocjk). Installation is written up there, so this is only what I learned along the way.
+Merging them into one font looked like the whole job. The merge really did come down to three scripts, and the time went into what came after. Same font, same size, three different results. Most of the causes were outside the font file, and the one inside it was metadata only iTerm2 reads.
 
 ## One line comes out of three fonts
 
@@ -190,7 +188,7 @@ The three lines at the top of this post now come out at the same weight in all t
 | UDEV Gothic NF | SIL OFL 1.1 | Yes |
 | D2Coding | SIL OFL 1.1 | Yes |
 
-With Menlo in the mix the result stays on my own Mac. That's why the repository has the scripts and no `.ttf` — everyone builds it themselves.
+With Menlo in the mix the result stays on my own Mac. That's why [JeongJaeSoon/menlocjk](https://github.com/JeongJaeSoon/menlocjk) has the scripts and no `.ttf` — installation is written up there, and everyone builds it themselves.
 
 For a redistributable variant, swap Menlo out of `prep.py` for MesloLGS NF. It's Apache-2.0, it's a Menlo clone, and its advance is the same 1233, so the grid worked out above survives the swap.
 
