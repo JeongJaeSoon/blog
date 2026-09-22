@@ -3,9 +3,9 @@ title: Picking a font when Korean, Japanese and English share one screen
 date: '2026-09-22'
 summary: >-
   Commit messages in Korean, comments and logs in Japanese, code in English, all
-  on one screen. No monospace font has all three, so VSCode, iTerm2 and Orca each
-  filled the gaps with a different one. Merging them into one family was the quick
-  part; the time went into the apps' rendering settings.
+  on one screen. VSCode, iTerm2 and Orca each filled the gaps with a different
+  font, so the same character came out three ways. Merging them into one family
+  was the quick part; the time went into the apps' rendering settings.
 lang: en
 tags:
   - fonts
@@ -14,7 +14,7 @@ tags:
 draft: true
 ---
 
-I work in Japan, so my screen ends up like this.
+Developing in Japan puts Korean, Japanese and English on the same screen, and I never found a monospace font that made all three look right together. Here is what a line of it looks like.
 
 ```text
 a1b2c3d 청구서 재발행 시 pending 이 남던 문제 수정
@@ -23,7 +23,7 @@ a1b2c3d 청구서 재발행 시 pending 이 남던 문제 수정
 await clearPendingFlag(invoiceId)
 ```
 
-No monospace font has all three. The app falls back to fill what is missing, and VSCode, iTerm2 and Orca each picked a different font for it. With all three open side by side on the same file, Korean looked different in every one. They were all set to 14px and still didn't match.
+No font has all three. The app falls back to fill what is missing, and VSCode, iTerm2 and Orca each picked a different font for it. With all three open side by side on the same file, Korean looked different in every one. They were all set to 14px and still didn't match.
 
 Merging them into one font looked like the whole job. The merge really did come down to three scripts, and the time went into what came after. Same font, same size, three different results. Most of the causes were outside the font file, and the one inside it was metadata only iTerm2 reads.
 
