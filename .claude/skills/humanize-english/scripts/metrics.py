@@ -86,7 +86,8 @@ NOMINALIZATION = re.compile(r"\b\w{4,}(?:tion|ment|ance|ence|ity|ness)\b", re.I)
 
 FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
 FENCE_LINE = re.compile(r"\A([ \t]*)(`{3,}|~{3,})(.*)\Z")
-INLINE_CODE = re.compile(r"(?<!`)(`+)(?:(?!\1)[^\n])*\1(?!`)")
+BACKTICK_RUN = re.compile(r"`+")
+BLANK_LINE = re.compile(r"\n[ \t]*\n")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BLOCKQUOTE = re.compile(r"(?m)^>.*$")
 HEADING_MARK = re.compile(r"(?m)^#{1,6}\s*")
@@ -142,6 +143,37 @@ def fence_marker(line: str) -> tuple[int, str, int, str] | None:
     return len(indent.expandtabs()), mark[0], len(mark), info
 
 
+def strip_code_spans(text: str) -> str:
+    """Blank out code spans, keeping the newlines so the layout survives.
+
+    A backtick run opens a span and the next run of exactly the same length
+    closes it, across line breaks but not across a blank line, because a span
+    is inline. A run with no equal-length partner in the same block is
+    literal text. None of that survives a backtracking regex, which is happy
+    to close a run of three with a run of two and carry off the prose in
+    between.
+    """
+    runs = [m.span() for m in BACKTICK_RUN.finditer(text)]
+    breaks = [m.start() for m in BLANK_LINE.finditer(text)]
+    out = list(text)
+    i = 0
+    while i < len(runs):
+        start, end = runs[i]
+        width = end - start
+        limit = next((b for b in breaks if b > start), len(text))
+        closer = next((j for j in range(i + 1, len(runs))
+                       if runs[j][1] <= limit and runs[j][1] - runs[j][0] == width),
+                      None)
+        if closer is None:
+            i += 1
+            continue
+        for k in range(start, runs[closer][1]):
+            if out[k] != "\n":
+                out[k] = " "
+        i = closer + 1
+    return "".join(out)
+
+
 def strip_fences(text: str) -> str:
     """Blank out fenced blocks.
 
@@ -179,9 +211,10 @@ def strip_fences(text: str) -> str:
 def strip_nonprose(text: str) -> str:
     """Remove everything that is not editable prose."""
     text = strip_fences(FRONT_MATTER.sub("", text))
-    for pattern, repl in ((TABLE_ROW, " "),
-                          (INLINE_CODE, " "), (LINK_TARGET, "]"), (URL, " "),
-                          (BLOCKQUOTE, " ")):
+    # Rows go before the span scan: each row is its own inline block, and
+    # `table_prose` reads their cells.
+    text = strip_code_spans(TABLE_ROW.sub(" ", text))
+    for pattern, repl in ((LINK_TARGET, "]"), (URL, " "), (BLOCKQUOTE, " ")):
         text = pattern.sub(repl, text)
     return HEADING_MARK.sub("", text)
 
@@ -193,12 +226,12 @@ def table_prose(text: str) -> str:
     for row in TABLE_ROW.findall(body):
         if TABLE_RULE.match(row):
             continue
-        # An escaped pipe belongs to the cell, so hide it before splitting,
-        # and drop code spans first or a pipe inside one tears them apart.
-        row = INLINE_CODE.sub(" ", row.replace("\\|", "\x00"))
+        # A span cannot cross a cell, so read each row on its own, and an
+        # escaped pipe belongs to the cell rather than to the table.
+        row = strip_code_spans(row).replace("\\|", "\x00")
         cells.extend(c.strip() for c in row.strip().strip("|").split("|"))
     joined = "\n\n".join(c for c in cells if c)
-    for pattern, repl in ((INLINE_CODE, " "), (LINK_TARGET, "]"), (URL, " ")):
+    for pattern, repl in ((LINK_TARGET, "]"), (URL, " ")):
         joined = pattern.sub(repl, joined)
     return joined.replace("\x00", "|")
 
