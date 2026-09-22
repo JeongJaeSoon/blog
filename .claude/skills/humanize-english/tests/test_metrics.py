@@ -32,6 +32,7 @@ EXPECTED: dict[str, tuple[list[str], list[str]]] = {
     "straight-apostrophes": (
         ["We're", "you've", "He'll", "It's", "didn't", "I'm"], ["Everyone's"],
     ),
+    "empty-edge-cells": (["can't", "isn't"], []),
     "curly-apostrophes": (
         ["didn’t", "I’m", "they’ve"], ["Everyone’s"],
     ),

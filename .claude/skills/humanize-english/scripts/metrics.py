@@ -281,9 +281,12 @@ def row_cells(row: str) -> list[str]:
     a backtick span does not shield a pipe either.
     """
     marked = "".join("\x00" if ch == "|" and escaped(row, i) else ch
-                     for i, ch in enumerate(row))
-    return [c.replace("\x00", "|")
-            for c in marked.strip().strip("|").split("|")]
+                     for i, ch in enumerate(row)).strip()
+    # One optional delimiter comes off each side, not every pipe there: `||`
+    # at an edge is an empty first or last cell, and dropping both loses it.
+    marked = marked[1:] if marked[:1] == "|" else marked
+    marked = marked[:-1] if marked[-1:] == "|" else marked
+    return [c.replace("\x00", "|") for c in marked.split("|")]
 
 
 def table_lines(text: str) -> tuple[set[int], list[str]]:
