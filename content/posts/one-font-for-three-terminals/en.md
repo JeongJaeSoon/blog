@@ -13,7 +13,7 @@ tags:
 draft: true
 ---
 
-With VSCode, iTerm2 and Orca open side by side on the same file, Korean looked different in all three. The size was 14px everywhere, but the weight varied, and in some of them Hangul lined up with the Latin grid while in others it didn't. Each app was falling back to a different font.
+With VSCode, iTerm2 and Orca open side by side on the same file, Korean looked different in all three. All three were set to 14px, and they still didn't match: each one was pulling Hangul out of a different font.
 
 Merging them into one font looked like the whole job. The merge really did come down to three scripts. What came after is what took the time: same font, same size, three different results, and none of the causes were in the font file.
 
@@ -145,7 +145,7 @@ Matched by eye with all three side by side. Orca sits one step up.
 | iTerm2 | `MenloCJK-Regular` | 14 | 400 | 172 |
 | Orca | `MenloCJK` | 14 | 500 | 199 |
 
-In iTerm2, turn off "Use a different font for non-ASCII text" and empty the Special Font Config. The fallback lives inside the font now, so there's no reason to use the second slot, and anything left in it wins first. Thin Strokes goes to Never.
+In iTerm2, turn off "Use a different font for non-ASCII text" and empty the Special Font Config. The fallback lives inside the font now, so the non-ASCII slot and the range exceptions have nothing left to do. Thin Strokes goes to Never.
 
 ## The build output can't be redistributed
 

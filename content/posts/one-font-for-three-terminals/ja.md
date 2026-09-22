@@ -12,7 +12,7 @@ tags:
 draft: true
 ---
 
-VSCodeとiTerm2、Orcaを並べて同じファイルを開くと、ハングルが3つとも違って見えました。サイズはどれも14pxに揃えてあるのに太さが違い、ハングルの幅がラテン文字のグリッドに乗るアプリと乗らないアプリに分かれます。アプリごとにフォールバック先のフォントが違うからです。
+VSCodeとiTerm2、Orcaを並べて同じファイルを開くと、ハングルが3つとも違って見えました。サイズはどれも14pxに揃えてあります。それでも違うのは、3つのアプリがハングルをそれぞれ別のフォントから取ってきているからです。
 
 フォントを1つにまとめれば片付く話だと思っていました。まとめる作業自体はスクリプト3本で終わりました。問題はその先です。同じフォントを同じサイズで指定しても3つの見た目は揃わず、原因はすべてフォントファイルの外にありました。
 
@@ -144,7 +144,7 @@ $ python3 apply.py --check
 | iTerm2 | `MenloCJK-Regular` | 14 | 400 | 172 |
 | Orca | `MenloCJK` | 14 | 500 | 199 |
 
-iTerm2では「Use a different font for non-ASCII text」を切り、Special Font Configを空にします。フォールバックはフォントの中に入っているので2枠目を使う理由がなく、残しておくとそちらが先に勝ちます。Thin StrokesはNeverです。
+iTerm2では「Use a different font for non-ASCII text」を切り、Special Font Configを空にします。フォールバックはフォントの中に入ったので、非ASCIIの枠も範囲の例外指定も出番がありません。Thin StrokesはNeverです。
 
 ## ビルド結果は配布できない
 

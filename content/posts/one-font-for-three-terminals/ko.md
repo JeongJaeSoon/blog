@@ -12,7 +12,7 @@ tags:
 draft: true
 ---
 
-VSCode와 iTerm2, Orca를 한 화면에 나란히 띄워 놓고 같은 파일을 열면 한글이 셋 다 다르게 보였습니다. 크기는 전부 14px로 맞춰 놨는데 굵기가 달랐고, 한글 폭이 라틴 글자와 맞아떨어지는 앱과 어긋나는 앱이 갈렸습니다. 앱마다 폴백 폰트가 달랐기 때문입니다.
+VSCode와 iTerm2, Orca를 한 화면에 나란히 띄워 놓고 같은 파일을 열면 한글이 셋 다 다르게 보였습니다. 크기는 전부 14px로 맞춰 놨는데도 그랬습니다. 세 앱이 한글을 서로 다른 폰트에서 가져오고 있었기 때문입니다.
 
 폰트 하나로 합치면 끝날 문제라고 봤습니다. 합치는 쪽은 실제로 스크립트 세 개로 끝났습니다. 문제는 그다음이었습니다. 세 앱에 같은 폰트를 물리고 같은 크기를 넣었는데도 여전히 다르게 보였고, 원인은 전부 폰트 파일 바깥에 있었습니다.
 
@@ -144,7 +144,7 @@ $ python3 apply.py --check
 | iTerm2 | `MenloCJK-Regular` | 14 | 400 | 172 |
 | Orca | `MenloCJK` | 14 | 500 | 199 |
 
-iTerm2에서는 "Use a different font for non-ASCII text"를 끄고 Special Font Config를 비웁니다. 폴백이 폰트 안에 들어가 있으니 두 슬롯을 쓸 이유가 없고, 남겨 두면 그쪽이 먼저 이깁니다. Thin Strokes는 Never입니다.
+iTerm2에서는 "Use a different font for non-ASCII text"를 끄고 Special Font Config를 비웁니다. 폴백이 폰트 안으로 들어갔으니 비ASCII 슬롯과 범위 예외를 쓸 이유가 없습니다. Thin Strokes는 Never입니다.
 
 ## 빌드 결과물은 배포할 수 없습니다
 
