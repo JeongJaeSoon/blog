@@ -91,7 +91,10 @@ BLANK_LINE = re.compile(r"\n[ \t]*\n")
 LIST_MARKER = re.compile(r"\A {0,3}(?:[-*+]|\d{1,9}[.)])(?:[ \t]|\Z)")
 LIST_PREFIX = re.compile(r"\A {0,3}(?:[-*+]|\d{1,9}[.)])[ \t]+")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
-BLOCKQUOTE = re.compile(r"(?m)^ {0,3}>.*$")
+BLOCKQUOTE_MARK = re.compile(r"\A {0,3}>")
+BLOCK_START = re.compile(r"\A {0,3}(?:#{1,6}[ \t]|[-*+][ \t]|\d{1,9}[.)][ \t]"
+                         r"|>|(?:`{3,}|~{3,})|(?:\*[ \t]*){3,}$|(?:-[ \t]*){3,}$"
+                         r"|(?:_[ \t]*){3,}$)")
 HEADING_MARK = re.compile(r"(?m)^#{1,6}\s*")
 TABLE_RULE = re.compile(
     r"\A {0,3}\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*\Z")
@@ -110,6 +113,11 @@ class Finding:
 
 
 FM_FIELD = re.compile(r"(?ms)^(?:title|summary):[ \t]*(.*?)(?=^\S+:|\Z)")
+BLOCK_SCALAR = re.compile(r"\A[>|][-+0-9]*[ \t]*\n?")
+QUOTED_SCALAR = re.compile(
+    r"\A'((?:[^']|'')*)'"
+    r'|\A"((?:[^"\\]|\\.)*)"')
+COMMENT_TAIL = re.compile(r"(?:(?<=\s)|\A)#.*\Z")
 
 
 def front_matter_prose(text: str) -> str:
@@ -119,12 +127,20 @@ def front_matter_prose(text: str) -> str:
         return ""
     values = []
     for m in FM_FIELD.finditer(fm.group(1)):
-        value = re.sub(r"\A>-?[ \t]*\n?", "", m.group(1))
-        value = re.sub(r"\s+", " ", value).strip()
-        if len(value) > 1 and value[0] == value[-1] == "'":
-            value = value[1:-1].replace("''", "'")
-        elif len(value) > 1 and value[0] == value[-1] == '"':
-            value = value[1:-1].replace('\\"', '"')
+        raw = m.group(1)
+        block = BLOCK_SCALAR.match(raw)
+        value = re.sub(r"\s+", " ", raw[block.end():] if block else raw).strip()
+        if block:
+            values.append(value)
+            continue
+        quoted = QUOTED_SCALAR.match(value)
+        if quoted and quoted.group(1) is not None:
+            value = quoted.group(1).replace("''", "'")
+        elif quoted:
+            value = quoted.group(2).replace('\\"', '"')
+        else:
+            # An unquoted scalar ends at a comment, which never renders.
+            value = COMMENT_TAIL.sub("", value).strip()
         values.append(value)
     return "\n\n".join(v for v in values if v)
 
@@ -274,6 +290,27 @@ def table_lines(text: str) -> tuple[set[int], list[str]]:
     return owned, rows
 
 
+def strip_blockquotes(text: str) -> str:
+    """Blank out block quotes, lazy continuations included.
+
+    A quoted paragraph may drop the `>` on its later lines, so a line-marked
+    match leaves the rest of the quotation sitting in the prose. The run ends
+    at a blank line or at a line that starts a block of its own.
+    """
+    out = []
+    quoting = False
+    for line in text.split("\n"):
+        if BLOCKQUOTE_MARK.match(line):
+            quoting = True
+        elif quoting and (not line.strip() or BLOCK_START.match(line)):
+            quoting = False
+        elif not quoting:
+            out.append(line)
+            continue
+        out.append(" " if quoting else line)
+    return "\n".join(out)
+
+
 def strip_nonprose(text: str) -> str:
     """Remove everything that is not editable prose."""
     text = strip_fences(FRONT_MATTER.sub("", text, count=1))
@@ -283,7 +320,8 @@ def strip_nonprose(text: str) -> str:
     text = strip_code_spans("\n".join(
         " " if n in owned else line
         for n, line in enumerate(text.split("\n"))))
-    for pattern, repl in ((LINK_TARGET, "]"), (URL, " "), (BLOCKQUOTE, " ")):
+    text = strip_blockquotes(text)
+    for pattern, repl in ((LINK_TARGET, "]"), (URL, " ")):
         text = pattern.sub(repl, text)
     return HEADING_MARK.sub("", text)
 
