@@ -1,4 +1,4 @@
-import { getAllPosts } from '@/lib/posts'
+import { getPublishedPosts } from '@/lib/posts'
 import { getDictionary } from '@/content/i18n'
 import { locales, isLocale, localeTags } from '@/lib/i18n'
 import { site } from '@/lib/site'
@@ -23,7 +23,7 @@ export async function GET(
   if (!isLocale(lang)) return new Response('Not found', { status: 404 })
 
   const t = getDictionary(lang)
-  const items = getAllPosts(lang)
+  const items = getPublishedPosts(lang)
     .map(
       (post) => `    <item>
       <title>${escape(post.title)}</title>
