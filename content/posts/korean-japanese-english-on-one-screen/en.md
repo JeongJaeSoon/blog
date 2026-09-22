@@ -11,7 +11,7 @@ tags:
   - fonts
   - terminal
   - macos
-draft: true
+draft: false
 ---
 
 Developing in Japan means Korean, Japanese and English all end up in the same IDE or terminal. But I never found a monospace font that made all three look right together. Here is what a line of it looks like.
