@@ -12,9 +12,9 @@ tags:
 ---
 
 On September 11, 2026, my local Codex settings had `gpt-6-astra` as the main
-model and `gpt-5.6-terra` as the default subagent model. Two separate values mean
-that handing work off moves it to something cheaper, which makes every
-splittable task look worth splitting.
+model and `gpt-5.6-terra` as the default subagent model. On paper that means
+handing work off lands on something cheaper, which makes every splittable task
+look worth splitting.
 
 Every hand-off also adds a brief to write, a wait, and another result to verify,
 so a small edit or a question whose answer is needed for the next step is
