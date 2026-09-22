@@ -1,11 +1,11 @@
 ---
-title: Making three terminals agree took everything except a font
+title: Picking a font when Korean, Japanese and English share one screen
 date: '2026-09-22'
 summary: >-
-  Merging Menlo, UDEV Gothic NF and D2Coding into one family was the quick part.
-  VSCode, iTerm2 and Orca still drew it three different ways. Most of the reasons
-  turned out to live outside the font file; the one inside it was metadata only
-  iTerm2 reads.
+  Working in Japan means Latin, kana, kanji and Hangul arrive on the same line.
+  No monospace font has all three, so VSCode, iTerm2 and Orca each filled the
+  gaps with a different one. Merging them into one family was the quick part; the
+  time went into the apps' rendering settings.
 lang: en
 tags:
   - fonts
@@ -14,31 +14,24 @@ tags:
 draft: true
 ---
 
-With VSCode, iTerm2 and Orca open side by side on the same file, Korean looked different in all three. All three were set to 14px and they still didn't match. Each one was pulling Hangul out of a different font.
+I work in Japan, so three scripts go past me in a day. The thinking is Korean, the tickets and comments and logs are Japanese, and the code is English. They don't get a file each, either. What lands on screen looks roughly like this.
+
+```text
+a1b2c3d 청구서 재발행 시 pending 이 남던 문제 수정
+
+// 再発行のときだけ pending を明示的にクリアする
+await clearPendingFlag(invoiceId)
+```
+
+That is Latin, kana and kanji, and Hangul inside three lines. No monospace font has all three, so the app falls back to fill the gaps — and VSCode, iTerm2 and Orca each picked a different font for it. With all three open side by side on the same file, Korean looked different in every one. All three were set to 14px and they still didn't match.
 
 Merging them into one font looked like the whole job. The merge really did come down to three scripts. What came after took the time. Same font, same size, three different results. Most of the causes were outside the font file, and the one inside it was metadata only iTerm2 reads.
 
 The scripts are at [JeongJaeSoon/menlocjk](https://github.com/JeongJaeSoon/menlocjk). Installation is written up there, so this is only what I learned along the way.
 
-## No fallback chain can be written the same way three times
+## One line comes out of three fonts
 
-All three apps handle font fallback differently.
-
-| App | Fallback model |
-|---|---|
-| VSCode | A CSS font list, as long as you like |
-| iTerm2 | Two slots — ASCII font and non-ASCII font — plus codepoint-range exceptions (Special Font Config) |
-| Orca | One family. It wraps whatever you type in quotes and drops it into CSS |
-
-There is no way to write `Menlo, UDEV Gothic NF, D2Coding` into all three. VSCode takes it verbatim, iTerm2 needs it split across two slots, and Orca treats the entire string as a single family name. So the fallback had to come out of the app settings and go into the font file.
-
-Off the shelf there is Sarasa Term K and friends. I built my own because I wanted to keep Menlo's Latin and its line spacing exactly as they were.
-
-## fontTools does most of the merging
-
-`prep.py` normalises the three sources to 2048 upem and drops `GSUB`, `GPOS`, `GDEF`, `DSIG`, `morx` and `kern`. That drops shaping, which a terminal does not need here — keeping ligatures on would mean keeping `GSUB`. D2Coding ships at 1000 upem, so `scaleUpem` takes it to 2048.
-
-`merge.py` fuses them. Cmap conflicts resolve to the first font, so the order is the priority.
+Split those lines by character and the sources come apart like this.
 
 | Characters | Source |
 |---|---|
@@ -48,11 +41,33 @@ Off the shelf there is Sarasa Term K and friends. I built my own because I wante
 
 D2Coding is in there for one reason. UDEV Gothic NF has no Hangul. Japanese and the icons are covered by UDEV alone, Hangul leaves a hole, and that is how a two-font merge became a three-font one.
 
+Three fonts mean three weights and three stroke contrasts. When the Hangul in a line runs thinner than the Latin, or the kanji heavier, nothing stands out as one bad glyph. The line reads unevenly. That is not an edge case for me. It is every day, so the unevenness sat in front of me for hours at a time.
+
+Off the shelf there is Sarasa Term K and friends. I built my own because I wanted to keep Menlo's Latin and its line spacing exactly as they were.
+
+## No fallback chain can be written the same way three times
+
+The first thing that failed was fixing this in the app settings. All three apps handle font fallback differently.
+
+| App | Fallback model |
+|---|---|
+| VSCode | A CSS font list, as long as you like |
+| iTerm2 | Two slots — ASCII font and non-ASCII font — plus codepoint-range exceptions (Special Font Config) |
+| Orca | One family. It wraps whatever you type in quotes and drops it into CSS |
+
+There is no way to write `Menlo, UDEV Gothic NF, D2Coding` into all three. VSCode takes it verbatim, iTerm2 needs it split across two slots, and Orca treats the entire string as a single family name. So the fallback had to come out of the app settings and go into the font file.
+
+## fontTools does most of the merging
+
+`prep.py` normalises the three sources to 2048 upem and drops `GSUB`, `GPOS`, `GDEF`, `DSIG`, `morx` and `kern`. That drops shaping, which a terminal does not need here — keeping ligatures on would mean keeping `GSUB`. D2Coding ships at 1000 upem, so `scaleUpem` takes it to 2048.
+
+`merge.py` fuses them. Cmap conflicts resolve to the first font, so the order of the source table above is the priority.
+
 `merge.py` overwrites the vertical metrics with Menlo's. `ascent`, `descent` and `lineGap` from `hhea`, plus the typo and win metrics from `OS/2`, have to come across or the line spacing shifts. Advance widths are untouched: `A` is 1233 (0.602em), `가` and `漢` are 2048, and all twelve faces built later carry the same values. Leaving the widths alone keeps the terminal grid intact and puts every glyph where the old fallback chain put it.
 
 The merged font carries 54,587 glyphs. A build takes 6.4 minutes on my Mac.
 
-## The weight ramp is pinned to a 27-unit grid
+## 27 units was the smallest weight step I could see at 14px
 
 I threw the first ramp away. The steps were unevenly spaced and 600 wasn't sitting on Menlo's drawn Bold. On screen some steps were invisible and others jumped.
 
@@ -73,7 +88,7 @@ Name IDs 16 (typographic family) and 17 (subfamily) are what make macOS treat al
 
 There's a cost. 700 is no longer Menlo's drawn Bold but one step heavier than it, and ANSI bold in a terminal reaches for 700, so bold text comes out thicker than the original. Orca and VSCode can point their bold weight at 600 and get the drawn Bold back (`Bold Font Weight`, `terminal.integrated.fontWeightBold`). iTerm2 has no such setting. It picks the bold face by the bold bit in `fsSelection`, and that bit only exists on 700. If the goal is three apps that match, 700 is the default and 600 is an option for the other two only.
 
-## 1,412 glyphs got emboldened twice
+## 1,412 accented Latin glyphs had been emboldened twice
 
 `embolden()` was walking the glyph order and replacing entries in `glyf` in place. A composite glyph pulls its components out of `glyf` at draw time, so whenever a component came earlier in the order, the composite was drawn from an already-thickened component and got stroked a second time. Measuring the glyph width of `A` against `Aacute` shows it directly.
 
@@ -153,7 +168,7 @@ $ python3 apply.py --check
 [warn] orca: running - quit it and rerun, or set it by hand in Settings > Terminal
 ```
 
-## The combination that matched
+## What made the three agree
 
 Matched by eye with all three side by side. Orca sits one step up.
 
@@ -164,6 +179,8 @@ Matched by eye with all three side by side. Orca sits one step up.
 | Orca | `MenloCJK` | 14 | 500 | 199 |
 
 In iTerm2, turn off "Use a different font for non-ASCII text" and empty the Special Font Config. The fallback lives inside the font now, so the non-ASCII slot and the range exceptions have nothing left to do. Thin Strokes goes to Never.
+
+The three lines at the top of this post now come out at the same weight in all three apps. Hangul, kanji and Latin share one stroke thickness, so the line reads evenly. Moving between apps no longer changes the letters.
 
 ## The build output can't be redistributed
 
