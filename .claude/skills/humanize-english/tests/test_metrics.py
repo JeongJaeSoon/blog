@@ -14,9 +14,10 @@ appear in these lists. Those are the false positives that would have an author
 edit a pasted terminal line.
 
 Where the stripper has to guess it guesses towards reading, so a construct it
-cannot parse is scanned rather than skipped. Two such readings are recorded
-below as `expectedFailure`: they cost the author a look, never a silent pass,
-and the day either is fixed `unittest` reports an unexpected success.
+cannot parse is scanned rather than skipped. Two such readings are asserted
+below exactly as they stand, not as they ought to be: they cost the author a
+look, never a silent pass, and stating them this way means a crash fails the
+suite and a real fix shows up as a failure to come and read.
 """
 from __future__ import annotations
 
@@ -173,32 +174,35 @@ class Extraction(unittest.TestCase):
         self.assertIn("doesn't", cells)
         self.assertNotIn("can't", cells)
 
-    @unittest.expectedFailure
-    def test_a_cell_count_mismatch_is_not_a_table(self):
-        """A known over-reading, verified against this repo's own remark-gfm:
-        it renders a paragraph, and the span there hides what it holds.
+    def test_a_cell_count_mismatch_still_reads_as_a_table(self):
+        """A known over-reading, stated as it stands rather than as it should be.
 
-        Comparing the two rows' cell counts does close this, and a branch that
+        Verified against this repo's own remark-gfm: a header of three cells
+        over a rule of two is one paragraph, where a span hides what it holds.
+        Comparing the two rows' cell counts does close it, and a branch that
         did so had four valid table shapes rejected in review — a list marker,
         an empty edge cell, a non-breaking space, a wide marker's margin —
         each one turning a real contraction into a silent pass. The count is
         the only rule here that errs towards reading less, which is why it is
-        not in the file. A malformed table costs a reading; a valid one that
-        this refuses to see costs the contraction."""
-        text = "| a | b | c |\n|---|---|\n| `can't` | d | e |\n"
-        self.assertEqual(metrics.table_prose(text), "")
-        self.assertNotIn("can't", metrics.strip_nonprose(text))
+        not in the file: a malformed table costs a reading, a valid one this
+        refuses to see costs the contraction.
 
-    @unittest.expectedFailure
-    def test_top_level_indented_code_is_not_prose(self):
-        """A known limit, recorded so the day it is fixed does not pass silently.
+        Fixing it makes this fail. Assert the cells are gone at that point.
+        """
+        text = "| a | b | c |\n|---|---|\n| `can't` | d | e |\n"
+        self.assertEqual(metrics.table_prose(text).split("\n\n"),
+                         ["a", "b", "c", "d", "e"])
+
+    def test_top_level_indented_code_still_reads_as_prose(self):
+        """A known limit, stated the same way and for the same reason.
 
         Reading a four-space block right means tracking paragraph and list
         context, which nothing here does. `write-post/references/voice.md` says
         to fence pasted output rather than indent it, so the cost is a reading,
-        not a wrong edit."""
+        not a wrong edit. Fixing it makes this fail; flip it to `assertNotIn`.
+        """
         text = "Before.\n\n    it's pasted output\n\nAfter.\n"
-        self.assertNotIn("it's", metrics.strip_nonprose(text))
+        self.assertIn("it's", metrics.strip_nonprose(text))
 
 
 class Protection(unittest.TestCase):
