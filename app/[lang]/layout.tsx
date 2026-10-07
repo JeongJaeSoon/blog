@@ -6,6 +6,7 @@ import { site } from '@/lib/site'
 import { locales, localeTags, isLocale, type Locale } from '@/lib/i18n'
 import { getDictionary } from '@/content/i18n'
 import { identity } from '@/content/profile'
+import { work } from '@/content/work'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import '../globals.css'
 
@@ -90,6 +91,7 @@ function SiteHeader({
 }) {
   const nav = [
     { label: t.nav.about, href: `/${lang}` },
+    { label: work[lang].nav, href: `/${lang}/work` },
     { label: t.nav.blog, href: `/${lang}/blog` },
   ]
 

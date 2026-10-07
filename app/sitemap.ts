@@ -7,6 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return locales.flatMap((lang) => [
     { url: `${site.url}/${lang}` },
     { url: `${site.url}/${lang}/blog` },
+    { url: `${site.url}/${lang}/work` },
     ...getPublishedPosts(lang).map((post) => ({
       url: `${site.url}/${lang}/blog/${post.slug}`,
       lastModified: new Date(post.date),

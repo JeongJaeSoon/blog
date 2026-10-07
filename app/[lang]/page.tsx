@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { work } from '@/content/work'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import {
@@ -26,6 +27,13 @@ export default async function HomePage({ params }: Props) {
   return (
     <div className="space-y-16">
       <Intro t={t} />
+      <section className="no-print rounded-lg border border-line p-5">
+        <h2 className="font-medium">{work[lang].title}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted">{work[lang].description}</p>
+        <Link href={`/${lang}/work`} className="mt-3 inline-block text-sm text-accent hover:underline">
+          {work[lang].nav} →
+        </Link>
+      </section>
       <Experience lang={lang} t={t} />
       <Projects t={t} />
       <Skills t={t} />
