@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { identity } from '@/content/profile'
+import { identity, projects } from '@/content/profile'
+import { getDictionary } from '@/content/i18n'
 import { work, workContact } from '@/content/work'
 import { isLocale, locales, localeTags } from '@/lib/i18n'
 import { site } from '@/lib/site'
@@ -33,11 +35,12 @@ export default async function WorkPage({ params }: Props) {
   const { lang } = await params
   if (!isLocale(lang)) notFound()
   const t = work[lang]
+  const dictionary = getDictionary(lang)
   return (
     <div className="space-y-12">
       <header className="max-w-2xl">
         <p className="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-faint">94soon · {identity.name}</p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.title}</h1>
+        <h1 className={`text-2xl font-semibold tracking-tight sm:text-3xl ${lang === 'ko' ? 'break-keep' : ''}`}>{t.title}</h1>
         <p className="mt-5 text-[0.95rem] leading-relaxed text-muted">{t.intro}</p>
       </header>
       <section aria-labelledby="areas">
@@ -56,10 +59,26 @@ export default async function WorkPage({ params }: Props) {
         <p className="mt-3 text-sm leading-relaxed text-muted">{t.approach}</p>
       </section>
       <section className="max-w-2xl">
+        <h2 className="font-medium">{t.aiTitle}</h2>
+        <p className="mt-3 text-sm leading-relaxed text-muted">{t.ai}</p>
+      </section>
+      <section className="max-w-2xl">
         <h2 className="font-medium">{t.openSourceTitle}</h2>
         <p className="mt-3 text-sm leading-relaxed text-muted">{t.openSource}</p>
+        <ul className="mt-5 space-y-4">
+          {projects.filter((project) => project.id === 'agent-guard').map((project) => (
+            <li key={project.id}>
+              <a href={project.href} className="font-mono text-sm text-accent underline underline-offset-4">{project.id}</a>
+              <p className="mt-1 text-sm leading-relaxed text-muted">{dictionary.projects[project.id]}</p>
+            </li>
+          ))}
+        </ul>
         <a href={identity.repositories} className="mt-4 inline-block text-sm text-accent underline underline-offset-4">{t.repositories} →</a>
       </section>
+      <aside className="max-w-2xl rounded-lg border border-line p-5">
+        <p className="text-sm leading-relaxed text-muted">{t.portfolio}</p>
+        <Link href={`/${lang}`} className="mt-3 inline-block text-sm text-accent underline underline-offset-4">{t.portfolioLink} →</Link>
+      </aside>
       <section className="border-t border-line pt-8">
         <h2 className="font-medium">{t.contactTitle}</h2>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">{t.contact}</p>
