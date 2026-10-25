@@ -26,8 +26,8 @@ export const work: Record<Locale, WorkContent> = {
   en: {
     nav: '94soon',
     title: '94soon — Software development & AI workflows',
-    description: '94soon is a Tokyo-based sole proprietorship run by Jaesoon Jeong since September 2026, supporting custom software development, AI workflows, and business automation.',
-    intro: 'I am Jaesoon Jeong (정재순). I started 94soon in September 2026 as a sole proprietorship based in Tokyo. I develop software for clients, help build AI workflows and business automation, and work on open-source tools.',
+    description: '94soon is a Tokyo-based sole proprietorship run by Jaesoon Jeong, supporting custom software development, AI workflows, and business automation.',
+    intro: 'I am Jaesoon Jeong (정재순). I run 94soon as a sole proprietorship based in Tokyo. I develop software for clients, help build AI workflows and business automation, and work on open-source tools.',
     areasTitle: 'What I work on',
     areas: [
       { title: 'Open-source development', body: 'Tools for developers and people working with AI agents. I publish code so others can inspect it, use it, and build on it.' },
