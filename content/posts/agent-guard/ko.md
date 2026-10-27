@@ -7,7 +7,7 @@ tags:
   - claude-code
   - security
   - ai-agents
-draft: true
+draft: false
 ---
 
 이 도구는 문제가 흥미로워 보여서 만든 게 아니다. 눈앞에서 계속 터졌기 때문에 만들었다.
