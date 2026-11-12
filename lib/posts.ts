@@ -166,10 +166,39 @@ export function getPostAlternates(slug: string): PostMeta[] {
   return getAllPosts().filter((post) => post.slug === slug)
 }
 
+type HastNode = {
+  type: string
+  tagName?: string
+  properties?: Record<string, unknown>
+  children?: HastNode[]
+}
+
+// Markdown has no video syntax and raw HTML is dropped by remark-rehype, so
+// `![alt](/videos/x.mp4)` is the way a post embeds a video.
+function rehypeVideoImages() {
+  const walk = (node: HastNode) => {
+    const src = node.properties?.src
+    if (node.tagName === 'img' && typeof src === 'string' && /\.(mp4|webm)$/i.test(src)) {
+      const alt = node.properties?.alt
+      node.tagName = 'video'
+      node.properties = {
+        src,
+        controls: true,
+        preload: 'metadata',
+        playsInline: true,
+        ariaLabel: typeof alt === 'string' && alt ? alt : undefined,
+      }
+    }
+    node.children?.forEach(walk)
+  }
+  return walk
+}
+
 const processor = unified()
   .use(remarkParse)
   .use(remarkGfm)
   .use(remarkRehype)
+  .use(rehypeVideoImages)
   .use(rehypeSlug)
   .use(rehypeAutolinkHeadings, { behavior: 'wrap' })
   .use(rehypeShiki, {
