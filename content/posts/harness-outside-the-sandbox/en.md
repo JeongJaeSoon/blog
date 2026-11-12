@@ -1,20 +1,17 @@
 ---
 title: Once Agents Outnumber People, the Harness Belongs Outside the Sandbox
 date: '2026-11-13'
-summary: I was asked whether giving every agent its own VM would run out of CPU first. Answering it, I worked out why the loop, the session, and the sandbox should be split, and then made an explainer video with a local TTS model.
+summary: I was asked whether giving every agent its own VM would run out of CPU first. Answering it, I worked out why the loop, the session, and the sandbox should be split.
 lang: en
 tags:
   - ai-agents
   - sandbox
-  - tts
 draft: false
 ---
 
 While designing a sandbox for agents, I got a question. For one person, the simplest setup is a single VM with the harness inside it. But for a factory running thousands of agents, would giving each agent its own VM not run out of CPU first?
 
 My answer was that at scale, the harness should move outside the sandbox. The first evidence I pointed to was a set of numbers Anthropic published when it rebuilt Claude Managed Agents. After moving the harness out of the container and creating containers only when needed, time to first token dropped by about 60% at p50 and by more than 90% at p95. That many sessions never needed to wait for a sandbox.
-
-While writing the answer down, it felt like a waste to leave it as text, so I also made an explainer video. The narration comes from a local TTS model, and getting the voice to sound natural took longer than working out the design. I wrote that part up separately below.
 
 ![A 6-minute 47-second explainer video on why the harness should move outside the sandbox](/videos/harness-outside-the-sandbox-en.mp4)
 
@@ -72,27 +69,6 @@ The brain and the hands alone do not keep an agent moving steadily in the intend
 - **Control engine (Orchestration)**: it manages the whole cycle of thinking, acting, and checking, and retries or takes another route when something fails. The state it needs also lives in the session, not in the loop.
 
 I left out Observability and Offline Eval here, because they do not take part in real-time execution directly.
-
-## I made the video with local TTS and redid the voice three times
-
-The visuals are 13 scenes built in HTML and CSS. Playwright's WebKit captures one frame every 1/30 of a second, and ffmpeg stitches them into a 1080p video. The first version used the macOS `say` command for narration, but it sounded so obviously synthetic that I switched to a local model starting with the Korean version.
-
-The model I chose is the MLX 8-bit conversion of Qwen3-TTS 1.7B CustomVoice (about 3.1GB, Apache-2.0). The Korean version uses the Korean speaker Sohee. I split the narration into 44 sentences, generated them one at a time, and joined them per scene.
-
-The first result had a pacing problem. It paused for 0.4 to 0.7 seconds at every comma, and some sentences paused for as long as 1.7 seconds. Part of the cause was a script that read like a translation and had too many commas, so I rewrote the script from scratch in a spoken style with fewer commas.
-
-On the second try, I told the model to sound "upbeat, without stopping at commas," trimmed the pauses inside sentences down to about 0.2 seconds, and played it back at 1.06x. The pauses were gone, but it sounded like someone who was annoyed or angry. The instruction, the speed-up, and the pause trimming stacked on top of each other and pushed the delivery toward something pushy.
-
-For the last attempt, I generated the same two sentences as "bright and kind," as "calm and soft," and with no instruction at all, and compared them. The default tone with no instruction sounded the most natural. This is the final setting.
-
-```sh
-# Shorten only pauses longer than 0.35s inside a sentence to 0.3s; leave the speed alone
-ffmpeg -i s3_1.wav -af "silenceremove=start_periods=1:start_threshold=-42dB:stop_periods=-1:stop_duration=0.35:stop_silence=0.3:stop_threshold=-42dB" out.wav
-```
-
-I added 0.45 seconds between sentences and about 1 second at each scene change. The default tone is more relaxed than the earlier settings, so the Korean video grew to 7 minutes 28 seconds. Still, I judged that better than a fast, curt 5 minutes.
-
-For the Japanese and English versions in this post, I kept the same settings and changed only the speaker: Ono_Anna for Japanese and Serena for English. The English video came out at 6 minutes 47 seconds.
 
 ## Open questions
 
