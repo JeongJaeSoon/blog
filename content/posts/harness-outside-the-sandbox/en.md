@@ -7,7 +7,7 @@ tags:
   - ai-agents
   - sandbox
   - tts
-draft: true
+draft: false
 ---
 
 While designing a sandbox for agents, I got a question. For one person, the simplest setup is a single VM with the harness inside it. But for a factory running thousands of agents, would giving each agent its own VM not run out of CPU first?
